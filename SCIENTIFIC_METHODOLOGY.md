@@ -220,12 +220,16 @@ conclusions the policy may draw. They are not findings.
 | Outcome | Meaning |
 |---|---|
 | Evidence supports a match | The adjusted statistic is at or above the match threshold, and the same-model alternative has been addressed (below) |
-| Evidence supports a non-match | The statistic, **not** adjusted for the number of candidates or alignments, is at or below the non-match threshold and not strongly negative, **and** all of: native-resolution geometry, no flagged condition that could hide a match, at least 250,000 usable pixels, a fingerprint from at least 20 reference images with split-half PCE at least 100 |
+| Evidence supports a non-match | **Only for a device declared conventional.** The statistic, **not** adjusted for the number of candidates or alignments, is at or below the non-match threshold and not strongly negative, **and** all of: native-resolution geometry, no flagged condition that could hide a match, at least 250,000 usable pixels, a fingerprint from at least 20 reference images with split-half PCE at least 100 |
 | Inconclusive | Anything between the thresholds; a low statistic under conditions that could hide a match; a high statistic for which the same-model alternative is not addressed |
 | Insufficient quality or unsupported analysis | Unsupported geometry; too few usable pixels; a severe quality condition together with a statistic below the match threshold |
 
 Principles:
 
+- **A low statistic on a recent smartphone is never a non-match.** In the project's evaluation of twelve
+  2017–2021 phones, 15% of genuine same-device images scored below the threshold and 13% met every
+  other condition for a non-match, with nothing in their metadata to distinguish them (issue #18). For
+  devices declared computational or unknown, a low statistic is therefore always inconclusive.
 - **Poor quality can hide a match but cannot create one.** Quality gates therefore restrict non-match
   conclusions, never match conclusions.
 - **Open set.** Every candidate is judged on its own. Nothing forces one of the enrolled sensors to be
