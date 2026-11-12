@@ -227,7 +227,7 @@ def processing_config(user: CurrentUser) -> dict[str, Any]:
         "environment": c.environment, "storage_backend": c.storage_backend, "registration_open": c.allow_registration,
         "versions": {"engine": ENGINE_VERSION, "algorithm": ALGORITHM_VERSION, "decision_policy": DECISION_POLICY_VERSION, "libraries": library_versions()},
         "limits": {k: getattr(c, k) for k in (
-            "max_upload_bytes", "max_image_pixels", "max_files_per_request", "max_reference_images", "max_candidates_per_analysis",
+            "max_upload_bytes", "max_request_bytes", "max_image_pixels", "max_files_per_request", "max_reference_images", "max_candidates_per_analysis",
             "user_storage_quota_bytes", "max_active_jobs_per_user", "file_token_seconds", "job_timeout_seconds", "session_hours",
             "rate_auth_per_15min", "rate_api_per_minute", "rate_upload_per_hour", "worker_memory_limit_mb", "default_retention_days")},
     }  # fmt: skip

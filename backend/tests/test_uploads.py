@@ -128,9 +128,19 @@ def test_size_count_and_quota_limits(app, settings):
     assert u.get(f"{API}/evidence").json()["total"] == 1
 
 
-def test_oversized_request_body_is_refused_before_reading(c):
+def test_oversized_request_body_is_refused_before_reading(c, settings):
     r = c.post(f"{API}/evidence", content=b"x", headers={"Content-Length": str(10**13), "Content-Type": "multipart/form-data; boundary=x"})
+    assert r.status_code == 413 and r.json()["error"]["code"] == "request_too_large"
+    settings.max_request_bytes = 50_000
+    r = c.post(f"{API}/evidence", files=files([("a.jpg", jpeg(81, 9)), ("b.jpg", jpeg(81, 10))]))
     assert r.status_code == 413
+    # A body without a declared length is not accepted.
+
+    def gen():
+        yield b"x" * 10
+
+    r = c.post(f"{API}/evidence", content=gen(), headers={"Content-Type": "multipart/form-data; boundary=x"})
+    assert r.status_code == 411 and r.json()["error"]["code"] == "length_required"
 
 
 def test_reference_upload_rules(app, settings):

@@ -30,6 +30,7 @@ reported as ``unsupported`` rather than guessed at.
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from typing import Literal
 
@@ -45,6 +46,10 @@ FloatArray = NDArray[np.float32]
 
 Geometry = Literal["native", "rotated", "cropped", "unsupported"]
 
+#: Threads used by the FFT. -1 uses every core; set SENSORTRACE_FFT_WORKERS=1 when many
+#: processes run in parallel (evaluation, multi-worker deployments) to avoid oversubscription.
+FFT_WORKERS = int(os.environ.get("SENSORTRACE_FFT_WORKERS", "-1"))
+
 PEAK_EXCLUSION = 11  # side of the square neighbourhood excluded around the peak
 SURFACE_WINDOW = 33  # side of the correlation-surface window kept for visualisation
 
@@ -58,9 +63,9 @@ def circular_xcorr(a: NDArray[np.floating], b: NDArray[np.floating]) -> NDArray[
         raise ValueError("arrays must have the same shape")
     a0 = a.astype(np.float64) - float(a.mean())
     b0 = b.astype(np.float64) - float(b.mean())
-    fa = sfft.rfft2(a0, workers=-1)
-    fb = sfft.rfft2(b0, workers=-1)
-    return np.asarray(sfft.irfft2(fa * np.conj(fb), s=a.shape, workers=-1), dtype=np.float64)
+    fa = sfft.rfft2(a0, workers=FFT_WORKERS)
+    fb = sfft.rfft2(b0, workers=FFT_WORKERS)
+    return np.asarray(sfft.irfft2(fa * np.conj(fb), s=a.shape, workers=FFT_WORKERS), dtype=np.float64)
 
 
 @dataclass(frozen=True)
@@ -229,9 +234,9 @@ def _cropped(w: FloatArray, inten: FloatArray, sat: NDArray[np.bool_], k: FloatA
     pad = np.zeros((fh, fw), dtype=np.float64)
     pad[:h, :wd] = prod
     k0 = k.astype(np.float64) - float(k.mean())
-    fk = sfft.rfft2(k0, workers=-1)
-    fp = sfft.rfft2(pad, workers=-1)
-    surface = np.asarray(sfft.irfft2(fk * np.conj(fp), s=(fh, fw), workers=-1), dtype=np.float64)
+    fk = sfft.rfft2(k0, workers=FFT_WORKERS)
+    fp = sfft.rfft2(pad, workers=FFT_WORKERS)
+    surface = np.asarray(sfft.irfft2(fk * np.conj(fp), s=(fh, fw), workers=FFT_WORKERS), dtype=np.float64)
     region = np.zeros((fh, fw), dtype=bool)
     region[: fh - h + 1, : fw - wd + 1] = True
     n_shifts = int(region.sum())

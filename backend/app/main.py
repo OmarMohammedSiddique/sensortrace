@@ -66,13 +66,15 @@ def create_app() -> FastAPI:
     app.add_middleware(CORSMiddleware, allow_origins=cfg.allowed_origins, allow_credentials=True,
                        allow_methods=["GET", "POST", "PATCH", "DELETE"], allow_headers=["Content-Type", "X-CSRF-Token", "Authorization"])  # fmt: skip
 
-    max_body = cfg.max_upload_bytes * cfg.max_files_per_request + 1024 * 1024
-
     @app.middleware("http")
     async def guard(request: Request, call_next):
-        length = request.headers.get("content-length")
-        if length and length.isdigit() and int(length) > max_body:
-            return _err(413, "request_too_large", "Request body is too large.")
+        if request.method in ("POST", "PUT", "PATCH"):
+            # Bodies must declare their length so the limit is enforced before anything is buffered.
+            length = request.headers.get("content-length")
+            if length is None and request.headers.get("transfer-encoding"):
+                return _err(411, "length_required", "Requests must declare a Content-Length.")
+            if length and (not length.isdigit() or int(length) > cfg.max_request_bytes):
+                return _err(413, "request_too_large", f"Request body exceeds the limit of {cfg.max_request_bytes // (1024 * 1024)} MB.")
         response = await call_next(request)
         h = response.headers
         h.setdefault("X-Content-Type-Options", "nosniff")

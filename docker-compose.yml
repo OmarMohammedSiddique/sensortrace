@@ -15,6 +15,9 @@ x-app-env: &app-env
   ST_COOKIE_SECURE: ${ST_COOKIE_SECURE:-false}
   ST_ALLOW_REGISTRATION: ${ST_ALLOW_REGISTRATION:-true}
   ST_WORKER_MEMORY_LIMIT_MB: ${ST_WORKER_MEMORY_LIMIT_MB:-0}
+  # The API is reached only through the web application's proxy; see SECURITY.md before changing.
+  ST_TRUST_FORWARDED_FOR: ${ST_TRUST_FORWARDED_FOR:-true}
+  SENSORTRACE_FFT_WORKERS: ${WORKER_CPUS:-4}
 
 services:
   db:
@@ -78,7 +81,7 @@ services:
       redis: {condition: service_healthy}
       objectstore: {condition: service_healthy}
     read_only: true
-    tmpfs: ["/tmp"]
+    tmpfs: ["/tmp:size=1g"]
     cap_drop: ["ALL"]
     security_opt: ["no-new-privileges:true"]
     healthcheck:

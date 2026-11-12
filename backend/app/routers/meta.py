@@ -105,7 +105,7 @@ def meta() -> s.Meta:
     return s.Meta(
         name="SensorTrace", api_version="v1", engine_version=ENGINE_VERSION, algorithm_version=ALGORITHM_VERSION,
         decision_policy_version=DECISION_POLICY_VERSION, libraries=library_versions(),
-        limits={"max_upload_bytes": c.max_upload_bytes, "max_image_pixels": c.max_image_pixels, "max_files_per_request": c.max_files_per_request,
+        limits={"max_upload_bytes": c.max_upload_bytes, "max_image_pixels": c.max_image_pixels, "max_files_per_request": c.max_files_per_request, "max_request_bytes": c.max_request_bytes,
                 "max_reference_images": c.max_reference_images, "max_candidates_per_analysis": c.max_candidates_per_analysis,
                 "recommended_reference_images": 30, "min_reference_images": 2},
         supported_formats=["image/jpeg", "image/png"], registration_open=c.allow_registration,

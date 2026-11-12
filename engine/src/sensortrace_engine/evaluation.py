@@ -23,7 +23,6 @@ import csv
 import io
 import json
 import multiprocessing as mp
-import os
 import time
 from collections import defaultdict
 from dataclasses import dataclass
@@ -70,6 +69,9 @@ def _files(root: Path, dev: DeviceSpec, category: str, count: int) -> list[Path]
 
 
 def _enrol_device(args: tuple[str, list[str], str]) -> dict[str, Any]:
+    from . import matching
+
+    matching.FFT_WORKERS = 1
     dev_id, files, out_path = args
     t0 = time.time()
     refs = [ReferenceInput(Path(f).name, (lambda f=f: Path(f).read_bytes())) for f in files]
@@ -97,7 +99,9 @@ _FPS: dict[str, Fingerprint] = {}
 
 
 def _init_worker(fp_dir: str, dev_ids: list[str]) -> None:
-    os.environ.setdefault("OMP_NUM_THREADS", "1")
+    from . import matching
+
+    matching.FFT_WORKERS = 1  # one thread per process: the pool already uses every core
     for d in dev_ids:
         _FPS[d] = Fingerprint.from_bytes((Path(fp_dir) / f"{d}.npz").read_bytes())
 
