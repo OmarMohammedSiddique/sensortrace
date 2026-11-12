@@ -73,7 +73,7 @@ export function SelectionGuidance({ sensors, images }: { sensors: Sensor[]; imag
   return (
     <div className="flex flex-col gap-2" aria-live="polite">
       {needControl.length > 0 ? (
-        <Notice tone="warning" title="A match cannot be supported for these sensors without a same-model control">
+        <Notice tone="warning" title={`A match cannot be supported for ${needControl.length === 1 ? "this sensor" : "these sensors"} without a same-model control`}>
           <p>
             {needControl.map((s) => `${s.device_name} / ${s.name}`).join("; ")}{" "}
             {needControl.length === 1 ? "belongs to a device whose pipeline is" : "belong to devices whose pipelines are"} not declared conventional.

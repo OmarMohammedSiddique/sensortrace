@@ -560,6 +560,37 @@ HANDLERS = {
 # ------------------------------------------------------------- maintenance
 
 
+def reap_interrupted() -> int:
+    """Fail jobs that the database shows as active but that no worker holds any more.
+
+    A worker killed mid-job (restart, out-of-memory) cannot update its row. Without this, the job
+    would look as if it were running for ever and block a new attempt.
+    """
+    from datetime import timedelta as _td
+
+    from rq import Queue
+    from rq.registry import ScheduledJobRegistry, StartedJobRegistry
+
+    from .deps import get_redis
+
+    conn = get_redis()
+    queue = Queue(QUEUE_NAME, connection=conn)
+    held = set(queue.job_ids) | set(StartedJobRegistry(queue=queue).get_job_ids()) | set(ScheduledJobRegistry(queue=queue).get_job_ids())
+    held = {j.split(":")[0] for j in held}  # started-registry entries may carry an execution suffix
+    cutoff = m.utcnow() - _td(seconds=90)  # grace for jobs that are just being handed over
+    n = 0
+    with session_scope() as db:
+        for job in db.scalars(select(m.Job).where(m.Job.status.in_(ACTIVE), m.Job.created_at < cutoff)):
+            if str(job.id) in held:
+                continue
+            job.status, job.stage, job.finished_at = "failed", "failed", m.utcnow()
+            job.error = "The job was interrupted before it finished. Start it again."
+            _mark_target_failed(db, job, job.error)
+            audit(db, job.user_id, "job.interrupted", entity_type="job", entity_id=job.id, kind=job.kind)
+            n += 1
+    return n
+
+
 def purge_expired() -> dict[str, int]:
     """Delete investigations past their retention date, expired exports and expired sessions."""
     from .services import purge_investigation

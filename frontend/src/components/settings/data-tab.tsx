@@ -313,7 +313,7 @@ function ExportsPanel() {
 /* --------------------------------------------------------- delete account */
 
 function DeleteAccountPanel() {
-  const { signOut, user } = useAuth();
+  const { user } = useAuth();
   const remove = useDeleteAccount();
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState("");
@@ -364,8 +364,9 @@ function DeleteAccountPanel() {
         onConfirm={async () => {
           if (!password) throw new Error("Enter your password to confirm.");
           await remove.mutateAsync(password);
-          toastSuccess("Your account has been deleted");
-          await signOut("/");
+          // Leave with a full page load: every cached query now answers 401, and a client-side
+          // transition would race the automatic "session ended" redirect to the sign-in page.
+          window.location.replace("/");
         }}
       >
         <div className="grid gap-1.5">

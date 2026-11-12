@@ -25,15 +25,21 @@ def worker() -> None:
     Worker([Queue(QUEUE_NAME, connection=conn)], connection=conn).work(with_scheduler=True)
 
 
-def scheduler(interval: int = 3600) -> None:
-    """Run retention and expiry purges periodically."""
-    from .jobs import purge_expired
+def scheduler(interval: int = 120) -> None:
+    """Reap interrupted jobs every cycle and run retention purges hourly."""
+    from .jobs import purge_expired, reap_interrupted
 
+    last_purge = 0.0
     while True:
         try:
-            log.info("purge: %s", purge_expired())
+            n = reap_interrupted()
+            if n:
+                log.info("reaped %d interrupted job(s)", n)
+            if time.time() - last_purge >= 3600:
+                log.info("purge: %s", purge_expired())
+                last_purge = time.time()
         except Exception:
-            log.exception("purge failed")
+            log.exception("maintenance cycle failed")
         time.sleep(interval)
 
 

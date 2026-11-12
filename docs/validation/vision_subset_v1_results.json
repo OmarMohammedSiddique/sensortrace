@@ -1,0 +1,1348 @@
+{
+  "dataset": {
+    "name": "vision-subset-v1",
+    "attribution": "VISION dataset (Shullani et al., EURASIP Journal on Information Security, 2017). (c) CSP Lab, University of Florence. CC BY-SA 4.0."
+  },
+  "engine": {
+    "algorithm_version": "prnu-wavelet-mle-1.0",
+    "engine_version": "0.1.0",
+    "libraries": {
+      "python": "3.12.16",
+      "numpy": "2.5.4",
+      "scipy": "1.18.1",
+      "PyWavelets": "1.10.0",
+      "pillow": "13.0.0",
+      "opencv-python-headless": "5.0.0.93"
+    }
+  },
+  "protocol": {
+    "target_fpr": 0.01,
+    "target_fnr": 0.01,
+    "reference_line": 60.0,
+    "statistic": "effective signed PCE (adjusted for the alignments searched)",
+    "devices": {
+      "calibration": [
+        "D02",
+        "D03",
+        "D05",
+        "D10",
+        "D14",
+        "D18"
+      ],
+      "test": [
+        "D01",
+        "D06",
+        "D11",
+        "D15",
+        "D26",
+        "D29",
+        "D34"
+      ]
+    },
+    "models": {
+      "calibration": [
+        "apple iphone 4s",
+        "apple iphone 5c",
+        "huawei p9"
+      ],
+      "test": [
+        "apple iphone 5",
+        "apple iphone 6",
+        "samsung galaxy s3",
+        "samsung galaxy s3 mini"
+      ]
+    }
+  },
+  "calibration": {
+    "n_same": 240,
+    "n_same_model_diff": 320,
+    "n_different_model_diff": 480,
+    "match_threshold_pooled_negatives": 9.119817405919465,
+    "match_threshold_same_model_negatives": 10.863852361049828,
+    "match_threshold_selected": 10.863852361049828,
+    "non_match_threshold_selected": 0.14310547905267437,
+    "summary_all": {
+      "n_same": 240,
+      "n_diff": 800,
+      "auc": 0.986515625,
+      "auc_ci_trial_bootstrap": [
+        0.9748114583333334,
+        0.9964174479166666
+      ],
+      "operating_point": {
+        "threshold": 10.863852361049828,
+        "n_same": 240,
+        "n_diff": 800,
+        "false_positives": 3,
+        "false_negatives": 7,
+        "fpr": 0.00375,
+        "fnr": 0.029166666666666667,
+        "fpr_ci": [
+          0.0007740088060229359,
+          0.010919650879743965
+        ],
+        "fnr_ci": [
+          0.01180528551854403,
+          0.05916855454550887
+        ],
+        "confidence": 0.95,
+        "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+      },
+      "max_diff": 18.77256799336144,
+      "diff_quantiles": {
+        "0.5": 0.12090864014751565,
+        "0.95": 4.8184997091292905,
+        "0.99": 9.12066721339625
+      },
+      "same_quantiles": {
+        "0.01": 0.183424674204975,
+        "0.05": 1089.9748090488808,
+        "0.5": 8760.905934994958
+      }
+    },
+    "summary_same_model": {
+      "n_same": 240,
+      "n_diff": 320,
+      "auc": 0.9859244791666667,
+      "auc_ci_trial_bootstrap": [
+        0.9738186848958333,
+        0.9964072265625
+      ],
+      "operating_point": {
+        "threshold": 10.863852361049828,
+        "n_same": 240,
+        "n_diff": 320,
+        "false_positives": 3,
+        "false_negatives": 7,
+        "fpr": 0.009375,
+        "fnr": 0.029166666666666667,
+        "fpr_ci": [
+          0.001937538922411152,
+          0.0271518055616619
+        ],
+        "fnr_ci": [
+          0.01180528551854403,
+          0.05916855454550887
+        ],
+        "confidence": 0.95,
+        "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+      },
+      "max_diff": 18.77256799336144,
+      "diff_quantiles": {
+        "0.5": 0.19035007841137214,
+        "0.95": 6.514620958879144,
+        "0.99": 10.831195035149392
+      },
+      "same_quantiles": {
+        "0.01": 0.183424674204975,
+        "0.05": 1089.9748090488808,
+        "0.5": 8760.905934994958
+      }
+    },
+    "method": "Match threshold: smallest value whose empirical false-positive rate on calibration negatives does not exceed the target, computed on pooled and on same-model negatives; the larger is selected. Non-match threshold: largest value whose empirical miss rate on calibration positives does not exceed the target. A threshold is null when the calibration set is too small to resolve the target."
+  },
+  "test": {
+    "original": {
+      "all_negatives": {
+        "calibrated": {
+          "n_same": 280,
+          "n_diff": 880,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 10.863852361049828,
+            "n_same": 280,
+            "n_diff": 880,
+            "false_positives": 6,
+            "false_negatives": 0,
+            "fpr": 0.006818181818181818,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.0025061418177703787,
+              0.014780853063493317
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 21.363444591807667,
+          "diff_quantiles": {
+            "0.5": 0.08613051423405321,
+            "0.95": 5.255184274641337,
+            "0.99": 9.43203214491998
+          },
+          "same_quantiles": {
+            "0.01": 1579.421306097484,
+            "0.05": 2460.2827780501784,
+            "0.5": 9997.179277004587
+          }
+        },
+        "reference_line": {
+          "n_same": 280,
+          "n_diff": 880,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 60.0,
+            "n_same": 280,
+            "n_diff": 880,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "fpr": 0.0,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.0,
+              0.00418313468618626
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 21.363444591807667,
+          "diff_quantiles": {
+            "0.5": 0.08613051423405321,
+            "0.95": 5.255184274641337,
+            "0.99": 9.43203214491998
+          },
+          "same_quantiles": {
+            "0.01": 1579.421306097484,
+            "0.05": 2460.2827780501784,
+            "0.5": 9997.179277004587
+          }
+        },
+        "confusion_calibrated": {
+          "same_source": {
+            "match": 280,
+            "inconclusive": 0,
+            "non_match": 0
+          },
+          "different_source": {
+            "match": 6,
+            "inconclusive": 411,
+            "non_match": 463
+          }
+        }
+      },
+      "same_model": {
+        "calibrated": {
+          "n_same": 280,
+          "n_diff": 240,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 10.863852361049828,
+            "n_same": 280,
+            "n_diff": 240,
+            "false_positives": 5,
+            "false_negatives": 0,
+            "fpr": 0.020833333333333332,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.006798310620786744,
+              0.04794569919944516
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 21.363444591807667,
+          "diff_quantiles": {
+            "0.5": 0.7218994736851777,
+            "0.95": 8.034259468964212,
+            "0.99": 13.01834119043518
+          },
+          "same_quantiles": {
+            "0.01": 1579.421306097484,
+            "0.05": 2460.2827780501784,
+            "0.5": 9997.179277004587
+          }
+        },
+        "reference_line": {
+          "n_same": 280,
+          "n_diff": 240,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 60.0,
+            "n_same": 280,
+            "n_diff": 240,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "fpr": 0.0,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.0,
+              0.015252810401278712
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 21.363444591807667,
+          "diff_quantiles": {
+            "0.5": 0.7218994736851777,
+            "0.95": 8.034259468964212,
+            "0.99": 13.01834119043518
+          },
+          "same_quantiles": {
+            "0.01": 1579.421306097484,
+            "0.05": 2460.2827780501784,
+            "0.5": 9997.179277004587
+          }
+        },
+        "confusion_calibrated": {
+          "same_source": {
+            "match": 280,
+            "inconclusive": 0,
+            "non_match": 0
+          },
+          "different_source": {
+            "match": 5,
+            "inconclusive": 147,
+            "non_match": 88
+          }
+        }
+      },
+      "different_model": {
+        "calibrated": {
+          "n_same": 280,
+          "n_diff": 640,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 10.863852361049828,
+            "n_same": 280,
+            "n_diff": 640,
+            "false_positives": 1,
+            "false_negatives": 0,
+            "fpr": 0.0015625,
+            "fnr": 0.0,
+            "fpr_ci": [
+              3.9558292525564206e-05,
+              0.008674663142624252
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 11.77119679091058,
+          "diff_quantiles": {
+            "0.5": 0.012787981654283413,
+            "0.95": 3.778594236385939,
+            "0.99": 6.754095114951268
+          },
+          "same_quantiles": {
+            "0.01": 1579.421306097484,
+            "0.05": 2460.2827780501784,
+            "0.5": 9997.179277004587
+          }
+        },
+        "reference_line": {
+          "n_same": 280,
+          "n_diff": 640,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 60.0,
+            "n_same": 280,
+            "n_diff": 640,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "fpr": 0.0,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.0,
+              0.005747294893332908
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 11.77119679091058,
+          "diff_quantiles": {
+            "0.5": 0.012787981654283413,
+            "0.95": 3.778594236385939,
+            "0.99": 6.754095114951268
+          },
+          "same_quantiles": {
+            "0.01": 1579.421306097484,
+            "0.05": 2460.2827780501784,
+            "0.5": 9997.179277004587
+          }
+        },
+        "confusion_calibrated": {
+          "same_source": {
+            "match": 280,
+            "inconclusive": 0,
+            "non_match": 0
+          },
+          "different_source": {
+            "match": 1,
+            "inconclusive": 264,
+            "non_match": 375
+          }
+        }
+      }
+    },
+    "jpeg90": {
+      "all_negatives": {
+        "calibrated": {
+          "n_same": 280,
+          "n_diff": 880,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 10.863852361049828,
+            "n_same": 280,
+            "n_diff": 880,
+            "false_positives": 5,
+            "false_negatives": 0,
+            "fpr": 0.005681818181818182,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.0018473678964069018,
+              0.013209293018607281
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 22.158379293347696,
+          "diff_quantiles": {
+            "0.5": 0.1045911933203107,
+            "0.95": 5.472409163491005,
+            "0.99": 9.539985878292107
+          },
+          "same_quantiles": {
+            "0.01": 1302.0187665263757,
+            "0.05": 1929.1217880391189,
+            "0.5": 7393.643968772423
+          }
+        },
+        "reference_line": {
+          "n_same": 280,
+          "n_diff": 880,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 60.0,
+            "n_same": 280,
+            "n_diff": 880,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "fpr": 0.0,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.0,
+              0.00418313468618626
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 22.158379293347696,
+          "diff_quantiles": {
+            "0.5": 0.1045911933203107,
+            "0.95": 5.472409163491005,
+            "0.99": 9.539985878292107
+          },
+          "same_quantiles": {
+            "0.01": 1302.0187665263757,
+            "0.05": 1929.1217880391189,
+            "0.5": 7393.643968772423
+          }
+        },
+        "confusion_calibrated": {
+          "same_source": {
+            "match": 280,
+            "inconclusive": 0,
+            "non_match": 0
+          },
+          "different_source": {
+            "match": 5,
+            "inconclusive": 420,
+            "non_match": 455
+          }
+        }
+      },
+      "same_model": {
+        "calibrated": {
+          "n_same": 280,
+          "n_diff": 240,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 10.863852361049828,
+            "n_same": 280,
+            "n_diff": 240,
+            "false_positives": 5,
+            "false_negatives": 0,
+            "fpr": 0.020833333333333332,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.006798310620786744,
+              0.04794569919944516
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 22.158379293347696,
+          "diff_quantiles": {
+            "0.5": 0.5801591684174006,
+            "0.95": 8.427720750565332,
+            "0.99": 11.885206705197925
+          },
+          "same_quantiles": {
+            "0.01": 1302.0187665263757,
+            "0.05": 1929.1217880391189,
+            "0.5": 7393.643968772423
+          }
+        },
+        "reference_line": {
+          "n_same": 280,
+          "n_diff": 240,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 60.0,
+            "n_same": 280,
+            "n_diff": 240,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "fpr": 0.0,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.0,
+              0.015252810401278712
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 22.158379293347696,
+          "diff_quantiles": {
+            "0.5": 0.5801591684174006,
+            "0.95": 8.427720750565332,
+            "0.99": 11.885206705197925
+          },
+          "same_quantiles": {
+            "0.01": 1302.0187665263757,
+            "0.05": 1929.1217880391189,
+            "0.5": 7393.643968772423
+          }
+        },
+        "confusion_calibrated": {
+          "same_source": {
+            "match": 280,
+            "inconclusive": 0,
+            "non_match": 0
+          },
+          "different_source": {
+            "match": 5,
+            "inconclusive": 141,
+            "non_match": 94
+          }
+        }
+      },
+      "different_model": {
+        "calibrated": {
+          "n_same": 280,
+          "n_diff": 640,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 10.863852361049828,
+            "n_same": 280,
+            "n_diff": 640,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "fpr": 0.0,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.0,
+              0.005747294893332908
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 8.914535805652301,
+          "diff_quantiles": {
+            "0.5": 0.01861251161774232,
+            "0.95": 4.170663669361994,
+            "0.99": 7.065678019737667
+          },
+          "same_quantiles": {
+            "0.01": 1302.0187665263757,
+            "0.05": 1929.1217880391189,
+            "0.5": 7393.643968772423
+          }
+        },
+        "reference_line": {
+          "n_same": 280,
+          "n_diff": 640,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 60.0,
+            "n_same": 280,
+            "n_diff": 640,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "fpr": 0.0,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.0,
+              0.005747294893332908
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 8.914535805652301,
+          "diff_quantiles": {
+            "0.5": 0.01861251161774232,
+            "0.95": 4.170663669361994,
+            "0.99": 7.065678019737667
+          },
+          "same_quantiles": {
+            "0.01": 1302.0187665263757,
+            "0.05": 1929.1217880391189,
+            "0.5": 7393.643968772423
+          }
+        },
+        "confusion_calibrated": {
+          "same_source": {
+            "match": 280,
+            "inconclusive": 0,
+            "non_match": 0
+          },
+          "different_source": {
+            "match": 0,
+            "inconclusive": 279,
+            "non_match": 361
+          }
+        }
+      }
+    },
+    "jpeg75": {
+      "all_negatives": {
+        "calibrated": {
+          "n_same": 280,
+          "n_diff": 880,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 10.863852361049828,
+            "n_same": 280,
+            "n_diff": 880,
+            "false_positives": 8,
+            "false_negatives": 0,
+            "fpr": 0.00909090909090909,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.00393274670953666,
+              0.01783377162579806
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 31.5618595947528,
+          "diff_quantiles": {
+            "0.5": 0.11997889331425121,
+            "0.95": 4.846276993487678,
+            "0.99": 10.220773452343572
+          },
+          "same_quantiles": {
+            "0.01": 662.9959158425136,
+            "0.05": 1107.4133312781828,
+            "0.5": 3647.567535738849
+          }
+        },
+        "reference_line": {
+          "n_same": 280,
+          "n_diff": 880,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 60.0,
+            "n_same": 280,
+            "n_diff": 880,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "fpr": 0.0,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.0,
+              0.00418313468618626
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 31.5618595947528,
+          "diff_quantiles": {
+            "0.5": 0.11997889331425121,
+            "0.95": 4.846276993487678,
+            "0.99": 10.220773452343572
+          },
+          "same_quantiles": {
+            "0.01": 662.9959158425136,
+            "0.05": 1107.4133312781828,
+            "0.5": 3647.567535738849
+          }
+        },
+        "confusion_calibrated": {
+          "same_source": {
+            "match": 280,
+            "inconclusive": 0,
+            "non_match": 0
+          },
+          "different_source": {
+            "match": 8,
+            "inconclusive": 423,
+            "non_match": 449
+          }
+        }
+      },
+      "same_model": {
+        "calibrated": {
+          "n_same": 280,
+          "n_diff": 240,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 10.863852361049828,
+            "n_same": 280,
+            "n_diff": 240,
+            "false_positives": 8,
+            "false_negatives": 0,
+            "fpr": 0.03333333333333333,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.014498755997796063,
+              0.0646209923111621
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 31.5618595947528,
+          "diff_quantiles": {
+            "0.5": 0.40955741236971266,
+            "0.95": 8.312572689485863,
+            "0.99": 14.834111180382875
+          },
+          "same_quantiles": {
+            "0.01": 662.9959158425136,
+            "0.05": 1107.4133312781828,
+            "0.5": 3647.567535738849
+          }
+        },
+        "reference_line": {
+          "n_same": 280,
+          "n_diff": 240,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 60.0,
+            "n_same": 280,
+            "n_diff": 240,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "fpr": 0.0,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.0,
+              0.015252810401278712
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 31.5618595947528,
+          "diff_quantiles": {
+            "0.5": 0.40955741236971266,
+            "0.95": 8.312572689485863,
+            "0.99": 14.834111180382875
+          },
+          "same_quantiles": {
+            "0.01": 662.9959158425136,
+            "0.05": 1107.4133312781828,
+            "0.5": 3647.567535738849
+          }
+        },
+        "confusion_calibrated": {
+          "same_source": {
+            "match": 280,
+            "inconclusive": 0,
+            "non_match": 0
+          },
+          "different_source": {
+            "match": 8,
+            "inconclusive": 131,
+            "non_match": 101
+          }
+        }
+      },
+      "different_model": {
+        "calibrated": {
+          "n_same": 280,
+          "n_diff": 640,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 10.863852361049828,
+            "n_same": 280,
+            "n_diff": 640,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "fpr": 0.0,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.0,
+              0.005747294893332908
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 10.299140874602895,
+          "diff_quantiles": {
+            "0.5": 0.05525002618982576,
+            "0.95": 4.1067710844978444,
+            "0.99": 7.564691402161928
+          },
+          "same_quantiles": {
+            "0.01": 662.9959158425136,
+            "0.05": 1107.4133312781828,
+            "0.5": 3647.567535738849
+          }
+        },
+        "reference_line": {
+          "n_same": 280,
+          "n_diff": 640,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 60.0,
+            "n_same": 280,
+            "n_diff": 640,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "fpr": 0.0,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.0,
+              0.005747294893332908
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 10.299140874602895,
+          "diff_quantiles": {
+            "0.5": 0.05525002618982576,
+            "0.95": 4.1067710844978444,
+            "0.99": 7.564691402161928
+          },
+          "same_quantiles": {
+            "0.01": 662.9959158425136,
+            "0.05": 1107.4133312781828,
+            "0.5": 3647.567535738849
+          }
+        },
+        "confusion_calibrated": {
+          "same_source": {
+            "match": 280,
+            "inconclusive": 0,
+            "non_match": 0
+          },
+          "different_source": {
+            "match": 0,
+            "inconclusive": 292,
+            "non_match": 348
+          }
+        }
+      }
+    },
+    "jpeg60": {
+      "all_negatives": {
+        "calibrated": {
+          "n_same": 280,
+          "n_diff": 880,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 10.863852361049828,
+            "n_same": 280,
+            "n_diff": 880,
+            "false_positives": 7,
+            "false_negatives": 0,
+            "fpr": 0.007954545454545454,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.003203947527296243,
+              0.01632035166220038
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 15.669067799991412,
+          "diff_quantiles": {
+            "0.5": 0.03874915884688379,
+            "0.95": 4.832254236448117,
+            "0.99": 9.157201304478837
+          },
+          "same_quantiles": {
+            "0.01": 324.70954630726794,
+            "0.05": 681.2084931372175,
+            "0.5": 2079.7396726031557
+          }
+        },
+        "reference_line": {
+          "n_same": 280,
+          "n_diff": 880,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 60.0,
+            "n_same": 280,
+            "n_diff": 880,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "fpr": 0.0,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.0,
+              0.00418313468618626
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 15.669067799991412,
+          "diff_quantiles": {
+            "0.5": 0.03874915884688379,
+            "0.95": 4.832254236448117,
+            "0.99": 9.157201304478837
+          },
+          "same_quantiles": {
+            "0.01": 324.70954630726794,
+            "0.05": 681.2084931372175,
+            "0.5": 2079.7396726031557
+          }
+        },
+        "confusion_calibrated": {
+          "same_source": {
+            "match": 280,
+            "inconclusive": 0,
+            "non_match": 0
+          },
+          "different_source": {
+            "match": 7,
+            "inconclusive": 386,
+            "non_match": 487
+          }
+        }
+      },
+      "same_model": {
+        "calibrated": {
+          "n_same": 280,
+          "n_diff": 240,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 10.863852361049828,
+            "n_same": 280,
+            "n_diff": 240,
+            "false_positives": 3,
+            "false_negatives": 0,
+            "fpr": 0.0125,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.0025852561852203475,
+              0.03609367948354552
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 14.46771037213054,
+          "diff_quantiles": {
+            "0.5": 0.33691989391421207,
+            "0.95": 5.95305093812694,
+            "0.99": 11.641469640147085
+          },
+          "same_quantiles": {
+            "0.01": 324.70954630726794,
+            "0.05": 681.2084931372175,
+            "0.5": 2079.7396726031557
+          }
+        },
+        "reference_line": {
+          "n_same": 280,
+          "n_diff": 240,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 60.0,
+            "n_same": 280,
+            "n_diff": 240,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "fpr": 0.0,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.0,
+              0.015252810401278712
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 14.46771037213054,
+          "diff_quantiles": {
+            "0.5": 0.33691989391421207,
+            "0.95": 5.95305093812694,
+            "0.99": 11.641469640147085
+          },
+          "same_quantiles": {
+            "0.01": 324.70954630726794,
+            "0.05": 681.2084931372175,
+            "0.5": 2079.7396726031557
+          }
+        },
+        "confusion_calibrated": {
+          "same_source": {
+            "match": 280,
+            "inconclusive": 0,
+            "non_match": 0
+          },
+          "different_source": {
+            "match": 3,
+            "inconclusive": 132,
+            "non_match": 105
+          }
+        }
+      },
+      "different_model": {
+        "calibrated": {
+          "n_same": 280,
+          "n_diff": 640,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 10.863852361049828,
+            "n_same": 280,
+            "n_diff": 640,
+            "false_positives": 4,
+            "false_negatives": 0,
+            "fpr": 0.00625,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.001705462459337712,
+              0.015924594815949412
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 15.669067799991412,
+          "diff_quantiles": {
+            "0.5": 0.008118685768265509,
+            "0.95": 4.281120258166556,
+            "0.99": 7.93940429219651
+          },
+          "same_quantiles": {
+            "0.01": 324.70954630726794,
+            "0.05": 681.2084931372175,
+            "0.5": 2079.7396726031557
+          }
+        },
+        "reference_line": {
+          "n_same": 280,
+          "n_diff": 640,
+          "auc": 1.0,
+          "auc_ci_trial_bootstrap": [
+            1.0,
+            1.0
+          ],
+          "operating_point": {
+            "threshold": 60.0,
+            "n_same": 280,
+            "n_diff": 640,
+            "false_positives": 0,
+            "false_negatives": 0,
+            "fpr": 0.0,
+            "fnr": 0.0,
+            "fpr_ci": [
+              0.0,
+              0.005747294893332908
+            ],
+            "fnr_ci": [
+              0.0,
+              0.013088164703296644
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 15.669067799991412,
+          "diff_quantiles": {
+            "0.5": 0.008118685768265509,
+            "0.95": 4.281120258166556,
+            "0.99": 7.93940429219651
+          },
+          "same_quantiles": {
+            "0.01": 324.70954630726794,
+            "0.05": 681.2084931372175,
+            "0.5": 2079.7396726031557
+          }
+        },
+        "confusion_calibrated": {
+          "same_source": {
+            "match": 280,
+            "inconclusive": 0,
+            "non_match": 0
+          },
+          "different_source": {
+            "match": 4,
+            "inconclusive": 254,
+            "non_match": 382
+          }
+        }
+      }
+    }
+  },
+  "cropped_search_negatives": {
+    "n": 1280,
+    "note": "All cross-resolution trials are different-device by construction (true negatives).",
+    "raw_pce_exceeding_reference_line": 0,
+    "adjusted_exceeding_reference_line": 0,
+    "adjusted_fpr_ci": [
+      0.0,
+      0.002877788279356856
+    ],
+    "raw_pce_max": 37.25120342224973,
+    "adjusted_max": 10.684305538670271
+  },
+  "test_per_device": {
+    "D06": {
+      "model_key": "apple iphone 6",
+      "n_same": 40,
+      "same_median": 6357.391240783241,
+      "same_min": 1148.6856950232457,
+      "n_diff": 160,
+      "diff_max": 15.277265193742327,
+      "misses_at_selected": 0,
+      "false_matches_at_selected": 4
+    },
+    "D15": {
+      "model_key": "apple iphone 6",
+      "n_same": 40,
+      "same_median": 10985.761321714843,
+      "same_min": 2156.749700401538,
+      "n_diff": 160,
+      "diff_max": 21.363444591807667,
+      "misses_at_selected": 0,
+      "false_matches_at_selected": 1
+    },
+    "D29": {
+      "model_key": "apple iphone 5",
+      "n_same": 40,
+      "same_median": 9779.496770460915,
+      "same_min": 3073.5412679752035,
+      "n_diff": 160,
+      "diff_max": 9.389564552355257,
+      "misses_at_selected": 0,
+      "false_matches_at_selected": 0
+    },
+    "D34": {
+      "model_key": "apple iphone 5",
+      "n_same": 40,
+      "same_median": 8884.460862834138,
+      "same_min": 1549.3800584083876,
+      "n_diff": 160,
+      "diff_max": 10.347055281890823,
+      "misses_at_selected": 0,
+      "false_matches_at_selected": 0
+    },
+    "D01": {
+      "model_key": "samsung galaxy s3 mini",
+      "n_same": 40,
+      "same_median": 18175.762798467556,
+      "same_min": 1928.3418219117875,
+      "n_diff": 40,
+      "diff_max": 6.543145060133395,
+      "misses_at_selected": 0,
+      "false_matches_at_selected": 0
+    },
+    "D26": {
+      "model_key": "samsung galaxy s3 mini",
+      "n_same": 40,
+      "same_median": 7853.396723899022,
+      "same_min": 2514.53509832798,
+      "n_diff": 40,
+      "diff_max": 11.498378499953434,
+      "misses_at_selected": 0,
+      "false_matches_at_selected": 1
+    },
+    "D11": {
+      "model_key": "samsung galaxy s3",
+      "n_same": 40,
+      "same_median": 14517.845450670935,
+      "same_min": 1890.428984504989,
+      "n_diff": 160,
+      "diff_max": 10.835662913070466,
+      "misses_at_selected": 0,
+      "false_matches_at_selected": 0
+    }
+  },
+  "leakage": {
+    "test_images": 520,
+    "exact_reference_test_duplicates": 0,
+    "near_duplicate_test_pairs_within_device": 1,
+    "note": "Near duplicates (dHash distance <= 2) are counted, not removed; they make trials less independent."
+  }
+}

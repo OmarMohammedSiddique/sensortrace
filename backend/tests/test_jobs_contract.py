@@ -350,3 +350,31 @@ def test_queue_outage_fails_the_job_instead_of_leaving_it_queued(app, settings, 
     monkeypatch.undo()
     settings.jobs_inline = True
     assert c.post(f"{API}/sensors/{sid}/fingerprints").status_code == 202  # not blocked by the failed attempt
+
+
+def test_interrupted_jobs_are_reaped(app, settings):
+    from datetime import timedelta
+
+    from app.models import utcnow
+
+    settings.jobs_inline = False
+    c = make_user(app)
+    sid = _sensor_with_refs(c, 101)
+    started = c.post(f"{API}/sensors/{sid}/fingerprints").json()
+    jid = started["job"]["id"]
+    assert jobs.reap_interrupted() == 0  # still held by the queue
+    # Simulate a worker that took the job and died: the message is gone, the row says running.
+    from rq import Queue
+
+    from app.deps import get_redis
+
+    Queue(jobs.QUEUE_NAME, connection=get_redis()).empty()
+    with session_scope() as db:
+        j = db.get(Job, jid)
+        j.status, j.created_at = "running", utcnow() - timedelta(minutes=10)
+    assert jobs.reap_interrupted() == 1
+    j = c.get(f"{API}/jobs/{jid}").json()
+    assert j["status"] == "failed" and "interrupted" in j["error"]
+    assert c.get(f"{API}/fingerprints/{started['fingerprint']['id']}").json()["status"] == "failed"
+    settings.jobs_inline = True
+    assert c.post(f"{API}/sensors/{sid}/fingerprints").status_code == 202
