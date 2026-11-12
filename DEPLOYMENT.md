@@ -1,8 +1,8 @@
 # Deployment
 
 SensorTrace runs as six containers: web application, API, worker, scheduler, PostgreSQL, Redis, plus an
-S3-compatible object store. Everything needed to run it locally is free and open source. No public
-deployment has been made and none is required to use the product.
+S3-compatible object store. Everything needed to run it locally is free and open source. It can also
+run on Vercel without a long-lived worker; see "Vercel" below.
 
 ## Requirements
 
@@ -107,8 +107,8 @@ openssl rand -base64 48
 
 ## Production checklist
 
-No production deployment has been performed as part of this project; the steps below are the intended
-procedure and have been exercised only as far as the local Compose stack.
+The container procedure below has been exercised only as far as the local Compose stack. The Vercel
+deployment in the next section is live and was verified end to end.
 
 1. **Host.** A Linux host or VM with Docker, sized per the requirements above. Restrict SSH.
 2. **Secrets.** Create `.env` with `ST_ENVIRONMENT=production`, a random `ST_SECRET_KEY`,
@@ -142,6 +142,56 @@ procedure and have been exercised only as far as the local Compose stack.
    degraded). Container logs are plain text on stdout.
 10. **Updates.** Pull, rebuild and `up -d`; migrations run automatically. Read CHANGELOG.md first: a new
     algorithm version does not alter stored results but new fingerprints and analyses will use it.
+
+## Vercel
+
+A deployment runs at `https://sensortrace.vercel.app` (project `sensortrace`).
+
+| Part | On Vercel |
+|---|---|
+| Web application | Next.js service |
+| API and engine | Python (FastAPI) service on the same domain under `/api/v1` |
+| Database | Neon Postgres (Marketplace), pooled connection, `ST_DB_POOL=null` |
+| Rate limits | Upstash Redis (Marketplace) |
+| Files | Private Vercel Blob store (`ST_STORAGE_BACKEND=vercel_blob`) |
+| Background jobs | No worker: each job runs in its own invocation of a signed internal endpoint (`ST_JOB_DISPATCH=http`) |
+| Retention purge | Daily Vercel Cron calling an internal endpoint with `CRON_SECRET` |
+| Registration | Closed, except for the first account (`ST_ALLOW_REGISTRATION=false`, `ST_ALLOW_FIRST_ACCOUNT=true`) |
+
+Deploy or update:
+
+```bash
+scripts/build_vercel_bundle.sh
+```
+
+```bash
+cd .vercel-bundle && npx vercel@latest deploy --prod
+```
+
+The script assembles `.vercel-bundle/` (web, API code, engine source, flat requirements, `vercel.json`);
+it is not committed. After a schema change, run the migrations against the unpooled database URL from
+`vercel env pull` before deploying:
+
+```bash
+cd backend && ST_DATABASE_URL="postgresql+psycopg://..." uv run alembic upgrade head
+```
+
+**Limits that differ from the container deployment**
+
+- **Job duration.** A job must finish within the function limit (300 seconds here). Small images and
+  the synthetic demo complete in seconds; a fingerprint from about 30 full-resolution phone photographs
+  will probably exceed it and is then reported as failed with an explanation. This has not been measured
+  on Vercel. Use the container deployment for large enrolments.
+- **No automatic retry or mid-job cancellation guarantee.** A job interrupted by the platform is marked
+  failed the next time its status is read.
+- **Request size.** One upload request is capped at 90 MB (`ST_MAX_REQUEST_BYTES`).
+- **Storage quota** is set to 500 MB per account to stay inside the free Blob allowance.
+- **Interactive API docs** are disabled (production mode).
+
+Verified on the live deployment on 2026-11-12 with a temporary account that was then deleted: health
+check, registration and its closure after the first account, secure cookie flags, synthetic demo
+enrolment (two fingerprints), three comparisons with the expected outcomes, PDF report download, signed
+private file access (anonymous request refused), account deletion, and removal of all stored files.
 
 ## Operations
 

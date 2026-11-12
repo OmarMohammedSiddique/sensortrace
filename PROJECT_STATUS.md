@@ -12,7 +12,7 @@ Status values: **Verified** (exercised by an automated test or a recorded run; e
 | Suite | Result | Command |
 |---|---|---|
 | Engine: unit, property, regression, reference cross-check | 94 passed (72% line coverage) | `make test-engine` |
-| Backend: integration against PostgreSQL, Redis, object storage | 108 passed | `make test-backend` |
+| Backend: integration against PostgreSQL, Redis, object storage | 112 passed | `make test-backend` |
 | Browser end-to-end against the Docker stack | 42 passed | `make test-e2e` |
 | Lint, formatting, types | Clean | `make lint` |
 | Dependency audit (`pip-audit` on engine and backend) | No known vulnerabilities | `make audit` |
@@ -94,7 +94,7 @@ Full table in VALIDATION.md section 4. In short:
 | 4 | Validation scope is narrow | High for any evidential use | 13 older smartphones. See VALIDATION.md section 7 |
 | 5 | Huawei P9: 17.5% of own images undetected, cause unknown | Medium | Reported as inconclusive by the product; documented |
 | 6 | Per-address rate limiting needs a reverse proxy | Low | Off by default; per-account limit still applies. SECURITY.md |
-| 7 | No production deployment performed | — | Not authorised; procedure documented in DEPLOYMENT.md, exercised only locally |
+| 7 | Vercel deployment has a 300-second job limit | Medium | Live at `sensortrace.vercel.app` and verified with synthetic data. Large real enrolments will probably time out there; not measured. Container deployment has no such limit but has only been run locally |
 | 8 | No independent security review or penetration test | Medium | |
 | 9 | Worker memory on Docker Desktop | Low | Docker's VM must have enough memory for the sensor size (about 1.5 GB per job at 12 MP) |
 | 10 | Evaluation images sampled in dataset order | Low | First 40 per category rather than random |
