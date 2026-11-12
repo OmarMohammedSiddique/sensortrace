@@ -98,6 +98,12 @@ jobs:
     needs: [engine, backend, frontend]
     steps:
       - uses: actions/checkout@v4
+      - name: Free runner disk space
+        # Hosted runners have about 14 GB free; the images plus the browser need more.
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          docker system prune -af >/dev/null
+          df -h /
       - name: Start the complete stack
         # The suite registers many accounts from one address; relax the sign-in rate limit for it.
         env:
@@ -106,6 +112,8 @@ jobs:
           WORKER_CPUS: "2"
           WORKER_MEM_LIMIT: 4g
         run: docker compose --profile app up --build -d --wait --wait-timeout 600
+      - name: Drop the build cache
+        run: docker builder prune -af >/dev/null && df -h /
       - uses: actions/setup-node@v4
         with:
           node-version: 22
