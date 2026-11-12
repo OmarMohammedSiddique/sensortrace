@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, type ReactNode } from "react";
 
 import { api, setCsrfToken, setUnauthorizedHandler, unwrap } from "@/lib/api/client";
-import { meQueryOptions } from "@/lib/api/hooks";
+import { fetchSession, meQueryOptions } from "@/lib/api/hooks";
 import { qk } from "@/lib/api/keys";
 import type { SessionInfo, User } from "@/lib/api/types";
 
@@ -32,8 +32,11 @@ export interface AuthContextValue {
   register: (input: { email: string; password: string; display_name?: string }) => Promise<User>;
   /** Ends the session and navigates to `redirectTo` (default "/"). */
   signOut: (redirectTo?: string) => Promise<void>;
-  /** Re-read the session from the API. */
-  refresh: () => Promise<void>;
+  /**
+   * Ask the API for the session, bypassing the session-hint shortcut, and update the
+   * context. Resolves true when a session exists.
+   */
+  refresh: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -111,7 +114,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const refresh = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: qk.me });
+    const session = await fetchSession();
+    queryClient.setQueryData(qk.me, session);
+    return session !== null;
   }, [queryClient]);
 
   const value = useMemo<AuthContextValue>(() => {

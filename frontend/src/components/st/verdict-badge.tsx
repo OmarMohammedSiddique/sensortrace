@@ -49,6 +49,8 @@ export interface VerdictBadgeProps {
   size?: "sm" | "md" | "lg";
   /** Use the shorter label ("Supports match"). The full label stays available as a title. */
   short?: boolean;
+  /** Let the full label wrap onto several lines instead of truncating (narrow columns). */
+  wrap?: boolean;
   className?: string;
 }
 
@@ -59,7 +61,7 @@ const SIZES = {
 } as const;
 
 /** Icon + mandated label + colour for one of the four verdicts. */
-export function VerdictBadge({ verdict, size = "md", short = false, className }: VerdictBadgeProps) {
+export function VerdictBadge({ verdict, size = "md", short = false, wrap = false, className }: VerdictBadgeProps) {
   const base = "inline-flex w-fit max-w-full shrink-0 items-center rounded-md border font-medium whitespace-nowrap";
   if (!isVerdict(verdict)) {
     return (
@@ -75,10 +77,10 @@ export function VerdictBadge({ verdict, size = "md", short = false, className }:
     <span
       data-verdict={verdict}
       title={short ? full : undefined}
-      className={cn(base, SIZES[size], style.badge, className)}
+      className={cn(base, SIZES[size], style.badge, wrap && "h-auto items-start py-1 text-left whitespace-normal [&>svg]:mt-px", className)}
     >
       <Icon aria-hidden="true" className="shrink-0" />
-      <span className="truncate">{short ? VERDICT_SHORT_LABELS[verdict] : full}</span>
+      <span className={wrap ? undefined : "truncate"}>{short ? VERDICT_SHORT_LABELS[verdict] : full}</span>
       {short ? <span className="sr-only"> ({full})</span> : null}
     </span>
   );

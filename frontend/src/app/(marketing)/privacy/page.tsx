@@ -52,9 +52,10 @@ export default function PrivacyPage() {
             pages are sent with a no-referrer policy.
           </p>
           <p>
-            The session cookie that keeps you signed in is not readable by scripts and is used for nothing else. Two
+            The session cookie that keeps you signed in is not readable by scripts and is used for nothing else. A
+            companion cookie records only that a session exists, so public pages need not ask the server. Two
             interface preferences are remembered in your browser: the colour theme (local storage) and whether the
-            sidebar is collapsed (a cookie that carries no identifier).
+            sidebar is collapsed (a cookie). None of these carries an identifier.
           </p>
         </DocSection>
 

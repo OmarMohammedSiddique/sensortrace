@@ -185,9 +185,9 @@ export default function HomePage() {
           />
           <dl className="divide-y overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
             {VERDICTS.map((v) => (
-              <div key={v.verdict} className="grid gap-2 p-5 sm:grid-cols-[17rem_1fr] sm:items-start sm:gap-6">
+              <div key={v.verdict} className="grid gap-2 p-5 sm:grid-cols-[15rem_1fr] sm:items-start sm:gap-6">
                 <dt>
-                  <VerdictBadge verdict={v.verdict} className="whitespace-normal sm:whitespace-nowrap" />
+                  <VerdictBadge verdict={v.verdict} wrap />
                 </dt>
                 <dd className="text-sm leading-relaxed text-muted-foreground">{v.body}</dd>
               </div>

@@ -49,6 +49,20 @@ export async function ensureCsrfToken(): Promise<string | null> {
   return csrfInflight;
 }
 
+/* ----------------------------------------------------------- session hint */
+
+/**
+ * True when the readable `st_hint` cookie is present. The proxy route sets it next to the
+ * HttpOnly session cookie and clears it on sign-out or a 401 from /auth/me. It lets public
+ * pages skip the /auth/me round trip (and a 401 in the console) for signed-out visitors.
+ * It is a hint only and is never trusted for access: inside /app the session is always
+ * verified against the API.
+ */
+export function hasSessionHint(): boolean {
+  if (typeof document === "undefined") return false;
+  return document.cookie.split("; ").some((c) => c === "st_hint=1");
+}
+
 /* ---------------------------------------------------------- 401 handling */
 
 type UnauthorizedHandler = (error: ApiError) => void;

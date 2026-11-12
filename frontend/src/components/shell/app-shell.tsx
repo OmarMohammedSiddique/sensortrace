@@ -46,11 +46,22 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { status, error, refresh } = useAuth();
   const router = useRouter();
 
+  // "unauthenticated" may come from the public-page shortcut (no session hint cookie), so
+  // confirm with the API once before sending the visitor to the sign-in page.
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.replace(signInHref(window.location.pathname + window.location.search));
-    }
-  }, [status, router]);
+    if (status !== "unauthenticated") return;
+    let cancelled = false;
+    refresh()
+      .then((hasSession) => {
+        if (!cancelled && !hasSession) router.replace(signInHref(window.location.pathname + window.location.search));
+      })
+      .catch(() => {
+        if (!cancelled) router.replace(signInHref(window.location.pathname + window.location.search));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [status, refresh, router]);
 
   if (status === "error") {
     return (

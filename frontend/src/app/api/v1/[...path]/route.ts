@@ -29,6 +29,21 @@ const HOP_BY_HOP = new Set([
   "expect",
 ]);
 
+/**
+ * Non-secret companion to the HttpOnly session cookie. It only says "a session probably
+ * exists" so public pages can skip GET /auth/me (and its 401) for signed-out visitors.
+ * It grants nothing: the API still authenticates every request by the real session cookie.
+ */
+const SESSION_COOKIE = "st_session";
+const HINT_COOKIE = "st_hint";
+
+function hintCookie(sessionSetCookie: string | undefined, on: boolean): string {
+  if (!on) return `${HINT_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`;
+  const maxAge = sessionSetCookie?.match(/;\s*max-age=(\d+)/i)?.[1];
+  const secure = sessionSetCookie ? /;\s*secure/i.test(sessionSetCookie) : false;
+  return `${HINT_COOKIE}=1; Path=/; SameSite=Lax${maxAge ? `; Max-Age=${maxAge}` : ""}${secure ? "; Secure" : ""}`;
+}
+
 function apiBase(): string {
   return (process.env.API_INTERNAL_URL || DEFAULT_API_URL).replace(/\/+$/, "");
 }
@@ -85,8 +100,22 @@ async function proxy(req: NextRequest, ctx: { params: Promise<{ path: string[] }
     responseHeaders.set(key, value);
   });
   // Set-Cookie must be forwarded one header per cookie, never comma-joined.
-  for (const cookie of upstream.headers.getSetCookie()) {
-    responseHeaders.append("set-cookie", cookie);
+  const setCookies = upstream.headers.getSetCookie();
+  for (const cookie of setCookies) responseHeaders.append("set-cookie", cookie);
+
+  // Keep the session hint in step with the real session cookie.
+  const sessionCookie = setCookies.find((c) => c.startsWith(`${SESSION_COOKIE}=`));
+  const route = path.join("/");
+  if (sessionCookie) {
+    const cleared = /^st_session=("")?;/.test(sessionCookie) || /;\s*max-age=0/i.test(sessionCookie);
+    responseHeaders.append("set-cookie", hintCookie(sessionCookie, !cleared));
+  } else if (route === "auth/me" && req.method === "GET") {
+    if (upstream.status === 401) responseHeaders.append("set-cookie", hintCookie(undefined, false));
+    else if (upstream.ok && !req.cookies.has(HINT_COOKIE) && req.cookies.has(SESSION_COOKIE)) {
+      responseHeaders.append("set-cookie", hintCookie(undefined, true));
+    }
+  } else if (route === "auth/logout" && upstream.ok) {
+    responseHeaders.append("set-cookie", hintCookie(undefined, false));
   }
   if (!responseHeaders.has("cache-control")) responseHeaders.set("cache-control", "no-store");
 

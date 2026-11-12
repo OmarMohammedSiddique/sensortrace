@@ -1,4 +1,6 @@
-@import "tailwindcss";
+/* Scan only src/ for class names. Without this the dev log under .next/ is treated as a
+   source file and every browser console message triggers a rebuild and reload. */
+@import "tailwindcss" source("..");
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 

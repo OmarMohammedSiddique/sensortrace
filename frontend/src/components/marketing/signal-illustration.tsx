@@ -36,9 +36,9 @@ function noiseCells() {
 
 const RIDGE_ROWS = 23;
 const RIDGE_COLS = 56;
-const RIDGE_W = 300;
+const RIDGE_W = 270;
 const ROW_GAP = 6.2;
-const PEAK_H = 118;
+const PEAK_H = 104;
 
 function ridgePaths() {
   const rand = mulberry32(7254);
@@ -46,18 +46,18 @@ function ridgePaths() {
   const cc = (RIDGE_COLS - 1) / 2;
   const rows: { d: string; near: number }[] = [];
   for (let r = 0; r < RIDGE_ROWS; r++) {
-    const baseY = 150 + r * ROW_GAP;
-    const skew = (r - cr) * -1.6;
+    const baseY = 118 + r * ROW_GAP;
+    const skew = (r - cr) * -1.3;
     let d = "";
     for (let c = 0; c < RIDGE_COLS; c++) {
-      const x = 10 + skew + (c / (RIDGE_COLS - 1)) * RIDGE_W;
-      const dr = (r - cr) / 0.85;
+      const x = 16 + skew + (c / (RIDGE_COLS - 1)) * RIDGE_W;
+      const dr = (r - cr) / 1.05;
       const dc = (c - cc) / 1.25;
       const peak = PEAK_H * Math.exp(-0.5 * (dr * dr + dc * dc));
       const y = baseY - peak - gaussian(rand) * 1.35;
       d += `${c === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`;
     }
-    rows.push({ d, near: Math.exp(-0.5 * ((r - cr) / 0.85) ** 2) });
+    rows.push({ d, near: Math.exp(-0.5 * ((r - cr) / 1.05) ** 2) });
   }
   return rows;
 }
@@ -79,33 +79,33 @@ export function SignalIllustration({ className }: { className?: string }) {
         <span className="font-mono text-[0.6875rem] text-muted-foreground">not measured data</span>
       </div>
       <svg
-        viewBox="0 0 520 318"
+        viewBox="0 36 520 262"
         role="img"
         aria-label="Illustration: on the left a square of fine random noise representing the noise residual of a photograph; on the right a mostly flat surface of small ripples with one tall, narrow peak at its centre, representing the correlation with a matching sensor fingerprint."
         className="relative block h-auto w-full"
       >
         {/* Noise residual */}
-        <g transform="translate(22 78)" className="text-foreground">
+        <g transform="translate(24 84)" className="text-foreground">
           <rect x="-1" y="-1" width={NOISE_COLS * CELL + 2} height={NOISE_ROWS * CELL + 2} rx="3" fill="none" stroke="currentColor" strokeOpacity="0.14" />
           {CELLS.map((cell, i) => (
             <rect key={i} x={cell.x} y={cell.y} width={CELL - 0.6} height={CELL - 0.6} fill="currentColor" opacity={cell.o} />
           ))}
         </g>
-        <text x="22" y="258" className="fill-muted-foreground font-mono text-[9px]">W = I - F(I)</text>
-        <text x="22" y="62" className="fill-foreground text-[10.5px] font-medium">Noise residual</text>
+        <text x="24" y="262" className="fill-muted-foreground font-mono text-[9px]">W = I - F(I)</text>
+        <text x="24" y="66" className="fill-foreground text-[10.5px] font-medium">Noise residual</text>
 
         {/* Connector */}
         <g className="text-muted-foreground" stroke="currentColor" strokeOpacity="0.55" fill="none" strokeWidth="1">
-          <path d="M184 156h17" strokeDasharray="2 3" />
-          <path d="M198 152.5l4 3.5-4 3.5" />
+          <path d="M190 162h17" strokeDasharray="2 3" />
+          <path d="M204 158.5l4 3.5-4 3.5" />
         </g>
 
         {/* Correlation surface */}
-        <text x="214" y="62" className="fill-foreground text-[10.5px] font-medium">Correlation surface</text>
-        <g transform="translate(200 12)">
+        <text x="222" y="66" className="fill-foreground text-[10.5px] font-medium">Correlation surface</text>
+        <g transform="translate(206 0)">
           {RIDGES.map((row, i) => (
             <g key={i}>
-              <path d={`${row.d}L330 310L-20 310Z`} className="fill-card" />
+              <path d={`${row.d}L310 300L-10 300Z`} className="fill-card" />
               <path
                 d={row.d}
                 fill="none"
@@ -118,10 +118,10 @@ export function SignalIllustration({ className }: { className?: string }) {
           ))}
         </g>
         <g className="text-muted-foreground" stroke="currentColor" strokeOpacity="0.6" strokeWidth="1" fill="none">
-          <path d="M392 40h34" />
+          <path d="M365 86l22 -8" />
         </g>
-        <text x="430" y="43" className="fill-foreground font-mono text-[9px]">peak</text>
-        <text x="214" y="306" className="fill-muted-foreground font-mono text-[9px]">PCE = peak energy / background energy</text>
+        <text x="391" y="80" className="fill-foreground font-mono text-[9px]">peak</text>
+        <text x="222" y="286" className="fill-muted-foreground font-mono text-[9px]">PCE = peak energy / background energy</text>
       </svg>
     </figure>
   );

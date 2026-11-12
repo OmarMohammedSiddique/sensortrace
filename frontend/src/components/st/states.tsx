@@ -1,4 +1,3 @@
-"use client";
 
 import { CircleAlert, RefreshCw, type LucideIcon } from "lucide-react";
 

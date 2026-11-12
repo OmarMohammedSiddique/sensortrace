@@ -63,7 +63,7 @@ export function trailFor(pathname: string): { label: string; href?: string }[] {
   const [, , section, id] = pathname.split("/");
   if (!section) return [{ label: "Dashboard" }];
   const s = SECTION[section];
-  if (!s) return [{ label: "Dashboard", href: "/app" }];
+  if (!s) return [];
   if (id && s.leaf) return [{ label: s.label, href: s.href }, { label: s.leaf }];
   return [{ label: s.label }];
 }

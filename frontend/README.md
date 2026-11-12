@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SensorTrace frontend
 
-## Getting Started
+Next.js (App Router, TypeScript strict) web client for the SensorTrace API.
+Engineers building pages: read [CONVENTIONS.md](./CONVENTIONS.md) first.
 
-First, run the development server:
+## Run
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev          # http://localhost:3100  (expects the API at http://127.0.0.1:8100)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Script | Purpose |
+|---|---|
+| `npm run dev` | Dev server on port 3100 |
+| `npm run build` / `npm run start` | Production build / serve on port 3100 |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run gen:api` | Regenerate `src/lib/api/schema.d.ts` from `../docs/api/openapi.json` |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Configuration
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | When read | Default | Meaning |
+|---|---|---|---|
+| `API_INTERNAL_URL` | **runtime**, per request | `http://127.0.0.1:8100` | Base URL of the backend, reachable from the Next.js server |
+| `PORT`, `HOSTNAME` | runtime (standalone server) | `3100`, `0.0.0.0` in Docker | Listen address |
 
-## Learn More
+There are no `NEXT_PUBLIC_*` variables and no secrets in the client.
 
-To learn more about Next.js, take a look at the following resources:
+## How the browser reaches the API
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The browser only calls same-origin `/api/v1/...`. The route handler
+`src/app/api/v1/[...path]/route.ts` streams each request to `API_INTERNAL_URL` and streams the
+response back (multipart uploads, `Set-Cookie`, binary downloads). It is a route handler rather than a
+`rewrites()` entry because rewrites are resolved at build time, which would bake the backend address
+into the image.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Docker
 
-## Deploy on Vercel
+```bash
+docker build -t sensortrace-frontend .
+docker run -p 3100:3100 -e API_INTERNAL_URL=http://api:8100 sensortrace-frontend
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Multi-stage build on `node:22-alpine`, `output: "standalone"`, runs as a non-root user. The build needs
+no network access beyond npm (fonts come from the `geist` package).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Security notes
+
+- Security headers, including a strict CSP with no third-party origins, are set in `next.config.ts`.
+- The session cookie is HttpOnly; the CSRF token is held in memory only and sent as `X-CSRF-Token`.
+- User-supplied text is always rendered as text. `dangerouslySetInnerHTML` is not used.
+- No telemetry, analytics or third-party requests.

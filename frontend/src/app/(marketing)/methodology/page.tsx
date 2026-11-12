@@ -249,9 +249,9 @@ export default function MethodologyPage() {
           <p>Each comparison ends in one of four outcomes:</p>
           <dl className="not-prose divide-y overflow-hidden rounded-lg bg-card ring-1 ring-foreground/10">
             {OUTCOMES.map((o) => (
-              <div key={o.verdict} className="grid gap-2 p-4 sm:grid-cols-[17rem_1fr] sm:gap-6">
+              <div key={o.verdict} className="grid gap-2 p-4 sm:grid-cols-[15rem_1fr] sm:gap-6">
                 <dt>
-                  <VerdictBadge verdict={o.verdict} className="whitespace-normal sm:whitespace-nowrap" />
+                  <VerdictBadge verdict={o.verdict} wrap />
                 </dt>
                 <dd className="text-sm leading-relaxed text-muted-foreground">{o.meaning}</dd>
               </div>

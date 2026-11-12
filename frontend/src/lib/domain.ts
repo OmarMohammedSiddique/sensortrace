@@ -151,8 +151,12 @@ const AUDIT_TEXT: Record<string, string> = {
 
 /** Plain-language sentence for an audit entry. Unknown actions fall back to a humanised code. */
 export function auditText(entry: Pick<AuditEntry, "action" | "details">): string {
-  const base = AUDIT_TEXT[entry.action] ?? humanize(entry.action);
   const details = entry.details as Record<string, unknown> | null | undefined;
+  if (entry.action.startsWith("job.") && typeof details?.kind === "string") {
+    const outcome = { "job.succeeded": "completed", "job.failed": "failed", "job.cancelled": "cancelled" }[entry.action];
+    if (outcome) return `${jobKindLabel(details.kind)} ${outcome}`;
+  }
+  const base = AUDIT_TEXT[entry.action] ?? humanize(entry.action);
   const name = details && ["filename", "name", "title"].map((k) => details[k]).find((v) => typeof v === "string" && v);
   return typeof name === "string" ? `${base}: ${name}` : base;
 }

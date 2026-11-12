@@ -22,7 +22,7 @@ import {
   type UseMutationOptions,
 } from "@tanstack/react-query";
 
-import { api, setCsrfToken, unwrap } from "./client";
+import { api, hasSessionHint, setCsrfToken, unwrap } from "./client";
 import { ApiError } from "./errors";
 import { qk } from "./keys";
 import type {
@@ -90,21 +90,31 @@ export function isJobTerminal(job: Pick<Job, "status"> | undefined | null): bool
 
 /* ------------------------------------------------------------------ session */
 
-/** Resolves to `null` (not an error) when signed out. Keeps the in-memory CSRF token in sync. */
+/** Reads the session from the API. Resolves to `null` (not an error) when signed out. */
+export async function fetchSession(): Promise<SessionInfo | null> {
+  try {
+    const session = await unwrap(api.GET("/api/v1/auth/me"));
+    setCsrfToken(session.csrf_token ?? null);
+    return session;
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 401) {
+      setCsrfToken(null);
+      return null;
+    }
+    throw err;
+  }
+}
+
+/**
+ * Session query. On public pages the API is only asked when the session-hint cookie is
+ * present; inside /app it is always asked. Keeps the in-memory CSRF token in sync.
+ */
 export const meQueryOptions = queryOptions({
   queryKey: qk.me,
   queryFn: async (): Promise<SessionInfo | null> => {
-    try {
-      const session = await unwrap(api.GET("/api/v1/auth/me"));
-      setCsrfToken(session.csrf_token ?? null);
-      return session;
-    } catch (err) {
-      if (err instanceof ApiError && err.status === 401) {
-        setCsrfToken(null);
-        return null;
-      }
-      throw err;
-    }
+    const inApp = typeof window !== "undefined" && window.location.pathname.startsWith("/app");
+    if (!inApp && !hasSessionHint()) return null;
+    return fetchSession();
   },
   staleTime: 60_000,
   retry: false,
