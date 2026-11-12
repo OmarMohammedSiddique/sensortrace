@@ -54,6 +54,8 @@ ACTIVE = ("queued", "running")
 def enqueue(db: Session, user: m.User, kind: str, target_type: str, target_id: uuid.UUID) -> m.Job:
     """Create a job row and queue it. Commits the session."""
     s = get_settings()
+    # Lock the account row so concurrent requests cannot both pass the count below.
+    db.execute(select(m.User.id).where(m.User.id == user.id).with_for_update())
     active = db.scalar(select(func.count()).select_from(m.Job).where(m.Job.user_id == user.id, m.Job.status.in_(ACTIVE)))
     if (active or 0) >= s.max_active_jobs_per_user:
         raise ApiError(
