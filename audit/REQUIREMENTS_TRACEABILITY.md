@@ -83,14 +83,14 @@ Run: `audit/experiments/e2e_real_data.py` against the rebuilt Docker stack; log 
 | 2 Private investigation | Verified | script; second-user checks |
 | 3 Register a sensor | Verified | script |
 | 4 Upload authentic reference photographs (30, iPhone 6) | Verified, hashes equal to the files | script |
-| 5 Genuine fingerprint | Verified: 62 s, split-half PCE 545,055 | script |
+| 5 Genuine fingerprint | Verified: 60 s for 30 eight-megapixel images, split-half PCE 545,055 | script |
 | 6 Upload questioned photographs | Verified | script |
 | 7 Real comparisons with numerical evidence | Verified: same device PCE 5,631 | script |
 | 8 Qualified outcomes | Verified: match for the same device; no match for another unit of the same model or another model; resized image neither match nor non-match; bad files rejected with reasons | script |
 | 9 Accurate report | Verified: PDF hash equals stored hash; evidence hash and fingerprint digest present; no probability | script |
 | 10 Persistence across restart | Verified: database, API, worker and web restarted; results, evidence bytes and fingerprint digest unchanged | script |
 | Unrelated sensors, bad images, unauthorised users | Verified | script |
-| Worker failure | See RELEASE_READINESS.md | script |
+| Worker failure | Verified after the fix for issue #19: a job whose worker was killed is marked failed after 111 s and a new request succeeds (the first run of this check failed and exposed the defect) | script |
 
 ## Tests: real computation or mock?
 
