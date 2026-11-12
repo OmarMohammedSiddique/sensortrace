@@ -86,11 +86,15 @@ def test_fixture_matches_algorithm_version(recorded):
 def test_fingerprint_numbers(current, recorded):
     for key in ("std", "abs_mean", "split_half_ncc"):
         assert current["fingerprint"][key] == pytest.approx(recorded["fingerprint"][key], rel=2e-3)
-    assert current["fingerprint"]["split_half_pce"] == pytest.approx(recorded["fingerprint"]["split_half_pce"], rel=1e-2)
+    assert current["fingerprint"]["split_half_pce"] == pytest.approx(
+        recorded["fingerprint"]["split_half_pce"], rel=1e-2
+    )
     assert current["fingerprint"]["samples"] == pytest.approx(recorded["fingerprint"]["samples"], rel=2e-2, abs=2e-6)
 
 
-@pytest.mark.parametrize("name", ["same_png", "same_png_2", "other_png", "same_jpeg85", "same_rot90", "same_crop", "same_saturated"])
+@pytest.mark.parametrize(
+    "name", ["same_png", "same_png_2", "other_png", "same_jpeg85", "same_rot90", "same_crop", "same_saturated"]
+)
 def test_case_numbers(current, recorded, name):
     c, r = current["cases"][name], recorded["cases"][name]
     for key in ("geometry", "rotation", "shift", "search_size", "valid_pixels", "verdict"):

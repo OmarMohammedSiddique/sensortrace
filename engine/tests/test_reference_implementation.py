@@ -24,8 +24,13 @@ from sensortrace_engine.matching import circular_xcorr, compare, pce_at
 from sensortrace_engine.residual import extract_residual, to_gray
 from sensortrace_engine.synthetic import SyntheticSensor
 
-REF = Path(os.environ.get("SENSORTRACE_PRNU_PYTHON", Path(__file__).resolve().parents[2] / "data/third_party/prnu-python"))
-pytestmark = [pytest.mark.reference, pytest.mark.skipif(not (REF / "prnu" / "functions.py").exists(), reason="reference implementation not fetched")]
+REF = Path(
+    os.environ.get("SENSORTRACE_PRNU_PYTHON", Path(__file__).resolve().parents[2] / "data/third_party/prnu-python")
+)
+pytestmark = [
+    pytest.mark.reference,
+    pytest.mark.skipif(not (REF / "prnu" / "functions.py").exists(), reason="reference implementation not fetched"),
+]
 
 SIGMA = 3.0
 BORDER = 32  # the two implementations treat image borders differently
