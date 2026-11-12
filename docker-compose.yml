@@ -59,6 +59,7 @@ services:
       retries: 30
 
   migrate:
+    image: sensortrace-backend:local
     build: {context: ., dockerfile: backend/Dockerfile}
     command: ["alembic", "upgrade", "head"]
     environment: *app-env
@@ -67,7 +68,8 @@ services:
     profiles: ["app"]
 
   api:
-    build: {context: ., dockerfile: backend/Dockerfile}
+    image: sensortrace-backend:local
+    pull_policy: never
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]
     environment: *app-env
     ports: ["127.0.0.1:${API_PORT:-8100}:8000"]
@@ -87,7 +89,8 @@ services:
     profiles: ["app"]
 
   worker:
-    build: {context: ., dockerfile: backend/Dockerfile}
+    image: sensortrace-backend:local
+    pull_policy: never
     command: ["python", "-m", "app.cli", "worker"]
     environment: *app-env
     depends_on:
@@ -106,7 +109,8 @@ services:
     profiles: ["app"]
 
   scheduler:
-    build: {context: ., dockerfile: backend/Dockerfile}
+    image: sensortrace-backend:local
+    pull_policy: never
     command: ["python", "-m", "app.cli", "scheduler"]
     environment: *app-env
     depends_on:
