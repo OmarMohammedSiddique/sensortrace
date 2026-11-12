@@ -18,7 +18,7 @@ Status values: **Verified** (exercised by an automated test or a recorded run; e
 | Dependency audit (`pip-audit` on engine and backend) | No known vulnerabilities | `make audit` |
 | Static security scan (`bandit`, medium and above) | No findings | — |
 | Empirical evaluation on real images | Completed; see VALIDATION.md | `make evaluate` |
-| GitHub Actions | Engine, backend, frontend jobs pass; see "Open items" for the rest | `.github/workflows/ci.yml` |
+| GitHub Actions (hosted Linux runners) | All five jobs pass: engine, backend, frontend, end-to-end (42 browser tests), dependency and image scan | `.github/workflows/ci.yml` |
 
 ## Definition of done
 
@@ -37,7 +37,7 @@ Status values: **Verified** (exercised by an automated test or a recorded run; e
 | 11 | Accurate PDF reports | Verified | `test_full_investigation_workflow` parses the PDF (hashes, numbers, caveats); browser download checked |
 | 12 | Data persists correctly | Verified | Fresh-session checks in API and browser suites; migration test |
 | 13 | Core APIs work and are documented | Verified | Contract test over the OpenAPI document; `docs/api/README.md` |
-| 14 | Automated tests and CI checks pass | Verified locally; CI partly | See test evidence and open item 1 |
+| 14 | Automated tests and CI checks pass | Verified | Local suites and a fully green GitHub Actions run |
 | 15 | Evaluation framework runs reproducibly | Verified | Full run completed; resumable; deterministic inputs |
 | 16 | Security and privacy controls tested | Verified | SECURITY.md "Testing performed" |
 | 17 | Operable through Docker Compose | Verified | Requirement 1; browser suite runs against it |
@@ -89,7 +89,6 @@ Full table in VALIDATION.md section 4. In short:
 
 | # | Item | Severity | Detail |
 |---|---|---|---|
-| 1 | CI: end-to-end and image-scan jobs not yet confirmed green on GitHub | Medium | Engine, backend and frontend jobs pass on hosted Linux runners. Fixes for the other two (worker sizing for 2-CPU runners, base-image updates) are pushed; confirm the next run |
 | 2 | Patent freedom-to-operate not checked | High for commercial release | PRNU camera identification was patented (Binghamton). Needs a patent attorney. Not a blocker for private use |
 | 3 | No licence chosen for SensorTrace | Medium | All rights reserved until decided |
 | 4 | Validation scope is narrow | High for any evidential use | 13 older smartphones. See VALIDATION.md section 7 |
@@ -111,8 +110,7 @@ output; camera-model identification; telemetry; scale search for resized images;
 
 ## Next priorities
 
-1. Confirm CI fully green.
-2. Evaluate recent smartphones with several units per model; evaluate dedicated cameras.
+1. Evaluate recent smartphones with several units per model; evaluate dedicated cameras.
 3. Natural-image and small reference sets; real crops; platform-processed images.
 4. Investigate the Huawei P9 failures.
 5. Legal review: patents, licence choice, LGPL compliance of distributed images.
