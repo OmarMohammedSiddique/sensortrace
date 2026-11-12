@@ -2,7 +2,7 @@
 # Download the FloreView evaluation subset (smartphones from 2017-2021) used by the audit.
 #
 # FloreView dataset: Baracchi, Shullani, Iuliani, Piva, "FloreView: an image and video dataset
-# for forensic analysis", IEEE Access 2023. (c) LESC, University of Florence. CC BY-SA 4.0.
+# for forensic analysis", IEEE Access, 2023. (c) CSP Lab, University of Florence. CC BY-SA 4.0.
 # Evaluation data only: never committed or redistributed.
 #
 # Usage: scripts/download_floreview_subset.sh [DEST_DIR] [N_PER_CATEGORY]
@@ -17,9 +17,9 @@ LIST="$DEST/FloreView_Dataset.txt"
 [ -s "$LIST" ] || curl -fsS --retry 3 -o "$LIST" "$BASE/FloreView_Dataset.txt"
 : > "$DEST/subset_urls.txt"
 for d in $DEVICES; do
-  for c in Flat Nat; do
-    grep -E "/Dataset/${d}_[^/]+/${c}/jpeg-h264/[^/]+\.jpg" "$LIST" | tr -d '\r' | sort | head -n "$N" >> "$DEST/subset_urls.txt"
-  done
+  grep -iE "/Dataset/${d}_[^/]+/Flat/jpeg-h264/[^/]+\.jpe?g" "$LIST" | tr -d '\r' | sort | head -n "$N" >> "$DEST/subset_urls.txt" || true
+  # Natural images: one still per scene (capture C1 of each location/scene), in dataset order.
+  grep -iE "/Dataset/${d}_[^/]+/Nat/jpeg-h264/L[0-9]+/S[0-9]+/[^/]+C1\.jpe?g" "$LIST" | tr -d '\r' | sort | head -n "$N" >> "$DEST/subset_urls.txt" || true
 done
 echo "$(wc -l < "$DEST/subset_urls.txt") files selected"
 fetch() {
@@ -33,4 +33,4 @@ fetch() {
 }
 export -f fetch
 xargs -P 6 -I{} bash -c 'fetch "$1" "$2"' _ {} "$DEST" < "$DEST/subset_urls.txt"
-echo "done: $(find "$DEST" -name '*.jpg' | wc -l) files, $(du -sh "$DEST" | cut -f1)"
+echo "done: $(find "$DEST" -iname '*.jpg' | wc -l) files, $(du -sh "$DEST" | cut -f1)"
