@@ -16,6 +16,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, type ReactN
 import { api, setCsrfToken, setUnauthorizedHandler, unwrap } from "@/lib/api/client";
 import { fetchSession, meQueryOptions } from "@/lib/api/hooks";
 import { qk } from "@/lib/api/keys";
+import { safeNextPath } from "@/lib/navigation-safety";
 import type { SessionInfo, User } from "@/lib/api/types";
 
 export type AuthStatus = "loading" | "authenticated" | "unauthenticated" | "error";
@@ -41,14 +42,7 @@ export interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-/**
- * Only same-site absolute paths are accepted as a post-sign-in destination, which rules
- * out open redirects such as `//evil.example` or `https://...`.
- */
-export function safeNextPath(next: string | null | undefined, fallback = "/app"): string {
-  if (!next || !next.startsWith("/") || next.startsWith("//") || next.includes("\\")) return fallback;
-  return next;
-}
+export { safeNextPath };
 
 export function signInHref(next?: string | null): string {
   return next ? `/sign-in?next=${encodeURIComponent(next)}` : "/sign-in";
