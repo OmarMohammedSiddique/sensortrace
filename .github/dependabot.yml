@@ -1,0 +1,26 @@
+# Weekly dependency updates, grouped so they arrive as a few pull requests rather than many.
+version: 2
+updates:
+  - package-ecosystem: uv
+    directory: /engine
+    schedule: {interval: weekly}
+    open-pull-requests-limit: 3
+    groups:
+      engine: {patterns: ["*"]}
+  - package-ecosystem: uv
+    directory: /backend
+    schedule: {interval: weekly}
+    open-pull-requests-limit: 3
+    groups:
+      backend: {patterns: ["*"]}
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule: {interval: weekly}
+    open-pull-requests-limit: 3
+    groups:
+      frontend: {patterns: ["*"], update-types: [minor, patch]}
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: {interval: weekly}
+    groups:
+      actions: {patterns: ["*"]}
