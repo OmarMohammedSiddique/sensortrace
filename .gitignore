@@ -33,3 +33,5 @@ test-results/
 # Vercel deployment bundle and link
 /.vercel-bundle/
 .vercel/
+.vercel
+.env*

@@ -16,7 +16,10 @@ SensorTrace is for analysing your own material or material you are authorised to
 - There is **no public or shared directory of fingerprints**. A fingerprint is visible only to the
   account that created it.
 - There is **no internet-wide matching** and no feature that searches images across accounts.
-- There is **no telemetry**. The application makes no third-party network calls; fonts are self-hosted.
+- **No third-party network calls**; fonts are self-hosted. A self-hosted installation collects no
+  usage data. The hosted Vercel deployment records aggregate, cookieless page views and page-load
+  performance (Vercel Web Analytics and Speed Insights), sent to the site's own address; it is enabled
+  only when the `VERCEL` environment variable is present.
   Uploaded images and fingerprints never leave the deployment's own storage.
 - Results are statistical indications with stated limitations (SCIENTIFIC_METHODOLOGY.md). The software
   makes no claim of forensic certification or courtroom admissibility.

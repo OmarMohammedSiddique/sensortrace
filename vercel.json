@@ -1,0 +1,16 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "web": { "root": "frontend", "framework": "nextjs" },
+    "api": {
+      "root": "backend",
+      "entrypoint": "app.main:app",
+      "functions": { "app/main.py": { "maxDuration": 300 } }
+    }
+  },
+  "rewrites": [
+    { "source": "/api/v1/(.*)", "destination": { "service": "api" } },
+    { "source": "/(.*)", "destination": { "service": "web" } }
+  ],
+  "crons": [{ "path": "/api/v1/internal/maintenance", "schedule": "0 3 * * *" }]
+}

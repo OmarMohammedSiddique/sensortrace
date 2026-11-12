@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 const TOC = [
   { id: "private", label: "Private by default" },
-  { id: "no-telemetry", label: "No telemetry" },
+  { id: "no-telemetry", label: "Analytics and third parties" },
   { id: "stored", label: "What is stored" },
   { id: "control", label: "Export, retention, deletion" },
   { id: "sessions", label: "Sessions and tokens" },
@@ -44,12 +44,18 @@ export default function PrivacyPage() {
           </p>
         </DocSection>
 
-        <DocSection id="no-telemetry" title="No telemetry, analytics or third-party requests">
+        <DocSection id="no-telemetry" title="Analytics and third-party requests">
           <p>
-            The application contains no analytics, tracking pixels, advertising or error-reporting services. Pages
-            load their scripts, styles and fonts from this server only, which is enforced by a content security policy
-            that forbids other origins. Your browser makes no request to any third party when you use SensorTrace, and
-            pages are sent with a no-referrer policy.
+            The application contains no tracking pixels, advertising or error-reporting services, and your browser
+            makes no request to any other origin when you use SensorTrace: scripts, styles and fonts load from this
+            server only, which is enforced by a content security policy, and pages are sent with a no-referrer policy.
+            Your images, fingerprints and results are never included in any measurement.
+          </p>
+          <p>
+            A self-hosted installation collects no usage data at all. The hosted deployment on Vercel records
+            aggregate page views and page-load performance with Vercel Web Analytics and Speed Insights. These use
+            no cookies, store no identifier in your browser and are sent to this site&apos;s own address; they show
+            which pages are visited and how fast they load, not who visited or what was uploaded.
           </p>
           <p>
             The session cookie that keeps you signed in is not readable by scripts and is used for nothing else. A
