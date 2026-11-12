@@ -501,3 +501,37 @@ def test_platform_connection_variables_are_accepted(monkeypatch):
     s = Settings()
     assert s.database_url == "postgresql+psycopg://u:p@host/db?sslmode=require"
     assert s.redis_url == "rediss://default:x@host:6379" and s.internal_base_url == "https://sensortrace.example.app"
+
+
+def test_bucket_creation_tolerates_a_concurrent_creator():
+    """Services that start together race to create the buckets; the loser must not crash."""
+    from botocore.exceptions import ClientError
+
+    from app.storage import S3Storage
+
+    calls = []
+
+    class Client:
+        def head_bucket(self, Bucket):
+            raise ClientError({"Error": {"Code": "404"}}, "HeadBucket")
+
+        def create_bucket(self, Bucket):
+            calls.append(Bucket)
+            raise ClientError({"Error": {"Code": "BucketAlreadyExists"}}, "CreateBucket")
+
+        def put_public_access_block(self, **kw):
+            pass
+
+    st = S3Storage.__new__(S3Storage)
+    st._buckets = {"evidence": "e", "derived": "d", "results": "r"}
+    st._c = Client()
+    st.ensure_buckets()
+    assert calls == ["e", "d", "r"]
+
+    class Denied(Client):
+        def create_bucket(self, Bucket):
+            raise ClientError({"Error": {"Code": "AccessDenied"}}, "CreateBucket")
+
+    st._c = Denied()
+    with pytest.raises(ClientError):
+        st.ensure_buckets()
