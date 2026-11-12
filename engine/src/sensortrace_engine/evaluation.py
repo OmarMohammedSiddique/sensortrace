@@ -150,6 +150,10 @@ def _score_image(args: tuple[str, str, list[str], bool]) -> list[dict[str, Any]]
     return rows
 
 
+def _score_job(job: tuple[str, str, list[str], bool]) -> tuple[tuple[str, str, list[str], bool], list[dict[str, Any]]]:
+    return job, _score_image(job)
+
+
 def run_scoring(
     manifest: dict[str, Any], out_dir: Path, *, workers: int = 6, include_cropped: bool = True
 ) -> list[dict[str, Any]]:
@@ -189,13 +193,29 @@ def run_scoring(
         for dev in devices
         for p in test_files[dev.id]
     ]
+    # Scoring is resumable: finished images are appended to a partial file and skipped on restart.
+    partial = out_dir / "scores.partial.jsonl"
     rows: list[dict[str, Any]] = []
+    done: set[tuple[str, str]] = set()
+    if partial.exists():
+        for line in partial.read_text().splitlines():
+            rec = json.loads(line)
+            rows.extend(rec["rows"])
+            done.add((rec["device"], rec["path"]))
+    todo = [j for j in jobs if (j[0], j[1]) not in done]
+    print(f"scoring {len(todo)} images ({len(done)} already done)", flush=True)
     t0 = time.time()
-    with ctx.Pool(workers, initializer=_init_worker, initargs=(str(fp_dir), [d.id for d in devices])) as pool:
-        for i, r in enumerate(pool.imap_unordered(_score_image, jobs, chunksize=2), start=1):
-            rows.extend(r)
-            if i % 25 == 0 or i == len(jobs):
-                print(f"scored {i}/{len(jobs)} images ({time.time() - t0:.0f}s)", flush=True)
+    if todo:
+        with (
+            ctx.Pool(workers, initializer=_init_worker, initargs=(str(fp_dir), [d.id for d in devices])) as pool,
+            partial.open("a") as sink,
+        ):
+            for i, (job, r) in enumerate(pool.imap_unordered(_score_job, todo), start=1):
+                rows.extend(r)
+                sink.write(json.dumps({"device": job[0], "path": job[1], "rows": r}) + "\n")
+                sink.flush()
+                if i % 10 == 0 or i == len(todo):
+                    print(f"scored {i}/{len(todo)} images ({time.time() - t0:.0f}s)", flush=True)
     rows.sort(key=lambda r: (r["device"], r["image"], r["condition"], r["candidate"]))
     with (out_dir / "scores.csv").open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))

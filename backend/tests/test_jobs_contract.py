@@ -329,3 +329,24 @@ def test_s3_storage_roundtrip_against_local_object_store():
         urllib.request.urlopen(f"http://127.0.0.1:{port}/{prefix}-evidence/u1/private.bin", timeout=3)
     assert exc.value.code in (401, 403)
     st.delete_prefix("evidence", "u1")
+
+
+def test_queue_outage_fails_the_job_instead_of_leaving_it_queued(app, settings, monkeypatch):
+    import redis as redis_lib
+    from rq import Queue
+
+    settings.jobs_inline = False
+    c = make_user(app)
+    sid = _sensor_with_refs(c, 100)
+
+    def boom(self, *a, **k):
+        raise redis_lib.ConnectionError("down")
+
+    monkeypatch.setattr(Queue, "enqueue", boom)
+    r = c.post(f"{API}/sensors/{sid}/fingerprints")
+    assert r.status_code == 503 and r.json()["error"]["code"] == "queue_unavailable"
+    jobs_list = c.get(f"{API}/jobs").json()["items"]
+    assert jobs_list[0]["status"] == "failed" and c.get(f"{API}/jobs", params={"active": True}).json()["total"] == 0
+    monkeypatch.undo()
+    settings.jobs_inline = True
+    assert c.post(f"{API}/sensors/{sid}/fingerprints").status_code == 202  # not blocked by the failed attempt

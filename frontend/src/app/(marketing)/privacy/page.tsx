@@ -39,8 +39,8 @@ export default function PrivacyPage() {
             only be compared with sensors that you have enrolled yourself from reference images in your possession.
           </p>
           <p>
-            Files are served through short-lived signed links that expire after five minutes and are tied to your
-            session.
+            Files are served through signed links that expire after five minutes and are bound to your account, so
+            a copied link is useless to anyone else.
           </p>
         </DocSection>
 
@@ -52,8 +52,9 @@ export default function PrivacyPage() {
             pages are sent with a no-referrer policy.
           </p>
           <p>
-            The only cookie is the session cookie that keeps you signed in. It is not readable by scripts and is not
-            used for any other purpose. Your colour-theme preference is kept in your browser&apos;s local storage.
+            The session cookie that keeps you signed in is not readable by scripts and is used for nothing else. Two
+            interface preferences are remembered in your browser: the colour theme (local storage) and whether the
+            sidebar is collapsed (a cookie that carries no identifier).
           </p>
         </DocSection>
 

@@ -74,19 +74,29 @@ def enqueue(db: Session, user: m.User, kind: str, target_type: str, target_id: u
         execute(str(job.id))
         db.refresh(job)
     else:
+        import redis as redis_lib
         from rq import Queue, Retry
 
         from .deps import get_redis
 
-        Queue(QUEUE_NAME, connection=get_redis()).enqueue(
-            execute,
-            str(job.id),
-            job_id=str(job.id),
-            job_timeout=s.job_timeout_seconds,
-            result_ttl=0,
-            failure_ttl=86400,
-            retry=Retry(max=MAX_ATTEMPTS - 1, interval=[10, 30]),
-        )
+        try:
+            Queue(QUEUE_NAME, connection=get_redis()).enqueue(
+                execute,
+                str(job.id),
+                job_id=str(job.id),
+                job_timeout=s.job_timeout_seconds,
+                result_ttl=0,
+                failure_ttl=86400,
+                retry=Retry(max=MAX_ATTEMPTS - 1, interval=[10, 30]),
+            )
+        except redis_lib.RedisError:
+            # Never leave a job that can not run looking as if it were waiting.
+            log.exception("could not enqueue job %s", job.id)
+            job.status, job.stage, job.finished_at = "failed", "failed", m.utcnow()
+            job.error = "The job queue is unavailable. Try again shortly."
+            _mark_target_failed(db, job, job.error)
+            db.commit()
+            raise ApiError(503, "queue_unavailable", "The job queue is unavailable. Try again shortly.") from None
     return job
 
 
@@ -325,6 +335,13 @@ def _run_analysis(jid: uuid.UUID) -> None:
                     "fingerprint_width": fp.width, "fingerprint_height": fp.height,
                     "algorithm_version": fp.algorithm_version, "is_demo": device.is_demo,
                     "split_half_pce": (fp.diagnostics.get("split_half") or {}).get("pce"),
+                    # Characteristics of the reference set, for comparison with the questioned image.
+                    "reference_profile": {
+                        "group": fp.diagnostics.get("group") or {},
+                        "mean_intensity": fp.diagnostics.get("mean_intensity"),
+                        "mean_saturated_fraction": fp.diagnostics.get("mean_saturated_fraction"),
+                        "screening": {k: (fp.diagnostics.get("screening") or {}).get(k) for k in ("submitted", "accepted", "rejected", "loo_pce_median")},
+                    },
                 },
             })  # fmt: skip
     if not specs:
@@ -356,6 +373,7 @@ def _run_analysis(jid: uuid.UUID) -> None:
         for c in result.candidates:
             sp = by_id[c.candidate_id]
             d = c.to_dict(include_surface=True)
+            sp["snapshot"]["metadata_consistency"] = _metadata_consistency(result.image.metadata, sp["snapshot"]["reference_profile"]["group"])
             an.candidates.append(m.AnalysisCandidate(
                 sensor_id=uuid.UUID(sp["sensor_id"]), fingerprint_id=uuid.UUID(sp["fingerprint_id"]), snapshot=sp["snapshot"],
                 rank=c.rank, verdict=c.decision.verdict.value, pce=c.measurement.pce, effective_pce=c.decision.effective_pce,
@@ -370,6 +388,31 @@ def _run_analysis(jid: uuid.UUID) -> None:
         an.policy, an.residual_visual_key = policy.to_dict(), vkey
         audit(db, user_id, "analysis.completed", entity_type="analysis", entity_id=an.id, investigation_id=inv_id,
               candidates=len(result.candidates), verdicts=full["summary"]["counts"])  # fmt: skip
+
+
+def _metadata_consistency(image_md: dict[str, Any], group: dict[str, Any]) -> dict[str, Any]:
+    """Compare the camera named in the questioned image's metadata with the reference set's.
+
+    Informational only: metadata is trivially editable and is never used for the outcome.
+    """
+
+    def norm(v: Any) -> str:
+        return " ".join(str(v or "").lower().split())
+
+    img = {"make": norm(image_md.get("Make")), "model": norm(image_md.get("Model"))}
+    ref = {"make": norm(group.get("make")), "model": norm(group.get("model"))}
+    if not img["model"] or not ref["model"]:
+        status = "unknown"
+    elif img == ref:
+        status = "same_model"
+    else:
+        status = "different_model"
+    return {
+        "status": status,
+        "image": img,
+        "reference": ref,
+        "note": "Metadata can be edited or stripped and is not used for the outcome.",
+    }
 
 
 def _json_default(o: Any) -> Any:

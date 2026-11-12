@@ -177,12 +177,12 @@ export default function DocsPage() {
           </p>
           <ol className="list-decimal space-y-1.5 pl-5">
             <li>Obtain a second physical device of the <strong>same make and model</strong>, ideally on the same software version.</li>
-            <li>Register it with exactly the same make and model text, enrol the same lens and build its fingerprint from reference images taken the same way.</li>
+            <li>Register it with the same make and model, enrol the same lens and build its fingerprint from reference images taken the same way.</li>
             <li>Run the comparison again with both sensors selected.</li>
           </ol>
           <p>
-            If the control stays low while the candidate is high, the outcome can support a match, labelled as
-            control-based. If the control is also high, the outcome is inconclusive for both. More controls give a
+            If the control stays low while the candidate is high, the outcome can support a match. Support
+            that rests on controls is labelled experimental. If the control is also high, the outcome is inconclusive for both. More controls give a
             better check; one control cannot exclude artefacts shared with other units.
           </p>
         </DocSection>
