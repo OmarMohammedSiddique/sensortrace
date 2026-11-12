@@ -118,7 +118,7 @@ Documentation claims found overstated were corrected in `SCIENTIFIC_METHODOLOGY.
 |---|---|
 | Engine (unit, regression, reference cross-check, independent audit tests) | 143 passed, 3 expected failures that document open findings F-06, F-07, F-09 |
 | Backend integration (incl. 17 security audit tests) | 130 passed |
-| Browser end-to-end against the rebuilt stack | see the pull request checks |
+| Browser end-to-end against the rebuilt stack | 44 passed |
 | End-to-end with authentic photographs | 28 / 28 checks |
 | `pip-audit` (engine, backend); `npm audit --omit=dev` | No known vulnerabilities |
 | Lint, formatting, type checks | Clean |
