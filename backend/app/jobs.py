@@ -84,7 +84,7 @@ def enqueue(db: Session, user: m.User, kind: str, target_type: str, target_id: u
             raise ApiError(503, "queue_unavailable", "The job could not be started. Try again shortly.")
     else:
         import redis as redis_lib
-        from rq import Queue, Retry
+        from rq import Queue
 
         from .deps import get_redis
 
@@ -96,7 +96,6 @@ def enqueue(db: Session, user: m.User, kind: str, target_type: str, target_id: u
                 job_timeout=s.job_timeout_seconds,
                 result_ttl=0,
                 failure_ttl=86400,
-                retry=Retry(max=MAX_ATTEMPTS - 1, interval=[10, 30]),
             )
         except redis_lib.RedisError:
             # Never leave a job that can not run looking as if it were waiting.
@@ -265,7 +264,9 @@ def execute(job_id: str) -> None:
         kind, attempts = job.kind, job.attempts
     _limit_memory()
     handler = HANDLERS[kind]
+    heartbeat = _Heartbeat(jid)
     try:
+        heartbeat.start()
         handler(jid)
     except CancelledError:
         _finish(jid, "cancelled", "Cancelled by user.", target_status="cancelled")
@@ -282,10 +283,78 @@ def execute(job_id: str) -> None:
                 if job is not None:
                     job.status, job.stage = "queued", "retrying"
                     job.message = f"Attempt {attempts} failed; retrying."
-            raise
+            # Re-enqueue directly. The queue library's own delayed retry depends on a scheduler
+            # process that does not recover after a worker crash.
+            if _requeue(jid, attempts):
+                return
         _finish(jid, "failed", "An internal error occurred while processing this job.")
     else:
         _finish(jid, "succeeded", "")
+    finally:
+        heartbeat.stop()
+
+
+HEARTBEAT_SECONDS = 15
+HEARTBEAT_TTL = 75
+
+
+def _heartbeat_key(jid: uuid.UUID | str) -> str:
+    return f"st:job-heartbeat:{jid}"
+
+
+class _Heartbeat:
+    """Marks a running job as alive in Redis. If the worker dies, the key expires and the reaper
+    can tell that nobody is running the job any more."""
+
+    def __init__(self, jid: uuid.UUID) -> None:
+        import threading
+
+        self.jid = jid
+        self._stop = threading.Event()
+        self._thread = threading.Thread(target=self._run, name="job-heartbeat", daemon=True)
+        self.enabled = not get_settings().jobs_inline and get_settings().job_dispatch == "rq"
+
+    def _beat(self) -> None:
+        from .deps import get_redis
+
+        try:
+            get_redis().set(_heartbeat_key(self.jid), "1", ex=HEARTBEAT_TTL)
+        except Exception:  # a missed beat must never fail the job
+            log.warning("heartbeat write failed for job %s", self.jid)
+
+    def _run(self) -> None:
+        while not self._stop.wait(HEARTBEAT_SECONDS):
+            self._beat()
+
+    def start(self) -> None:
+        if self.enabled:
+            self._beat()
+            self._thread.start()
+
+    def stop(self) -> None:
+        if self.enabled:
+            self._stop.set()
+            from .deps import get_redis
+
+            try:
+                get_redis().delete(_heartbeat_key(self.jid))
+            except Exception:
+                pass
+
+
+def _requeue(jid: uuid.UUID, attempts: int) -> bool:
+    from rq import Queue
+
+    from .deps import get_redis
+
+    try:
+        Queue(QUEUE_NAME, connection=get_redis()).enqueue(
+            execute, str(jid), job_id=f"{jid}-retry{attempts}", job_timeout=get_settings().job_timeout_seconds, result_ttl=0, failure_ttl=86400
+        )
+        return True
+    except Exception:
+        log.exception("could not re-enqueue job %s", jid)
+        return False
 
 
 def _finish(jid: uuid.UUID, status: str, message: str, target_status: str = "failed") -> None:
@@ -632,29 +701,38 @@ HANDLERS = {
 
 
 def reap_interrupted() -> int:
-    """Fail jobs that the database shows as active but that no worker holds any more.
+    """Fail jobs that the database shows as active but that nothing is running or going to run.
 
     A worker killed mid-job (restart, out-of-memory) cannot update its row. Without this, the job
     would look as if it were running for ever and block a new attempt.
+
+    * A **running** job is alive while its worker refreshes a heartbeat key in Redis.
+    * A **queued** job is alive while a message for it is waiting in the queue.
+
+    The queue library's own registries are not consulted: after a crash they keep listing the job
+    for as long as its timeout, and its delayed-retry mechanism may never fire.
     """
     from datetime import timedelta as _td
 
     from rq import Queue
-    from rq.registry import ScheduledJobRegistry, StartedJobRegistry
 
     from .deps import get_redis
 
     conn = get_redis()
-    queue = Queue(QUEUE_NAME, connection=conn)
-    held = set(queue.job_ids) | set(StartedJobRegistry(queue=queue).get_job_ids()) | set(ScheduledJobRegistry(queue=queue).get_job_ids())
-    held = {j.split(":")[0] for j in held}  # started-registry entries may carry an execution suffix
-    cutoff = m.utcnow() - _td(seconds=90)  # grace for jobs that are just being handed over
+    waiting = {j[:36] for j in Queue(QUEUE_NAME, connection=conn).job_ids}  # "<uuid>" or "<uuid>-retryN"
+    now = m.utcnow()
+    grace = _td(seconds=HEARTBEAT_TTL + HEARTBEAT_SECONDS)
     n = 0
     with session_scope() as db:
-        for job in db.scalars(select(m.Job).where(m.Job.status.in_(ACTIVE), m.Job.created_at < cutoff)):
-            if str(job.id) in held:
+        for job in db.scalars(select(m.Job).where(m.Job.status.in_(ACTIVE), m.Job.created_at < now - grace)):
+            if job.status == "running":
+                if job.started_at and now - job.started_at < grace:
+                    continue
+                if conn.exists(_heartbeat_key(job.id)):
+                    continue
+            elif str(job.id) in waiting:
                 continue
-            job.status, job.stage, job.finished_at = "failed", "failed", m.utcnow()
+            job.status, job.stage, job.finished_at = "failed", "failed", now
             job.error = "The job was interrupted before it finished. Start it again."
             _mark_target_failed(db, job, job.error)
             audit(db, job.user_id, "job.interrupted", entity_type="job", entity_id=job.id, kind=job.kind)

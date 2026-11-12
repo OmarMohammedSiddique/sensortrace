@@ -100,8 +100,7 @@ def test_transient_failures_are_retried_then_reported_without_leaking_details(ap
 
     monkeypatch.setitem(jobs.HANDLERS, "fingerprint", flaky)
     for attempt in (1, 2):
-        with pytest.raises(ConnectionError):  # re-raised so the queue schedules a retry
-            jobs.execute(jid)
+        jobs.execute(jid)  # fails, and puts itself back on the queue
         j = c.get(f"{API}/jobs/{jid}").json()
         assert j["status"] == "queued" and j["stage"] == "retrying" and j["attempts"] == attempt
     jobs.execute(jid)
@@ -112,10 +111,8 @@ def test_transient_failures_are_retried_then_reported_without_leaking_details(ap
     sid2 = _sensor_with_refs(c, 95)
     started2 = c.post(f"{API}/sensors/{sid2}/fingerprints").json()
     monkeypatch.setitem(jobs.HANDLERS, "fingerprint", lambda job_id: (_ for _ in ()).throw(ConnectionError("10.0.0.5 secret detail")))
-    for _ in range(jobs.MAX_ATTEMPTS - 1):
-        with pytest.raises(ConnectionError):
-            jobs.execute(started2["job"]["id"])
-    jobs.execute(started2["job"]["id"])
+    for _ in range(jobs.MAX_ATTEMPTS):
+        jobs.execute(started2["job"]["id"])
     j2 = c.get(f"{API}/jobs/{started2['job']['id']}").json()
     assert j2["status"] == "failed" and "secret" not in j2["error"] and "10.0.0.5" not in j2["error"]
     fp2 = c.get(f"{API}/fingerprints/{started2['fingerprint']['id']}").json()
@@ -355,8 +352,12 @@ def test_queue_outage_fails_the_job_instead_of_leaving_it_queued(app, settings, 
 
 
 def test_interrupted_jobs_are_reaped(app, settings):
+    """A worker that dies stops refreshing its heartbeat; the reaper then fails the job."""
     from datetime import timedelta
 
+    from rq import Queue
+
+    from app.deps import get_redis
     from app.models import utcnow
 
     settings.jobs_inline = False
@@ -364,22 +365,53 @@ def test_interrupted_jobs_are_reaped(app, settings):
     sid = _sensor_with_refs(c, 101)
     started = c.post(f"{API}/sensors/{sid}/fingerprints").json()
     jid = started["job"]["id"]
-    assert jobs.reap_interrupted() == 0  # still held by the queue
-    # Simulate a worker that took the job and died: the message is gone, the row says running.
-    from rq import Queue
+    long_ago = utcnow() - timedelta(minutes=10)
+    with session_scope() as db:
+        db.get(Job, jid).created_at = long_ago
+    assert jobs.reap_interrupted() == 0  # queued, and its message is still waiting
 
-    from app.deps import get_redis
-
+    # A worker takes the job and is alive: heartbeat present.
     Queue(jobs.QUEUE_NAME, connection=get_redis()).empty()
     with session_scope() as db:
         j = db.get(Job, jid)
-        j.status, j.created_at = "running", utcnow() - timedelta(minutes=10)
-    assert jobs.reap_interrupted() == 1
+        j.status, j.started_at = "running", long_ago
+    get_redis().set(jobs._heartbeat_key(jid), "1", ex=60)
+    assert jobs.reap_interrupted() == 0
+
+    # The worker is killed: the heartbeat expires. Stale entries in the queue library's own
+    # registries must not keep the job looking alive.
+    get_redis().delete(jobs._heartbeat_key(jid))
+    get_redis().zadd(f"rq:scheduled:{jobs.QUEUE_NAME}", {jid: 9999999999})
+    try:
+        assert jobs.reap_interrupted() == 1
+    finally:
+        get_redis().zrem(f"rq:scheduled:{jobs.QUEUE_NAME}", jid)
     j = c.get(f"{API}/jobs/{jid}").json()
     assert j["status"] == "failed" and "interrupted" in j["error"]
     assert c.get(f"{API}/fingerprints/{started['fingerprint']['id']}").json()["status"] == "failed"
     settings.jobs_inline = True
     assert c.post(f"{API}/sensors/{sid}/fingerprints").status_code == 202
+
+
+def test_running_job_writes_and_clears_a_heartbeat(app, settings, monkeypatch):
+    from app.deps import get_redis
+
+    settings.jobs_inline = False
+    c = make_user(app)
+    sid = _sensor_with_refs(c, 104)
+    started = c.post(f"{API}/sensors/{sid}/fingerprints").json()
+    jid = started["job"]["id"]
+    seen = {}
+    real = jobs.HANDLERS["fingerprint"]
+
+    def spy(job_id):
+        seen["during"] = bool(get_redis().exists(jobs._heartbeat_key(job_id)))
+        return real(job_id)
+
+    monkeypatch.setitem(jobs.HANDLERS, "fingerprint", spy)
+    _burst_worker()
+    assert seen["during"] is True and not get_redis().exists(jobs._heartbeat_key(jid))
+    assert c.get(f"{API}/jobs/{jid}").json()["status"] == "succeeded"
 
 
 def test_http_dispatch_runs_jobs_through_the_signed_internal_endpoint(app, settings, monkeypatch):
