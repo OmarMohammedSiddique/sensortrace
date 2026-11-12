@@ -1,17 +1,9 @@
-import { ScanSearch } from "lucide-react";
 import type { Metadata } from "next";
 
-import { PageHeader } from "@/components/st/page-header";
-import { EmptyState } from "@/components/st/states";
+import { AnalysisResult } from "@/components/analyses/analysis-result";
 
-export const metadata: Metadata = { title: "Analysis" };
+export const metadata: Metadata = { title: "Comparison result" };
 
-// Placeholder: replace this file with the real page (see CONVENTIONS.md).
-export default function AnalysesIdPage() {
-  return (
-    <>
-      <PageHeader title="Analysis" description="Ranked candidates with measurements, outcomes, reasons and caveats." />
-      <EmptyState icon={ScanSearch} title="This section is being built" description="The analysis result page is not available in this build yet." />
-    </>
-  );
+export default function AnalysisPage() {
+  return <AnalysisResult />;
 }
