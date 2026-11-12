@@ -1,7 +1,11 @@
 # Project status
 
-Last updated: 2026-11-12. Algorithm `prnu-wavelet-mle-1.0`, decision logic `policy-1.0`.
+Last updated: 2026-11-12. Algorithm `prnu-wavelet-mle-1.0`, decision logic `policy-1.1`.
 Release candidate 0.1.0. Repository: private, `github.com/OmarMohammedSiddique/sensortrace`.
+
+**An independent audit was completed on 2026-11-12. Its findings supersede the summary below where they
+differ: read `audit/RELEASE_READINESS.md` first.** It found and fixed eight high-severity defects and
+showed that detection on recent smartphones is unreliable (15% of genuine images missed).
 
 Status values: **Verified** (exercised by an automated test or a recorded run; evidence cited) ·
 **Implemented, unverified** · **Experimental** (works; insufficiently validated) · **Blocked** ·
@@ -11,8 +15,8 @@ Status values: **Verified** (exercised by an automated test or a recorded run; e
 
 | Suite | Result | Command |
 |---|---|---|
-| Engine: unit, property, regression, reference cross-check | 94 passed (72% line coverage) | `make test-engine` |
-| Backend: integration against PostgreSQL, Redis, object storage | 112 passed | `make test-backend` |
+| Engine: unit, property, regression, reference cross-check, independent audit tests | 143 passed, 3 expected failures documenting open findings | `make test-engine` |
+| Backend: integration against PostgreSQL, Redis, object storage, incl. security audit tests | 130 passed | `make test-backend` |
 | Browser end-to-end against the Docker stack | 42 passed | `make test-e2e` |
 | Lint, formatting, types | Clean | `make lint` |
 | Dependency audit (`pip-audit` on engine and backend) | No known vulnerabilities | `make audit` |

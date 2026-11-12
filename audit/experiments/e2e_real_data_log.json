@@ -1,0 +1,210 @@
+{
+  "base": "http://localhost:3100",
+  "steps": [
+    {
+      "step": "register",
+      "email_domain": "audit-sensortrace.dev"
+    },
+    {
+      "step": "create investigation, device, sensor",
+      "investigation": "d42fc131-aac1-4c72-a0a7-0acf7dfb01f1",
+      "sensor": "c1a1f699-66cc-4de5-81ee-2c448abc72b4"
+    },
+    {
+      "step": "fingerprint job",
+      "status": "succeeded",
+      "seconds": 60.4,
+      "images": 30,
+      "size": [
+        3264,
+        2448
+      ],
+      "split_half_pce": 545055.1640605858
+    },
+    {
+      "step": "comparisons",
+      "same_device": {
+        "analysis": "2de0d495-b3dd-4a23-a85b-44f4f7e5d504",
+        "verdict": "match_supported",
+        "pce": 5631.079094633167,
+        "adjusted": 5629.693046357546,
+        "ncc": 0.0268310450178338,
+        "geometry": "native"
+      },
+      "same_model_other_device": {
+        "analysis": "901c806e-c598-4049-9fd7-a6240aed63df",
+        "verdict": "non_match_supported",
+        "pce": 0.8919799818569403,
+        "adjusted": 0.23153175393182182,
+        "ncc": 0.0003637308527777616,
+        "geometry": "native"
+      },
+      "other_model": {
+        "analysis": "641a623b-4598-46d8-ac1a-be5460e9d702",
+        "verdict": "non_match_supported",
+        "pce": 2.116869152490192,
+        "adjusted": 1.1634255103366549,
+        "ncc": 0.000663453595311169,
+        "geometry": "native"
+      },
+      "resized_same_device": {
+        "analysis": "4da1abb8-c213-4195-b9a9-30fc0c657164",
+        "verdict": "inconclusive",
+        "pce": 30.601570981544697,
+        "adjusted": 1.5080981196274201,
+        "ncc": 0.0037603507672660597,
+        "geometry": "cropped"
+      }
+    },
+    {
+      "step": "worker killed mid-job",
+      "status_when_killed": "running",
+      "final_status": "failed",
+      "error": "The job was interrupted before it finished. Start it again.",
+      "seconds": 111
+    }
+  ],
+  "checks": [
+    {
+      "check": "30 authentic reference photographs accepted",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "stored SHA-256 equals the SHA-256 of the files on disk",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "fingerprint created from real images",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "evidence hash preserved (same_device)",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "evidence hash preserved (same_model_other_device)",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "evidence hash preserved (other_model)",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "bad input 'resized.jpg' accepted for analysis",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "bad input 'not-an-image.jpg' rejected with a reason",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "bad input 'truncated.jpg' rejected with a reason",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "same-device photograph: evidence supports a match",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "other device of the same model: not a match",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "other model: not a match",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "resized same-device photograph: not reported as a match and not as a non-match",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "result carries reasons, caveats and an uncalibrated-policy statement",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "report downloads as a PDF whose SHA-256 matches the stored value",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "report states the evidence hash and the fingerprint digest",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "report does not state a probability of identity",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "a second user cannot see any of it",
+      "passed": true,
+      "detail": "[404, 404, 404, 404, 404]"
+    },
+    {
+      "check": "a second user cannot use the first user's file link",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "an anonymous client cannot use the file link",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "after restarting database, API, worker and web: results persist unchanged",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "after restart: evidence bytes still match their hash",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "after restart: fingerprint digest unchanged",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "a job whose worker died does not stay 'running' for ever",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "the fingerprint can be requested again afterwards",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "the retried job succeeds",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "audit account deleted",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "audit account deleted",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "failed_checks": 0
+}
