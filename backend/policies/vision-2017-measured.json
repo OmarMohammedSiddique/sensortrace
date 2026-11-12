@@ -1,0 +1,35 @@
+{
+  "policy_id": "vision-2017-measured",
+  "match_threshold": 60.0,
+  "non_match_threshold": 10.0,
+  "calibrated": false,
+  "basis": "Reference line PCE = 60 (Goljan, Fridrich and Filler 2009), fixed in advance and not tuned, with measurements from the SensorTrace VISION subset evaluation attached (13 smartphones from 2011-2016, camera-original JPEGs at native resolution, 40 flat-field reference images per device, one candidate per comparison). On the seven held-out devices: 0 false matches in 880 different-device comparisons (95% upper bound 0.42%) and 0 misses in 280 same-device comparisons (upper bound 1.3%). On all 13 devices: 0 false matches in 3,680 (upper bound 0.10%), 0 in 560 same-model comparisons (7 device pairs), and 7 misses in 520, all from one device. These thresholds are not calibrated and the measurements do not lift the same-model requirement: same-model evidence is one device pair for four of the five models (80 trials each, upper bound 4.5% per model) and firmware is not part of the model key. The non-match line of 10 is an engineering choice.",
+  "calibration": {
+    "dataset": "vision-subset-v1",
+    "attribution": "VISION dataset (Shullani et al., EURASIP Journal on Information Security, 2017). (c) CSP Lab, University of Florence. CC BY-SA 4.0.",
+    "model_keys": [],
+    "threshold_selection": "Fixed a priori from the literature; not tuned on this data.",
+    "held_out_operating_point": {
+      "threshold": 60.0, "devices": 7, "n_same": 280, "n_diff": 880, "false_positives": 0, "false_negatives": 0,
+      "fpr_ci": [0.0, 0.004183], "fnr_ci": [0.0, 0.013088],
+      "confidence": 0.95, "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+    },
+    "all_devices_operating_point": {
+      "threshold": 60.0, "devices": 13, "n_same": 520, "n_diff": 3680, "false_positives": 0, "false_negatives": 7,
+      "fpr_ci": [0.0, 0.001002], "fnr_ci": [0.005429, 0.027538],
+      "note": "Includes the six devices that were available for calibration; all seven misses are from the Huawei P9."
+    },
+    "same_model_evidence": [
+      {"model": "apple iphone 4s", "devices": 2, "device_pairs": 1, "trials": 80, "max_statistic": 8.6, "false_matches": 0, "fpr_upper_95": 0.045},
+      {"model": "apple iphone 5", "devices": 2, "device_pairs": 1, "trials": 80, "max_statistic": 10.3, "false_matches": 0, "fpr_upper_95": 0.045},
+      {"model": "apple iphone 6", "devices": 2, "device_pairs": 1, "trials": 80, "max_statistic": 21.4, "false_matches": 0, "fpr_upper_95": 0.045},
+      {"model": "samsung galaxy s3 mini", "devices": 2, "device_pairs": 1, "trials": 80, "max_statistic": 11.5, "false_matches": 0, "fpr_upper_95": 0.045},
+      {"model": "apple iphone 5c", "devices": 3, "device_pairs": 3, "trials": 240, "max_statistic": 18.8, "false_matches": 0, "fpr_upper_95": 0.015}
+    ],
+    "algorithm_version": "prnu-wavelet-mle-1.0"
+  },
+  "min_valid_pixels": 250000,
+  "min_reference_images_for_non_match": 20,
+  "min_split_half_pce_for_non_match": 100.0,
+  "version": "policy-1.1"
+}
