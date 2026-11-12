@@ -149,7 +149,7 @@ export function MarketingFooter() {
       </div>
       <div className="border-t">
         <div className="container-page flex flex-col gap-1 py-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>No telemetry, no analytics, no third-party requests.</p>
+          <p>No third-party requests. Your images are never part of any measurement.</p>
           {meta.data ? (
             <p className="font-mono">
               engine {meta.data.engine_version} · {meta.data.algorithm_version} · {meta.data.decision_policy_version}

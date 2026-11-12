@@ -134,7 +134,8 @@ Results are written to `data/eval/vision_subset_v1/` (`report.md`, `results.json
 ## Responsible use
 
 Analyse only your own material or material you are authorised to investigate. SensorTrace has no public
-fingerprint directory, no cross-account matching and no telemetry. See [SECURITY.md](SECURITY.md).
+fingerprint directory and no cross-account matching. Uploaded images and fingerprints are never part of
+any usage measurement. See [SECURITY.md](SECURITY.md).
 
 ## Licence
 

@@ -89,7 +89,7 @@ export default function HomePage() {
               <GetStarted secondary={{ href: "/methodology", label: "Read the methodology" }} />
             </div>
             <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
-              {["Private by default", "No telemetry or third-party requests", "Published method and limitations"].map((t) => (
+              {["Private by default", "No third-party requests", "Published method and limitations"].map((t) => (
                 <li key={t} className="flex items-center gap-1.5">
                   <Check aria-hidden="true" className="size-3.5 text-brand" />
                   {t}
