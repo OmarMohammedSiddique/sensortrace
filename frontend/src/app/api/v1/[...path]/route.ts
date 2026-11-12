@@ -26,7 +26,7 @@ const HOP_BY_HOP = new Set([
   "transfer-encoding",
   "upgrade",
   "host",
-  "content-length",
+  "expect",
 ]);
 
 function apiBase(): string {
@@ -40,7 +40,7 @@ function errorResponse(status: number, code: string, message: string): Response 
   );
 }
 
-async function proxy(req: NextRequest, ctx: RouteContext<"/api/v1/[...path]">): Promise<Response> {
+async function proxy(req: NextRequest, ctx: { params: Promise<{ path: string[] }> }): Promise<Response> {
   const { path } = await ctx.params;
   const target = `${apiBase()}/api/v1/${path.map(encodeURIComponent).join("/")}${req.nextUrl.search}`;
 
@@ -50,8 +50,6 @@ async function proxy(req: NextRequest, ctx: RouteContext<"/api/v1/[...path]">): 
   });
   // Ask for an unencoded body so it can be passed through byte for byte.
   headers.set("accept-encoding", "identity");
-  const forwardedFor = req.headers.get("x-forwarded-for");
-  if (forwardedFor) headers.set("x-forwarded-for", forwardedFor);
   headers.set("x-forwarded-host", req.headers.get("host") ?? "");
   headers.set("x-forwarded-proto", req.nextUrl.protocol.replace(":", ""));
 
@@ -82,7 +80,7 @@ async function proxy(req: NextRequest, ctx: RouteContext<"/api/v1/[...path]">): 
   const responseHeaders = new Headers();
   upstream.headers.forEach((value, key) => {
     const k = key.toLowerCase();
-    if (HOP_BY_HOP.has(k) && k !== "content-length") return;
+    if (HOP_BY_HOP.has(k)) return;
     if (k === "set-cookie" || k === "content-encoding") return;
     responseHeaders.set(key, value);
   });

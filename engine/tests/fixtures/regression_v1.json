@@ -1,0 +1,115 @@
+{
+  "algorithm_version": "prnu-wavelet-mle-1.0",
+  "fingerprint": {
+    "std": 1.1283116119065317,
+    "abs_mean": 0.8996419786663963,
+    "split_half_pce": 122769.2167601159,
+    "split_half_ncc": 0.7844489216804504,
+    "samples": [
+      -0.03848693147301674,
+      -0.33376210927963257,
+      1.025975227355957,
+      -1.8290199041366577
+    ]
+  },
+  "cases": {
+    "same_png": {
+      "pce": 34801.700156918916,
+      "ncc": 0.42225736498267546,
+      "effective_pce": 34800.313902389265,
+      "geometry": "native",
+      "rotation": 0,
+      "shift": [
+        0,
+        0
+      ],
+      "search_size": 2,
+      "valid_pixels": 196608,
+      "verdict": "match_supported"
+    },
+    "same_png_2": {
+      "pce": 56263.45835550794,
+      "ncc": 0.5360460920644435,
+      "effective_pce": 56262.07208578516,
+      "geometry": "native",
+      "rotation": 0,
+      "shift": [
+        0,
+        0
+      ],
+      "search_size": 2,
+      "valid_pixels": 196608,
+      "verdict": "match_supported"
+    },
+    "other_png": {
+      "pce": 0.08216294614209668,
+      "ncc": 0.0006508801767379443,
+      "effective_pce": -0.10063983413348677,
+      "geometry": "native",
+      "rotation": 180,
+      "shift": [
+        0,
+        0
+      ],
+      "search_size": 2,
+      "valid_pixels": 196608,
+      "verdict": "insufficient_or_unsupported"
+    },
+    "same_jpeg85": {
+      "pce": 1703.0771783097814,
+      "ncc": 0.09361288741449883,
+      "effective_pce": 1701.691696842963,
+      "geometry": "native",
+      "rotation": 0,
+      "shift": [
+        0,
+        0
+      ],
+      "search_size": 2,
+      "valid_pixels": 196608,
+      "verdict": "match_supported"
+    },
+    "same_rot90": {
+      "pce": 51107.09247784918,
+      "ncc": 0.5102283065422251,
+      "effective_pce": 51105.70621061214,
+      "geometry": "rotated",
+      "rotation": 270,
+      "shift": [
+        0,
+        0
+      ],
+      "search_size": 2,
+      "valid_pixels": 196608,
+      "verdict": "match_supported"
+    },
+    "same_crop": {
+      "pce": 22237.215483543285,
+      "ncc": 0.4753773767936326,
+      "effective_pce": 22216.360226290202,
+      "geometry": "cropped",
+      "rotation": 0,
+      "shift": [
+        32,
+        64
+      ],
+      "search_size": 33796,
+      "valid_pixels": 98304,
+      "verdict": "match_supported"
+    },
+    "same_saturated": {
+      "pce": 46467.690773093374,
+      "ncc": 0.48644139933994096,
+      "effective_pce": 46466.3045085643,
+      "geometry": "native",
+      "rotation": 0,
+      "shift": [
+        0,
+        0
+      ],
+      "search_size": 2,
+      "valid_pixels": 119808,
+      "verdict": "match_supported"
+    }
+  }
+}

@@ -183,8 +183,11 @@ def run_scoring(
                 )
         enrol_log_path.write_text(json.dumps(enrol_log, indent=2))
 
+    # Recompressed conditions are evaluated on test devices only: calibration uses originals.
     jobs = [
-        (dev.id, str(p), list(manifest["conditions"]), include_cropped) for dev in devices for p in test_files[dev.id]
+        (dev.id, str(p), list(manifest["conditions"]) if dev.split == "test" else ["original"], include_cropped)
+        for dev in devices
+        for p in test_files[dev.id]
     ]
     rows: list[dict[str, Any]] = []
     t0 = time.time()

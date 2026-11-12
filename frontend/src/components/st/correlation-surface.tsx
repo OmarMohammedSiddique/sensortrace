@@ -184,8 +184,8 @@ export function CorrelationSurface({ surface, size = 264, label, hideCaption = f
           <p className="leading-relaxed">
             {peakAtCentre
               ? "The largest value in this window is at the centre (the tested alignment)."
-              : `The largest value in this window is ${Math.abs(dx)} px ${dx < 0 ? "left" : "right"}, ${Math.abs(dy)} px ${dy < 0 ? "up" : "down"} of the centre.`}{" "}
-            Window of &plusmn;{half} px; colours are scaled to this window only.
+              : `The largest value in this window is ${Math.abs(dx)} cells ${dx < 0 ? "left" : "right"}, ${Math.abs(dy)} cells ${dy < 0 ? "up" : "down"} of the centre.`}{" "}
+            Window of &plusmn;{half} cells; colours are scaled to this window only.
           </p>
         </figcaption>
       )}

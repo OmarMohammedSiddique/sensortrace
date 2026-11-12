@@ -18,7 +18,8 @@ detected and returned as a mask so estimators and detectors can exclude them.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -131,6 +132,8 @@ class Residual:
     #: True where any channel is saturated.
     saturated: BoolArray
     sigma0: float
+    #: Per-rotation FFT of the masked residual, reused when comparing with several fingerprints.
+    fft_cache: dict[int, Any] = field(default_factory=dict, repr=False, compare=False)
 
     @property
     def shape(self) -> tuple[int, int]:

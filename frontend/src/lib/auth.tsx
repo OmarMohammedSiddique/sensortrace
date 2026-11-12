@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback<AuthContextValue["register"]>(
     async (input) => {
-      const session = await unwrap(api.POST("/api/v1/auth/register", { body: input }));
+      const session = await unwrap(api.POST("/api/v1/auth/register", { body: { display_name: "", ...input } }));
       adopt(session);
       return session.user;
     },

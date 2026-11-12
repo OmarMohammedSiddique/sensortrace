@@ -54,18 +54,26 @@ PEAK_EXCLUSION = 11  # side of the square neighbourhood excluded around the peak
 SURFACE_WINDOW = 33  # side of the correlation-surface window kept for visualisation
 
 
-def circular_xcorr(a: NDArray[np.floating], b: NDArray[np.floating]) -> NDArray[np.float64]:
+def _rfft(x: NDArray[np.floating]) -> NDArray[np.complexfloating]:
+    """Real FFT in single precision. The statistic is a ratio of sums over millions of
+    samples, so complex64 round-off (relative 1e-6) is far below the correlation noise floor."""
+    return sfft.rfft2(np.ascontiguousarray(x, dtype=np.float32), workers=FFT_WORKERS)
+
+
+def _xcorr_from_fft(fa: NDArray[np.complexfloating], b: NDArray[np.floating]) -> FloatArray:
+    b0 = b.astype(np.float32) - np.float32(b.mean(dtype=np.float64))
+    return np.asarray(sfft.irfft2(fa * np.conj(_rfft(b0)), s=b.shape, workers=FFT_WORKERS), dtype=np.float32)
+
+
+def circular_xcorr(a: NDArray[np.floating], b: NDArray[np.floating]) -> FloatArray:
     """Circular cross-correlation ``r[s] = sum_x a[x + s] * b[x]`` (means removed).
 
     ``r[0, 0]`` is the zero-shift correlation (un-normalised).
     """
     if a.shape != b.shape:
         raise ValueError("arrays must have the same shape")
-    a0 = a.astype(np.float64) - float(a.mean())
-    b0 = b.astype(np.float64) - float(b.mean())
-    fa = sfft.rfft2(a0, workers=FFT_WORKERS)
-    fb = sfft.rfft2(b0, workers=FFT_WORKERS)
-    return np.asarray(sfft.irfft2(fa * np.conj(fb), s=a.shape, workers=FFT_WORKERS), dtype=np.float64)
+    a0 = a.astype(np.float32) - np.float32(a.mean(dtype=np.float64))
+    return _xcorr_from_fft(_rfft(a0), b)
 
 
 @dataclass(frozen=True)
@@ -77,7 +85,7 @@ class PceResult:
 
 
 def pce_at(
-    surface: NDArray[np.float64],
+    surface: NDArray[np.floating],
     peak: tuple[int, int],
     *,
     energy_region: NDArray[np.bool_] | None = None,
@@ -92,7 +100,7 @@ def pce_at(
     r = exclusion // 2
     rows = np.arange(peak[0] - r, peak[0] + r + 1) % h
     cols = np.arange(peak[1] - r, peak[1] + r + 1) % w
-    sq = surface * surface
+    sq = np.square(surface, dtype=np.float64)
     if energy_region is None:
         total = float(sq.sum())
         count = h * w
@@ -201,7 +209,7 @@ def _ncc(a: NDArray, b: NDArray, valid: NDArray[np.bool_]) -> float:
     return float((av * bv).sum() / denom) if denom > 0 else 0.0
 
 
-def _window(surface: NDArray[np.float64], peak: tuple[int, int], energy: float) -> FloatArray:
+def _window(surface: NDArray[np.floating], peak: tuple[int, int], energy: float) -> FloatArray:
     h, w = surface.shape
     r = SURFACE_WINDOW // 2
     rows = np.arange(peak[0] - r, peak[0] + r + 1) % h
@@ -210,11 +218,14 @@ def _window(surface: NDArray[np.float64], peak: tuple[int, int], energy: float) 
     return np.asarray(surface[np.ix_(rows, cols)] / scale, dtype=np.float32)
 
 
-def _native(w: FloatArray, inten: FloatArray, sat: NDArray[np.bool_], k: FloatArray):
+def _native(w: FloatArray, inten: FloatArray, sat: NDArray[np.bool_], k: FloatArray, cache: dict, key: int):
     valid = ~sat
-    a = np.where(valid, w, 0.0)
-    b = np.where(valid, inten * k, 0.0)
-    surface = circular_xcorr(a, b)
+    fa = cache.get(key)
+    if fa is None:
+        a = np.where(valid, w, np.float32(0.0))
+        fa = cache[key] = _rfft(a - np.float32(a.mean(dtype=np.float64)))
+    b = np.where(valid, inten * k, np.float32(0.0))
+    surface = _xcorr_from_fft(fa, b)
     res = pce_at(surface, (0, 0))
     return surface, res, _ncc(w, inten * k, valid), valid
 
@@ -229,14 +240,14 @@ def _cropped(w: FloatArray, inten: FloatArray, sat: NDArray[np.bool_], k: FloatA
     fh, fw = k.shape
     h, wd = w.shape
     valid = ~sat
-    prod = np.where(valid, w * inten, 0.0).astype(np.float64)
-    prod -= prod.mean()
-    pad = np.zeros((fh, fw), dtype=np.float64)
+    prod = np.where(valid, w * inten, np.float32(0.0)).astype(np.float32)
+    prod -= np.float32(prod.mean(dtype=np.float64))
+    pad = np.zeros((fh, fw), dtype=np.float32)
     pad[:h, :wd] = prod
-    k0 = k.astype(np.float64) - float(k.mean())
-    fk = sfft.rfft2(k0, workers=FFT_WORKERS)
-    fp = sfft.rfft2(pad, workers=FFT_WORKERS)
-    surface = np.asarray(sfft.irfft2(fk * np.conj(fp), s=(fh, fw), workers=FFT_WORKERS), dtype=np.float64)
+    k0 = k.astype(np.float32) - np.float32(k.mean(dtype=np.float64))
+    surface = np.asarray(
+        sfft.irfft2(_rfft(k0) * np.conj(_rfft(pad)), s=(fh, fw), workers=FFT_WORKERS), dtype=np.float32
+    )
     region = np.zeros((fh, fw), dtype=bool)
     region[: fh - h + 1, : fw - wd + 1] = True
     n_shifts = int(region.sum())
@@ -289,7 +300,7 @@ def compare(residual: Residual, fingerprint: Fingerprint) -> ComparisonMeasureme
     for rot in rotations:
         wr, ir, sr = _rot(residual, rot)
         if mode == "native":
-            surface, res, ncc, valid = _native(wr, ir, sr, k)
+            surface, res, ncc, valid = _native(wr, ir, sr, k, residual.fft_cache, rot)
             search += 1
         else:
             surface, res, ncc, valid, n_shifts = _cropped(wr, ir, sr, k)

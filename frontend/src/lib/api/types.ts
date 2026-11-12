@@ -8,6 +8,12 @@ import type { components } from "./schema";
 
 type S = components["schemas"];
 
+/**
+ * Request-body helper. The generator marks every field that has a server-side default as
+ * required; `Input<T, K>` keeps only the keys in K required and makes the rest optional.
+ */
+export type Input<T, K extends keyof T = never> = Pick<T, K> & Partial<Omit<T, K>>;
+
 export type Meta = Omit<S["Meta"], "limits" | "reference_guidance" | "limitations"> & {
   limits: MetaLimits;
   reference_guidance: GuidanceItem[];
@@ -21,7 +27,9 @@ export interface MetaLimits {
   max_candidates_per_analysis: number;
   recommended_reference_images: number;
   min_reference_images: number;
-  [key: string]: number;
+  /** Whole-request cap for multipart uploads; only present on newer API builds. */
+  max_request_bytes?: number;
+  [key: string]: number | undefined;
 }
 export interface GuidanceItem {
   title: string;
@@ -38,22 +46,28 @@ export type AuditEntry = S["AuditOut"];
 export type ExportOut = S["ExportOut"];
 
 export type Device = S["DeviceOut"];
-export type DeviceIn = S["DeviceIn"];
-export type DevicePatch = S["DevicePatch"];
+export type DeviceIn = Input<S["DeviceIn"], "name">;
+export type DevicePatch = Input<S["DevicePatch"]>;
 export type Sensor = S["SensorOut"];
-export type SensorIn = S["SensorIn"];
-export type SensorPatch = S["SensorPatch"];
+export type SensorIn = Input<S["SensorIn"], "name">;
+export type SensorPatch = Input<S["SensorPatch"]>;
 export type Fingerprint = S["FingerprintOut"];
 export type FingerprintDetail = S["FingerprintDetail"];
 export type Investigation = S["InvestigationOut"];
-export type InvestigationIn = S["InvestigationIn"];
-export type InvestigationPatch = S["InvestigationPatch"];
+export type InvestigationIn = Input<S["InvestigationIn"], "title">;
+export type InvestigationPatch = Input<S["InvestigationPatch"]>;
 export type Note = S["NoteOut"];
 export type Report = S["ReportOut"];
 export type Job = S["JobOut"];
 export type UploadResult = S["UploadResult"];
 export type UploadResponse = S["UploadResponse"];
-export type AnalysisIn = S["AnalysisIn"];
+export type AnalysisIn = Input<S["AnalysisIn"], "evidence_ids">;
+export type AnalysisPatch = Input<S["AnalysisPatch"]>;
+export type EvidencePatch = Input<S["EvidencePatch"]>;
+export type ProfileIn = Input<S["ProfileIn"]>;
+export type RegisterIn = Input<S["RegisterIn"], "email" | "password">;
+export type LoginIn = S["LoginIn"];
+export type TokenIn = Input<S["TokenIn"], "name">;
 export type AnalysisStarted = S["AnalysisStarted"];
 
 export type Policy = S["PolicyOut"];
@@ -74,7 +88,7 @@ export type JobStatus = "queued" | "running" | "succeeded" | "failed" | "cancell
 export type PipelineClass = "conventional" | "computational" | "unknown";
 export type EvidenceCategory = "questioned" | "reference" | "context";
 export type InvestigationStatus = "open" | "closed" | "archived";
-export type DeviceType = NonNullable<DeviceIn["device_type"]>;
+export type DeviceType = NonNullable<S["DeviceIn"]["device_type"]>;
 
 /* ------------------------------------------------------------- quality */
 

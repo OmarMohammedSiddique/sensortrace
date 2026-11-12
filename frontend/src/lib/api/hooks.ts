@@ -29,6 +29,7 @@ import type {
   Analysis,
   AnalysisDetail,
   AnalysisIn,
+  AnalysisPatch,
   AnalysisStarted,
   AuditEntry,
   Dashboard,
@@ -36,6 +37,7 @@ import type {
   DeviceIn,
   DevicePatch,
   Evidence,
+  EvidencePatch,
   EvidenceCategory,
   Fingerprint,
   FingerprintDetail,
@@ -49,6 +51,7 @@ import type {
   Page,
   PageParams,
   Policy,
+  ProfileIn,
   ReferenceImage,
   Report,
   Sensor,
@@ -58,7 +61,13 @@ import type {
   Usage,
   User,
 } from "./types";
-import type { components } from "./schema";
+
+/**
+ * Request bodies are typed with the relaxed `Input<>` shapes from types.ts (fields with
+ * server-side defaults are optional), so they are cast when handed to the generated client.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Body = any;
 
 /** Signed file URLs expire after 5 minutes: treat objects carrying them as stale after 3.5. */
 export const FILE_URL_STALE_TIME = 210_000;
@@ -221,7 +230,7 @@ export function useCancelJob() {
 
 export function useUpdateProfile() {
   return useApiMutation(
-    (body: components["schemas"]["ProfileIn"]) => unwrap<User>(api.PATCH("/api/v1/auth/me", { body })),
+    (body: ProfileIn) => unwrap<User>(api.PATCH("/api/v1/auth/me", { body: body as Body })),
     { invalidate: [qk.me, qk.dashboard] },
   );
 }
@@ -273,14 +282,14 @@ export function useDevice(deviceId: string | undefined) {
   });
 }
 export function useCreateDevice() {
-  return useApiMutation((body: DeviceIn) => unwrap<Device>(api.POST("/api/v1/devices", { body })), {
+  return useApiMutation((body: DeviceIn) => unwrap<Device>(api.POST("/api/v1/devices", { body: body as Body })), {
     invalidate: [qk.devices.all, qk.dashboard],
   });
 }
 export function useUpdateDevice(deviceId: string) {
   return useApiMutation(
     (body: DevicePatch) =>
-      unwrap<Device>(api.PATCH("/api/v1/devices/{device_id}", { params: { path: { device_id: deviceId } }, body })),
+      unwrap<Device>(api.PATCH("/api/v1/devices/{device_id}", { params: { path: { device_id: deviceId } }, body: body as Body })),
     { invalidate: [qk.devices.all, qk.sensors.all] },
   );
 }
@@ -313,7 +322,7 @@ export function useCreateSensor(deviceId: string) {
   return useApiMutation(
     (body: SensorIn) =>
       unwrap<Sensor>(
-        api.POST("/api/v1/devices/{device_id}/sensors", { params: { path: { device_id: deviceId } }, body }),
+        api.POST("/api/v1/devices/{device_id}/sensors", { params: { path: { device_id: deviceId } }, body: body as Body }),
       ),
     { invalidate: [qk.devices.all, qk.sensors.all, qk.dashboard] },
   );
@@ -321,7 +330,7 @@ export function useCreateSensor(deviceId: string) {
 export function useUpdateSensor(sensorId: string) {
   return useApiMutation(
     (body: SensorPatch) =>
-      unwrap<Sensor>(api.PATCH("/api/v1/sensors/{sensor_id}", { params: { path: { sensor_id: sensorId } }, body })),
+      unwrap<Sensor>(api.PATCH("/api/v1/sensors/{sensor_id}", { params: { path: { sensor_id: sensorId } }, body: body as Body })),
     { invalidate: [qk.sensors.all, qk.devices.all] },
   );
 }
@@ -433,7 +442,7 @@ export function useInvestigation(id: string | undefined) {
 }
 export function useCreateInvestigation() {
   return useApiMutation(
-    (body: InvestigationIn) => unwrap<Investigation>(api.POST("/api/v1/investigations", { body })),
+    (body: InvestigationIn) => unwrap<Investigation>(api.POST("/api/v1/investigations", { body: body as Body })),
     { invalidate: [qk.investigations.all, qk.dashboard] },
   );
 }
@@ -441,7 +450,7 @@ export function useUpdateInvestigation(id: string) {
   return useApiMutation(
     (body: InvestigationPatch) =>
       unwrap<Investigation>(
-        api.PATCH("/api/v1/investigations/{investigation_id}", { params: { path: { investigation_id: id } }, body }),
+        api.PATCH("/api/v1/investigations/{investigation_id}", { params: { path: { investigation_id: id } }, body: body as Body }),
       ),
     { invalidate: [qk.investigations.all, qk.dashboard] },
   );
@@ -525,9 +534,9 @@ export function useEvidence(evidenceId: string | null | undefined) {
 }
 export function useUpdateEvidence() {
   return useApiMutation(
-    ({ id, ...body }: components["schemas"]["EvidencePatch"] & { id: string }) =>
+    ({ id, ...body }: EvidencePatch & { id: string }) =>
       unwrap<Evidence>(
-        api.PATCH("/api/v1/evidence/{evidence_id}", { params: { path: { evidence_id: id } }, body }),
+        api.PATCH("/api/v1/evidence/{evidence_id}", { params: { path: { evidence_id: id } }, body: body as Body }),
       ),
     { invalidate: [qk.evidence.all, qk.investigations.all] },
   );
@@ -570,15 +579,15 @@ export function useAnalysis(analysisId: string | undefined) {
 }
 /** Starts one analysis per evidence id. Resolves with `{ analyses, jobs }`. */
 export function useStartAnalyses() {
-  return useApiMutation((body: AnalysisIn) => unwrap<AnalysisStarted>(api.POST("/api/v1/analyses", { body })), {
+  return useApiMutation((body: AnalysisIn) => unwrap<AnalysisStarted>(api.POST("/api/v1/analyses", { body: body as Body })), {
     invalidate: [qk.analyses.all, qk.jobs.all, qk.dashboard, qk.investigations.all],
   });
 }
 export function useUpdateAnalysis() {
   return useApiMutation(
-    ({ id, ...body }: components["schemas"]["AnalysisPatch"] & { id: string }) =>
+    ({ id, ...body }: AnalysisPatch & { id: string }) =>
       unwrap<Analysis>(
-        api.PATCH("/api/v1/analyses/{analysis_id}", { params: { path: { analysis_id: id } }, body }),
+        api.PATCH("/api/v1/analyses/{analysis_id}", { params: { path: { analysis_id: id } }, body: body as Body }),
       ),
     { invalidate: [qk.analyses.all, qk.investigations.all] },
   );
