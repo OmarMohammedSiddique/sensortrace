@@ -293,3 +293,60 @@ def test_f01_parallel_uploads_per_account_are_bounded(user, other):
         deps._uploading.pop(uid, None)
     upload_evidence(user, jpeg(61, 5))
     assert uid not in deps._uploading, "the slot was not released"
+
+
+# ---------------------------------------------------------------- decisions taken after the audit
+
+
+def test_one_client_cannot_lock_everyone_out_of_sign_in(app, settings):
+    """F-13: without real client addresses, bad sign-ins for one account must not block another."""
+    from app.deps import get_redis
+    from tests.conftest import API, PASSWORD, Client, make_user
+
+    victim = make_user(app)
+    for key in get_redis().scan_iter("rl:auth-*"):
+        get_redis().delete(key)
+    settings.rate_auth_per_15min = 5
+    settings.trust_forwarded_for = False
+    attacker = Client(app)
+    codes = [attacker.post(f"{API}/auth/login", json={"email": "target@audit-sensortrace.dev", "password": "wrong-password-xx"}).status_code for _ in range(12)]
+    assert codes[:5] == [401] * 5 and set(codes[5:]) == {429}  # the attacked account is throttled
+    fresh = Client(app)
+    assert fresh.post(f"{API}/auth/login", json={"email": victim.email, "password": PASSWORD}).status_code == 200
+
+
+def test_password_change_revokes_api_tokens_and_tokens_cannot_manage_sessions(app):
+    """F-17."""
+    from tests.conftest import API, PASSWORD, Client, make_user
+
+    c = make_user(app)
+    token = c.post(f"{API}/auth/tokens", json={"name": "t"}).json()["token"]
+    api = Client(app)
+    h = {"Authorization": f"Bearer {token}"}
+    sid = c.get(f"{API}/auth/sessions").json()[0]["id"]
+    assert api.delete(f"{API}/auth/sessions/{sid}", headers=h).status_code == 403
+    assert c.get(f"{API}/auth/me").status_code == 200
+    assert c.post(f"{API}/auth/password", json={"current_password": PASSWORD, "new_password": "a-different-long-passphrase"}).status_code == 204
+    assert api.get(f"{API}/auth/me", headers=h).status_code == 401
+
+
+def test_reports_survive_very_long_text(app):
+    """F-16: long acquisition notes, descriptions and notes must not break report generation."""
+    import io
+
+    from pypdf import PdfReader
+
+    from tests.conftest import API, enrol_sensor, jpeg, make_user, upload_evidence
+
+    c = make_user(app)
+    a = enrol_sensor(c, 301, n=3)
+    inv = c.post(f"{API}/investigations", json={"title": "Long", "description": "d" * 3700}).json()
+    ev = upload_evidence(c, jpeg(301, 50), investigation_id=inv["id"])
+    assert c.patch(f"{API}/evidence/{ev}", json={"acquisition": {"notes": "n" * 4100, "source": "s" * 290}}).status_code == 200
+    assert c.post(f"{API}/investigations/{inv['id']}/notes", json={"body": "x" * 15000}).status_code == 201
+    an = c.post(f"{API}/analyses", json={"evidence_ids": [ev], "sensor_ids": [a["sensor_id"]], "investigation_id": inv["id"]}).json()["analyses"][0]
+    r = c.post(f"{API}/analyses/{an['id']}/reports")
+    assert r.status_code == 201, r.text
+    text = "".join(p.extract_text() for p in PdfReader(io.BytesIO(c.get(r.json()["download_url"]).content)).pages)
+    assert "shortened in this report" in text and "Idealised" not in text and "p-value" not in text.lower()
+    assert c.post(f"{API}/investigations/{inv['id']}/reports").status_code == 201

@@ -304,7 +304,9 @@ def test_s3_storage_roundtrip_against_local_object_store():
         socket.create_connection(("127.0.0.1", port), timeout=1).close()
     except OSError:
         pytest.skip("object store not running")
-    prefix = f"test-{uuid.uuid4().hex[:8]}"
+    # Fixed bucket names: every new bucket costs the object store several volumes, so creating
+    # fresh ones per run eventually exhausts it. Objects are removed at the end instead.
+    prefix = "sensortrace-test"
     st = S3Storage(Settings(storage_backend="s3", s3_endpoint_url=f"http://127.0.0.1:{port}", s3_access_key=os.environ.get("ST_TEST_S3_ACCESS_KEY", "sensortrace"),
                             s3_secret_key=os.environ.get("ST_TEST_S3_SECRET_KEY", "sensortrace-dev-secret"), s3_bucket_evidence=f"{prefix}-evidence",
                             s3_bucket_derived=f"{prefix}-derived", s3_bucket_results=f"{prefix}-results"))  # fmt: skip

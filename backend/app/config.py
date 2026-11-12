@@ -93,6 +93,13 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _production_guards(self) -> Settings:
+        if self.environment == "development" and self.secret_key == DEV_SECRET:
+            import logging
+
+            logging.getLogger("sensortrace").warning(
+                "Using the published development secret key: file links can be forged by anyone who has read the "
+                "source. Set ST_SECRET_KEY before exposing this instance to other people."
+            )
         if self.environment == "production":
             if self.secret_key == DEV_SECRET or len(self.secret_key) < 32:
                 raise ValueError("ST_SECRET_KEY must be set to a random value of at least 32 characters")
