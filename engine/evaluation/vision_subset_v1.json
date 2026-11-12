@@ -1,0 +1,23 @@
+{
+  "name": "vision-subset-v1",
+  "attribution": "VISION dataset (Shullani et al., EURASIP Journal on Information Security, 2017). (c) CSP Lab, University of Florence. CC BY-SA 4.0.",
+  "root": "../data/vision",
+  "reference": {"category": "flat", "count": 40},
+  "test": {"category": "nat", "count": 40},
+  "conditions": ["original", "jpeg90", "jpeg75", "jpeg60"],
+  "devices": [
+    {"id": "D05", "dir": "D05_Apple_iPhone5c", "model_key": "apple iphone 5c", "split": "calibration"},
+    {"id": "D14", "dir": "D14_Apple_iPhone5c", "model_key": "apple iphone 5c", "split": "calibration"},
+    {"id": "D18", "dir": "D18_Apple_iPhone5c", "model_key": "apple iphone 5c", "split": "calibration"},
+    {"id": "D02", "dir": "D02_Apple_iPhone4s", "model_key": "apple iphone 4s", "split": "calibration"},
+    {"id": "D10", "dir": "D10_Apple_iPhone4s", "model_key": "apple iphone 4s", "split": "calibration"},
+    {"id": "D03", "dir": "D03_Huawei_P9", "model_key": "huawei p9", "split": "calibration"},
+    {"id": "D06", "dir": "D06_Apple_iPhone6", "model_key": "apple iphone 6", "split": "test"},
+    {"id": "D15", "dir": "D15_Apple_iPhone6", "model_key": "apple iphone 6", "split": "test"},
+    {"id": "D29", "dir": "D29_Apple_iPhone5", "model_key": "apple iphone 5", "split": "test"},
+    {"id": "D34", "dir": "D34_Apple_iPhone5", "model_key": "apple iphone 5", "split": "test"},
+    {"id": "D01", "dir": "D01_Samsung_GalaxyS3Mini", "model_key": "samsung galaxy s3 mini", "split": "test"},
+    {"id": "D26", "dir": "D26_Samsung_GalaxyS3Mini", "model_key": "samsung galaxy s3 mini", "split": "test"},
+    {"id": "D11", "dir": "D11_Samsung_GalaxyS3", "model_key": "samsung galaxy s3", "split": "test"}
+  ]
+}
