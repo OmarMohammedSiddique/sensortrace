@@ -64,7 +64,9 @@ def _limit_auth(request: Request, email: str = "") -> None:
 def register(body: s.RegisterIn, request: Request, response: Response, db: Db) -> s.SessionInfo:
     cfg = get_settings()
     if not cfg.allow_registration:
-        raise ApiError(403, "registration_closed", "Registration is disabled on this server.")
+        no_accounts = (db.scalar(select(func.count()).select_from(User)) or 0) == 0
+        if not (cfg.allow_first_account and no_accounts):
+            raise ApiError(403, "registration_closed", "Registration is disabled on this server.")
     _limit_auth(request)
     email = body.email.strip().lower()
     problem = password_problem(body.password, email)

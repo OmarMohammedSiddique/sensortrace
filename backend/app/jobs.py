@@ -73,6 +73,13 @@ def enqueue(db: Session, user: m.User, kind: str, target_type: str, target_id: u
     if s.jobs_inline:
         execute(str(job.id))
         db.refresh(job)
+    elif s.job_dispatch == "http":
+        if not kick(job.id):
+            job.status, job.stage, job.finished_at = "failed", "failed", m.utcnow()
+            job.error = "The job could not be started. Try again shortly."
+            _mark_target_failed(db, job, job.error)
+            db.commit()
+            raise ApiError(503, "queue_unavailable", "The job could not be started. Try again shortly.")
     else:
         import redis as redis_lib
         from rq import Queue, Retry
@@ -98,6 +105,62 @@ def enqueue(db: Session, user: m.User, kind: str, target_type: str, target_id: u
             db.commit()
             raise ApiError(503, "queue_unavailable", "The job queue is unavailable. Try again shortly.") from None
     return job
+
+
+def internal_signature(job_id: uuid.UUID | str) -> str:
+    """HMAC that authorises one invocation of the internal run endpoint for one job."""
+    import hashlib as _h
+    import hmac as _hmac
+
+    return _hmac.new(get_settings().secret_key.encode(), f"run-job:{job_id}".encode(), _h.sha256).hexdigest()
+
+
+def kick(job_id: uuid.UUID) -> bool:
+    """Start a job in its own invocation of the API (http dispatch).
+
+    The request is sent and not awaited: the invocation keeps running after this caller stops
+    listening. Returns False only if the request could not be sent at all.
+    """
+    import httpx
+
+    base = get_settings().internal_base_url
+    if not base:
+        log.error("http job dispatch needs ST_INTERNAL_BASE_URL")
+        return False
+    url = f"{base.rstrip('/')}/api/v1/internal/jobs/{job_id}/run"
+    try:
+        httpx.post(url, headers={"X-ST-Internal": internal_signature(job_id)}, timeout=httpx.Timeout(10.0, read=1.5))
+    except httpx.ReadTimeout:
+        pass  # expected: the job is running and will outlive this request
+    except httpx.HTTPError:
+        log.exception("could not start job %s", job_id)
+        return False
+    return True
+
+
+def reap_stale(db: Session, user_id: uuid.UUID) -> int:
+    """http dispatch: fail a user's jobs whose invocation has evidently ended without finishing."""
+    from datetime import timedelta as _td
+
+    cfg = get_settings()
+    now = m.utcnow()
+    n = 0
+    for job in db.scalars(select(m.Job).where(m.Job.user_id == user_id, m.Job.status.in_(ACTIVE))):
+        overdue = job.status == "running" and job.started_at and now - job.started_at > _td(seconds=cfg.job_timeout_seconds + 45)
+        never_started = job.status == "queued" and now - job.created_at > _td(seconds=180)
+        if not (overdue or never_started):
+            continue
+        job.status, job.stage, job.finished_at = "failed", "failed", now
+        job.error = (
+            "The job exceeded the time limit of this deployment. Use fewer or smaller images, or a deployment with a longer limit."
+            if overdue
+            else "The job did not start. Try again."
+        )
+        _mark_target_failed(db, job, job.error)
+        n += 1
+    if n:
+        db.commit()
+    return n
 
 
 def request_cancel(db: Session, job: m.Job) -> None:
@@ -205,7 +268,8 @@ def execute(job_id: str) -> None:
         _finish(jid, "failed", "The job exceeded its memory limit.")
     except Exception:
         log.exception("job %s failed (attempt %d)", job_id, attempts)
-        if attempts < MAX_ATTEMPTS and not get_settings().jobs_inline:
+        cfg = get_settings()
+        if attempts < MAX_ATTEMPTS and not cfg.jobs_inline and cfg.job_dispatch == "rq":
             with session_scope() as db:
                 job = db.get(m.Job, jid)
                 if job is not None:

@@ -19,6 +19,7 @@ from .routers import (
     auth,
     devices,
     files,
+    internal,
     investigations,
     meta,
     reports,
@@ -109,7 +110,7 @@ def create_app() -> FastAPI:
         return _err(500, "internal_error", "An internal error occurred.")
 
     for r in (meta.router, auth.router, account.router, account.admin_router, devices.router, investigations.router,
-              analyses.router, analyses.jobs_router, reports.router, files.router):  # fmt: skip
+              analyses.router, analyses.jobs_router, reports.router, files.router, internal.router):  # fmt: skip
         app.include_router(r, prefix="/api/v1")
     return app
 

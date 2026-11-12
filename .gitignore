@@ -29,3 +29,7 @@ test-results/
 .DS_Store
 .idea/
 .vscode/
+
+# Vercel deployment bundle and link
+/.vercel-bundle/
+.vercel/

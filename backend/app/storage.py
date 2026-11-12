@@ -191,6 +191,57 @@ class S3Storage:
             return False
 
 
+class VercelBlobStorage:
+    """Private Vercel Blob store. Logical buckets are pathname prefixes inside one store."""
+
+    def __init__(self) -> None:
+        from vercel.blob import sync as blob
+
+        self._b = blob
+
+    @staticmethod
+    def _name(bucket: str, key: str) -> str:
+        _check(bucket, key)
+        return f"{bucket}/{key}"
+
+    def put(self, bucket: str, key: str, data: bytes, content_type: str = "application/octet-stream") -> None:
+        self._b.put_blob(self._name(bucket, key), data, access="private", content_type=content_type, allow_overwrite=True)
+
+    def get(self, bucket: str, key: str) -> bytes:
+        from vercel import blob as errors
+
+        try:
+            body = self._b.get_blob(self._name(bucket, key), access="private").body
+        except errors.BlobNotFoundError:
+            raise KeyError(key) from None
+        return bytes(body) if isinstance(body, (bytes, bytearray, memoryview)) else body.read()
+
+    def delete(self, bucket: str, key: str) -> None:
+        self._b.delete_blob(self._name(bucket, key))
+
+    def exists(self, bucket: str, key: str) -> bool:
+        from vercel import blob as errors
+
+        try:
+            self._b.head_blob(self._name(bucket, key))
+            return True
+        except errors.BlobNotFoundError:
+            return False
+
+    def delete_prefix(self, bucket: str, prefix: str) -> int:
+        names = [item.pathname for item in self._b.query_blobs(prefix=self._name(bucket, prefix.rstrip("/")) + "/")]
+        for i in range(0, len(names), 500):
+            self._b.delete_blob(names[i : i + 500])
+        return len(names)
+
+    def ready(self) -> bool:
+        try:
+            next(iter(self._b.query_blobs(prefix="evidence/", page_size=1)), None)
+            return True
+        except Exception:
+            return False
+
+
 _storage: Storage | None = None
 
 
@@ -202,6 +253,8 @@ def get_storage() -> Storage:
             st = S3Storage(s)
             st.ensure_buckets()
             _storage = st
+        elif s.storage_backend == "vercel_blob":
+            _storage = VercelBlobStorage()
         else:
             _storage = LocalStorage(s.storage_local_path)
     return _storage

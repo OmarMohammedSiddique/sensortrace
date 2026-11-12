@@ -16,6 +16,8 @@ log = logging.getLogger("sensortrace")
 def list_policies() -> list[DecisionPolicy]:
     out = [LITERATURE_DEFAULT_POLICY]
     d = Path(get_settings().policies_dir)
+    if not d.is_absolute() and not d.is_dir():
+        d = Path(__file__).resolve().parent.parent / d  # relative to the backend root, whatever the working directory
     if d.is_dir():
         for f in sorted(d.glob("*.json")):
             try:

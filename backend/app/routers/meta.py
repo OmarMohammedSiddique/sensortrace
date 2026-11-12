@@ -74,6 +74,23 @@ LIMITATIONS = [
 ]
 
 
+def _registration_open(c) -> bool:
+    if c.allow_registration:
+        return True
+    if not c.allow_first_account:
+        return False
+    from sqlalchemy import func, select
+    from sqlalchemy.orm import Session
+
+    from ..models import User
+
+    try:
+        with Session(get_engine()) as db:
+            return (db.scalar(select(func.count()).select_from(User)) or 0) == 0
+    except Exception:
+        return False
+
+
 @router.get("/health")
 def health(response: Response) -> dict[str, Any]:
     """Liveness and dependency checks."""
@@ -108,6 +125,6 @@ def meta() -> s.Meta:
         limits={"max_upload_bytes": c.max_upload_bytes, "max_image_pixels": c.max_image_pixels, "max_files_per_request": c.max_files_per_request, "max_request_bytes": c.max_request_bytes,
                 "max_reference_images": c.max_reference_images, "max_candidates_per_analysis": c.max_candidates_per_analysis,
                 "recommended_reference_images": 30, "min_reference_images": 2},
-        supported_formats=["image/jpeg", "image/png"], registration_open=c.allow_registration,
+        supported_formats=["image/jpeg", "image/png"], registration_open=_registration_open(c),
         reference_guidance=REFERENCE_GUIDANCE, limitations=LIMITATIONS,
     )  # fmt: skip

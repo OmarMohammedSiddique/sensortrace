@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from functools import lru_cache
 from typing import Literal
 
@@ -20,7 +21,7 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:63799/0"
 
     # Storage
-    storage_backend: Literal["local", "s3"] = "local"
+    storage_backend: Literal["local", "s3", "vercel_blob"] = "local"
     storage_local_path: str = "../storage"
     s3_endpoint_url: str | None = None
     s3_region: str = "us-east-1"
@@ -36,6 +37,8 @@ class Settings(BaseSettings):
     cookie_secure: bool = False
     allowed_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3100"])
     allow_registration: bool = True
+    #: When registration is closed, still allow the very first account (the administrator) to be created.
+    allow_first_account: bool = False
     trust_forwarded_for: bool = False  # enable only behind a trusted reverse proxy
 
     # Limits and quotas
@@ -59,6 +62,33 @@ class Settings(BaseSettings):
     worker_memory_limit_mb: int = 0  # address-space cap per job on Linux; 0 disables
     policies_dir: str = "policies"
     jobs_inline: bool = False  # run jobs synchronously (tests only)
+    #: "rq": Redis queue and worker processes. "http": each job runs in its own invocation of the
+    #: API's internal run endpoint (for platforms without long-lived workers).
+    job_dispatch: Literal["rq", "http"] = "rq"
+    #: Public base URL the API can reach itself on (http dispatch). Derived from Vercel variables when unset.
+    internal_base_url: str | None = None
+    #: "pool" keeps connections; "null" opens one per use (serverless with an external pooler).
+    db_pool: Literal["pool", "null"] = "pool"
+
+    @model_validator(mode="after")
+    def _platform_defaults(self) -> Settings:
+        """Accept the connection variables that hosting integrations provide."""
+        if "ST_DATABASE_URL" not in os.environ:
+            url = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL")
+            if url:
+                self.database_url = url
+        for prefix in ("postgres://", "postgresql://"):
+            if self.database_url.startswith(prefix):
+                self.database_url = "postgresql+psycopg://" + self.database_url[len(prefix) :]
+        if "ST_REDIS_URL" not in os.environ:
+            url = os.environ.get("REDIS_URL") or os.environ.get("KV_URL")
+            if url:
+                self.redis_url = url
+        if self.internal_base_url is None:
+            host = os.environ.get("VERCEL_PROJECT_PRODUCTION_URL") or os.environ.get("VERCEL_URL")
+            if host:
+                self.internal_base_url = f"https://{host}"
+        return self
 
     @model_validator(mode="after")
     def _production_guards(self) -> Settings:

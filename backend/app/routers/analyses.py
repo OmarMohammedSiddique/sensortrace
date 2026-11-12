@@ -12,7 +12,7 @@ from ..audit import audit
 from ..config import get_settings
 from ..deps import CurrentUser, Db, owned
 from ..errors import ApiError, bad_request, conflict
-from ..jobs import enqueue, request_cancel
+from ..jobs import enqueue, reap_stale, request_cancel
 from ..models import Analysis, Evidence, Fingerprint, Investigation, Job, Sensor, User
 from ..policies import get_policy, list_policies
 from ..services import file_url, purge_analysis
@@ -189,6 +189,8 @@ def delete_analysis(analysis_id: uuid.UUID, user: CurrentUser, db: Db) -> None:
 @jobs_router.get("/jobs", response_model=s.Page[s.JobOut])
 def list_jobs(user: CurrentUser, db: Db, active: bool | None = None, limit: Annotated[int, Query(ge=1, le=200)] = 50,
               offset: Annotated[int, Query(ge=0)] = 0) -> s.Page[s.JobOut]:  # fmt: skip
+    if get_settings().job_dispatch == "http":
+        reap_stale(db, user.id)
     stmt = select(Job).where(Job.user_id == user.id)
     if active is True:
         stmt = stmt.where(Job.status.in_(("queued", "running")))
@@ -206,6 +208,8 @@ def list_jobs(user: CurrentUser, db: Db, active: bool | None = None, limit: Anno
 
 @jobs_router.get("/jobs/{job_id}", response_model=s.JobOut)
 def get_job(job_id: uuid.UUID, user: CurrentUser, db: Db) -> Job:
+    if get_settings().job_dispatch == "http":
+        reap_stale(db, user.id)
     return owned(db, Job, job_id, user, "Job")
 
 

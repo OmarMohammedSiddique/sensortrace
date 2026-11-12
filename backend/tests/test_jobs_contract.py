@@ -378,3 +378,92 @@ def test_interrupted_jobs_are_reaped(app, settings):
     assert c.get(f"{API}/fingerprints/{started['fingerprint']['id']}").json()["status"] == "failed"
     settings.jobs_inline = True
     assert c.post(f"{API}/sensors/{sid}/fingerprints").status_code == 202
+
+
+def test_http_dispatch_runs_jobs_through_the_signed_internal_endpoint(app, settings, monkeypatch):
+    """Serverless mode: the API starts each job by calling its own internal endpoint."""
+    from fastapi.testclient import TestClient
+
+    settings.jobs_inline = False
+    settings.job_dispatch = "http"
+    settings.internal_base_url = "http://testserver"
+    internal = TestClient(app)
+    calls = []
+
+    def fake_post(url, headers=None, timeout=None):
+        calls.append(url)
+        return internal.post(url.replace("http://testserver", ""), headers=headers)
+
+    import httpx
+
+    monkeypatch.setattr(httpx, "post", fake_post)
+    c = make_user(app)
+    sid = _sensor_with_refs(c, 102)
+    started = c.post(f"{API}/sensors/{sid}/fingerprints")
+    assert started.status_code == 202 and len(calls) == 1 and "/internal/jobs/" in calls[0]
+    jid = started.json()["job"]["id"]
+    assert c.get(f"{API}/jobs/{jid}").json()["status"] == "succeeded"
+    assert c.get(f"{API}/fingerprints/{started.json()['fingerprint']['id']}").json()["status"] == "ready"
+    # The internal endpoint refuses callers without the per-job signature, and other jobs' signatures.
+    assert internal.post(f"{API}/internal/jobs/{jid}/run").status_code == 404
+    assert internal.post(f"{API}/internal/jobs/{jid}/run", headers={"X-ST-Internal": "0" * 64}).status_code == 404
+    assert internal.post(f"{API}/internal/jobs/{uuid.uuid4()}/run", headers={"X-ST-Internal": jobs.internal_signature(jid)}).status_code == 404
+    assert c.post(f"{API}/internal/jobs/{jid}/run").status_code == 404  # a signed-in user is not enough
+    assert internal.get(f"{API}/internal/maintenance").status_code == 404
+    assert "/internal/" not in str(internal.get(f"{API}/openapi.json").json()["paths"].keys())
+
+
+def test_http_dispatch_reaps_jobs_that_outlived_their_invocation(app, settings, monkeypatch):
+    from datetime import timedelta
+
+    import httpx
+
+    from app.models import utcnow
+
+    settings.jobs_inline = False
+    settings.job_dispatch = "http"
+    settings.internal_base_url = "http://testserver"
+    monkeypatch.setattr(httpx, "post", lambda *a, **k: None)  # the invocation never reports back
+    c = make_user(app)
+    sid = _sensor_with_refs(c, 103)
+    jid = c.post(f"{API}/sensors/{sid}/fingerprints").json()["job"]["id"]
+    assert c.get(f"{API}/jobs/{jid}").json()["status"] == "queued"
+    with session_scope() as db:
+        j = db.get(Job, jid)
+        j.status, j.started_at = "running", utcnow() - timedelta(seconds=settings.job_timeout_seconds + 120)
+    j = c.get(f"{API}/jobs/{jid}").json()
+    assert j["status"] == "failed" and "time limit" in j["error"]
+
+    # If the request cannot be sent at all, the job fails immediately.
+    def down(*a, **k):
+        raise httpx.ConnectError("down")
+
+    monkeypatch.setattr(httpx, "post", down)
+    r = c.post(f"{API}/sensors/{sid}/fingerprints")
+    assert r.status_code == 503 and r.json()["error"]["code"] == "queue_unavailable"
+
+
+def test_first_account_only_registration(anon, settings):
+    from sqlalchemy import func, select
+
+    from app.models import User
+
+    settings.allow_registration = False
+    settings.allow_first_account = True
+    with session_scope() as db:
+        assert db.scalar(select(func.count()).select_from(User)) > 0
+    r = anon.post(f"{API}/auth/register", json={"email": "late@e2e-sensortrace.dev", "password": "correct-horse-battery-staple"})
+    assert r.status_code == 403 and anon.get(f"{API}/meta").json()["registration_open"] is False
+
+
+def test_platform_connection_variables_are_accepted(monkeypatch):
+    from app.config import Settings
+
+    monkeypatch.delenv("ST_DATABASE_URL", raising=False)
+    monkeypatch.delenv("ST_REDIS_URL", raising=False)
+    monkeypatch.setenv("DATABASE_URL", "postgres://u:p@host/db?sslmode=require")
+    monkeypatch.setenv("KV_URL", "rediss://default:x@host:6379")
+    monkeypatch.setenv("VERCEL_PROJECT_PRODUCTION_URL", "sensortrace.example.app")
+    s = Settings()
+    assert s.database_url == "postgresql+psycopg://u:p@host/db?sslmode=require"
+    assert s.redis_url == "rediss://default:x@host:6379" and s.internal_base_url == "https://sensortrace.example.app"
