@@ -55,9 +55,7 @@ def _padding(n: int, block: int, guard: int) -> tuple[int, int]:
     return before, extra - before
 
 
-def adaptive_wiener_noise(
-    coeff: NDArray[np.floating], noise_var: float
-) -> NDArray[np.floating]:
+def adaptive_wiener_noise(coeff: NDArray[np.floating], noise_var: float) -> NDArray[np.floating]:
     """Return the noise component of a coefficient array.
 
     Implements steps 2-3 of the module docstring. Works on any real array
@@ -96,9 +94,7 @@ def wavelet_noise_residual(
         raise ValueError("sigma0 must be positive")
     h, w = channel.shape
     if min(h, w) < MIN_SIDE:
-        raise ImageTooSmallError(
-            f"image side {min(h, w)} px is below the minimum of {MIN_SIDE} px"
-        )
+        raise ImageTooSmallError(f"image side {min(h, w)} px is below the minimum of {MIN_SIDE} px")
 
     block = 2**levels
     guard = block  # reflect at least one coarsest-level block on each side

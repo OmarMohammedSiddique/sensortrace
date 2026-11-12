@@ -27,3 +27,23 @@ dev = [
     "pytest-cov>=7.1.0",
     "ruff>=0.17.4",
 ]
+
+[project.scripts]
+sensortrace = "sensortrace_engine.cli:main"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501", "B008"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["slow: long-running tests", "reference: needs the independent reference implementation"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+check_untyped_defs = true

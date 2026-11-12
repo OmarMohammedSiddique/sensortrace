@@ -222,9 +222,7 @@ class FingerprintAccumulator:
     def finalize(self) -> Fingerprint:
         n = self.n_images
         if n < MIN_REFERENCE_IMAGES:
-            raise InsufficientReferenceError(
-                f"at least {MIN_REFERENCE_IMAGES} reference images are required, got {n}"
-            )
+            raise InsufficientReferenceError(f"at least {MIN_REFERENCE_IMAGES} reference images are required, got {n}")
         a, b = self._halves
         k = _finalize(a.rp + b.rp, a.nn + b.nn)
 

@@ -109,9 +109,7 @@ def sniff_format(data: bytes) -> str:
         return "jpeg"
     if data.startswith(PNG_MAGIC):
         return "png"
-    raise UnsupportedFormatError(
-        "file content is not a JPEG or PNG image (only these formats are supported)"
-    )
+    raise UnsupportedFormatError("file content is not a JPEG or PNG image (only these formats are supported)")
 
 
 def _jsonable(v: Any) -> Any:
@@ -236,9 +234,7 @@ def ingest_image(data: bytes, limits: IngestLimits = DEFAULT_LIMITS) -> Ingested
     if len(data) == 0:
         raise CorruptImageError("file is empty")
     if len(data) > limits.max_bytes:
-        raise ImageTooLargeError(
-            f"file is {len(data):,} bytes; the limit is {limits.max_bytes:,} bytes"
-        )
+        raise ImageTooLargeError(f"file is {len(data):,} bytes; the limit is {limits.max_bytes:,} bytes")
     fmt = sniff_format(data)
     digest = sha256_hex(data)
     notes: list[str] = []
@@ -247,7 +243,11 @@ def ingest_image(data: bytes, limits: IngestLimits = DEFAULT_LIMITS) -> Ingested
         with warnings.catch_warnings():
             warnings.simplefilter("error", Image.DecompressionBombWarning)
             img = Image.open(io.BytesIO(data), formats=["JPEG" if fmt == "jpeg" else "PNG"])
-    except (UnidentifiedImageError, Image.DecompressionBombError, Image.DecompressionBombWarning):
+    except (Image.DecompressionBombError, Image.DecompressionBombWarning):
+        raise ImageTooLargeError(
+            f"image pixel count exceeds the decoder safety limit (limit {limits.max_pixels:,} px)"
+        ) from None
+    except UnidentifiedImageError:
         raise CorruptImageError("file header could not be parsed as an image") from None
     except Exception as exc:
         raise CorruptImageError(f"file header could not be parsed: {type(exc).__name__}") from None
@@ -260,9 +260,7 @@ def ingest_image(data: bytes, limits: IngestLimits = DEFAULT_LIMITS) -> Ingested
             f"image is {width}x{height} px ({width * height:,} px); the limit is {limits.max_pixels:,} px"
         )
     if min(width, height) < limits.min_side:
-        raise ImageTooSmallError(
-            f"image is {width}x{height} px; the minimum side is {limits.min_side} px"
-        )
+        raise ImageTooSmallError(f"image is {width}x{height} px; the minimum side is {limits.min_side} px")
     if getattr(img, "n_frames", 1) > 1:
         notes.append("File contains multiple frames; only the first frame is analysed.")
 
@@ -276,9 +274,7 @@ def ingest_image(data: bytes, limits: IngestLimits = DEFAULT_LIMITS) -> Ingested
             luma = list(qt[0]) if 0 in qt else None
             metadata["JpegQualityEstimate"] = estimate_jpeg_quality(luma)
             metadata["JpegQuantHash"] = (
-                hashlib.sha256(
-                    b"".join(bytes(int(v) & 0xFF for v in qt[k]) for k in sorted(qt))
-                ).hexdigest()[:16]
+                hashlib.sha256(b"".join(bytes(int(v) & 0xFF for v in qt[k]) for k in sorted(qt))).hexdigest()[:16]
                 if qt
                 else None
             )
@@ -294,7 +290,8 @@ def ingest_image(data: bytes, limits: IngestLimits = DEFAULT_LIMITS) -> Ingested
             pixels = np.asarray(img)
         else:
             mode = img.mode
-            img.verify()  # structural/CRC check; consumes the file object
+            # Structural/CRC check on a fresh handle (verify must directly follow open).
+            Image.open(io.BytesIO(data), formats=["PNG"]).verify()
             arr = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
             if arr is None:
                 raise CorruptImageError("PNG pixel data could not be decoded")
@@ -317,9 +314,7 @@ def ingest_image(data: bytes, limits: IngestLimits = DEFAULT_LIMITS) -> Ingested
     except (CorruptImageError, UnsupportedFormatError):
         raise
     except (OSError, SyntaxError, ValueError, Image.DecompressionBombError) as exc:
-        raise CorruptImageError(
-            f"image data is corrupt or truncated ({type(exc).__name__})"
-        ) from None
+        raise CorruptImageError(f"image data is corrupt or truncated ({type(exc).__name__})") from None
 
     if pixels.shape[0] != height or pixels.shape[1] != width:
         raise CorruptImageError("decoded dimensions do not match the file header")

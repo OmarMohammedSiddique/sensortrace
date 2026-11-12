@@ -21,13 +21,22 @@ Design rules
   *non-match* conclusions, not match conclusions.
 * Each candidate is judged independently: nothing forces one of the enrolled
   sensors to be selected (open-set behaviour).
+* **Non-unique artefacts.** Published studies (Iuliani et al. 2021; Loison et
+  al. 2026) show that on many smartphones released since about 2018 the
+  statistic between *different devices of the same model* is routinely far
+  above any classical threshold. For a sensor whose pipeline is not declared
+  conventional, a high statistic therefore supports a match only when the
+  same-model alternative has been addressed: either the policy was calibrated
+  on that model with same-model negatives, or fingerprints of other physical
+  devices of the same model ("controls") were compared and stayed below the
+  threshold. Otherwise the outcome is ``inconclusive``.
 """
 
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
 from enum import StrEnum
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 from scipy.special import log_ndtr
@@ -119,20 +128,24 @@ class DecisionPolicy:
         return cls(**d)
 
 
-#: Default policy. Thresholds are literature conventions, NOT calibrated for the user's
-#: devices or conditions; see SCIENTIFIC_METHODOLOGY.md for the sources and caveats.
+DeviceClass = Literal["conventional", "computational", "unknown"]
+
+#: Default policy. The thresholds are reference lines from the literature, NOT calibrated
+#: error-rate operating points; see SCIENTIFIC_METHODOLOGY.md for sources and caveats.
 LITERATURE_DEFAULT_POLICY = DecisionPolicy(
-    policy_id="literature-default-uncalibrated",
+    policy_id="literature-reference-uncalibrated",
     match_threshold=60.0,
     non_match_threshold=10.0,
     calibrated=False,
     basis=(
-        "Match threshold PCE = 60 follows the convention of Goljan, Fridrich and Filler (2009), "
-        "who reported it for full-resolution images on a large-scale test. It has not been "
-        "calibrated for the devices, processing pipelines or image conditions in this case. "
-        "The non-match threshold of 10 is a conservative engineering choice within the range "
-        "expected for unrelated sensors under the idealised model; it is not a published or "
-        "validated figure."
+        "Uncalibrated reference lines. PCE = 60 is the convention of Goljan, Fridrich and Filler "
+        "(2009), observed on pre-2009 cameras at full resolution: no exceedance in about one "
+        "million different-model tests, overall false-alarm rate 2.4e-5 with 2.4% missed "
+        "detections. No error rate can be attached to it for other devices: later studies "
+        "measured false-match rates from 5% to over 60% at this value between same-model "
+        "smartphones. The non-match line of 10 is an engineering choice inside the range "
+        "expected for unrelated sensors under the idealised noise model; it is not a published "
+        "or validated figure."
     ),
 )
 
@@ -145,6 +158,8 @@ class Decision:
     reasons: list[str] = field(default_factory=list)
     caveats: list[str] = field(default_factory=list)
     policy: dict[str, Any] = field(default_factory=dict)
+    #: How the same-model (non-unique artefact) alternative was treated.
+    nua: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -154,22 +169,26 @@ class Decision:
             "reasons": self.reasons,
             "caveats": self.caveats,
             "policy": self.policy,
+            "nua": self.nua,
         }
 
 
 STANDARD_CAVEATS = [
-    "This result is a statistical indication, not proof of origin. It is not a probability "
-    "that the image came from the sensor.",
-    "The method links an image to an enrolled sensor fingerprint. It cannot identify an "
+    "This result is a statistical indication, not proof of origin, and not a probability that "
+    "the image came from the sensor.",
+    "The method tests an image against an enrolled sensor fingerprint. It cannot identify an "
     "unknown camera from a single image.",
 ]
 
-SMARTPHONE_CAVEAT = (
+NON_MATCH_CAVEAT = (
+    "A low statistic does not exclude the sensor. Zoom, stabilisation, multi-frame processing, "
+    "editing, resizing and dark or saturated content can all hide a true match."
+)
+
+COMPUTATIONAL_CAVEAT = (
     "Modern smartphones apply computational processing (multi-frame fusion, HDR, lens "
-    "correction, stabilisation) that can weaken the sensor pattern or introduce artefacts "
-    "shared by different phones of the same model. Published studies report elevated false "
-    "matches between same-model devices for some recent phones; a match to a smartphone "
-    "sensor should be corroborated against other devices of the same model where possible."
+    "correction, synthetic blur) that can weaken the sensor pattern and add artefacts shared by "
+    "different phones of the same model and software version."
 )
 
 
@@ -179,31 +198,42 @@ def decide(
     policy: DecisionPolicy = LITERATURE_DEFAULT_POLICY,
     quality: QualityReport | None = None,
     fingerprint_diagnostics: dict[str, Any] | None = None,
-    smartphone: bool | None = None,
+    device_class: DeviceClass = "unknown",
+    model_key: str | None = None,
+    control_pces: list[float] | None = None,
+    n_candidates: int = 1,
 ) -> Decision:
-    """Apply ``policy`` to one measurement."""
+    """Apply ``policy`` to one measurement.
+
+    ``control_pces`` are the statistics obtained for the same questioned image
+    against fingerprints of *other physical devices of the same model*.
+    ``n_candidates`` is the number of sensors searched for this image; the
+    statistic is adjusted for that many additional trials.
+    """
     pol = policy.to_dict()
     caveats = list(STANDARD_CAVEATS)
     if not policy.calibrated:
         caveats.append(
-            "Thresholds are literature conventions and have not been calibrated on validation "
-            "data representative of this device and these image conditions."
+            "Thresholds are uncalibrated reference lines from the literature. No false-match or "
+            "missed-match rate is available for this device and these image conditions."
         )
-    if smartphone is None or smartphone:
-        caveats.append(SMARTPHONE_CAVEAT)
+    if device_class != "conventional":
+        caveats.append(COMPUTATIONAL_CAVEAT)
+    nua: dict[str, Any] = {"device_class": device_class, "model_key": model_key, "mitigation": "not_applicable"}
 
     def out(verdict: Verdict, eff: float | None, reasons: list[str]) -> Decision:
-        return Decision(verdict, VERDICT_LABELS[verdict], eff, reasons, caveats, pol)
+        return Decision(verdict, VERDICT_LABELS[verdict], eff, reasons, caveats, pol, nua)
 
     if measurement.geometry == "unsupported" or measurement.pce is None:
         return out(Verdict.UNSUITABLE, None, list(measurement.notes) or ["No valid test could be performed."])
 
-    eff = effective_pce(measurement.pce, measurement.search_size)
+    trials = measurement.search_size * max(int(n_candidates), 1)
+    eff = effective_pce(measurement.pce, trials)
     reasons: list[str] = []
-    if measurement.search_size > 1:
+    if trials > 1:
         reasons.append(
-            f"{measurement.search_size:,} alignments were tested; the statistic was adjusted from "
-            f"PCE {measurement.pce:.1f} to an equivalent single-test value of {eff:.1f}."
+            f"{trials:,} hypotheses were tested (alignments x candidate sensors); the statistic was "
+            f"adjusted from PCE {measurement.pce:.1f} to an equivalent single-test value of {eff:.1f}."
         )
     if measurement.geometry == "cropped":
         caveats.append(
@@ -212,10 +242,46 @@ def decide(
         )
 
     if eff >= policy.match_threshold:
+        reasons.append(f"Statistic {eff:.1f} is at or above the match threshold of {policy.match_threshold:g}.")
+        if device_class == "conventional":
+            nua["mitigation"] = "declared_conventional"
+            return out(Verdict.MATCH, eff, reasons)
+        scope = (policy.calibration or {}).get("model_keys") or []
+        if policy.calibrated and model_key and model_key in scope:
+            nua["mitigation"] = "calibrated_for_model"
+            reasons.append("The policy was calibrated with same-model negatives for this device model.")
+            return out(Verdict.MATCH, eff, reasons)
+        controls = [effective_pce(c, trials) for c in (control_pces or [])]
+        if controls:
+            nua.update(n_controls=len(controls), max_control=max(controls))
+            if max(controls) < policy.match_threshold:
+                nua["mitigation"] = "same_model_controls"
+                reasons.append(
+                    f"{len(controls)} control device(s) of the same model were tested against this "
+                    f"image and stayed below the threshold (highest {max(controls):.1f})."
+                )
+                caveats.append(
+                    f"Support relative to {len(controls)} same-model control device(s) is experimental. "
+                    "A small control set cannot rule out artefacts shared with other units, "
+                    "production batches or software versions."
+                )
+                return out(Verdict.MATCH, eff, reasons)
+            nua["mitigation"] = "controls_failed"
+            reasons.append(
+                f"A control device of the same model also exceeds the threshold (highest "
+                f"{max(controls):.1f}). The high statistic is at least partly due to artefacts shared "
+                "by this model, so it does not single out one device."
+            )
+            return out(Verdict.INCONCLUSIVE, eff, reasons)
+        nua["mitigation"] = "none"
         reasons.append(
-            f"Statistic {eff:.1f} is at or above the match threshold of {policy.match_threshold:g}."
+            "The sensor's processing pipeline is not declared conventional, and on many recent "
+            "smartphones different devices of the same model also produce high statistics. "
+            "Without same-model control fingerprints or a calibration for this model, a match "
+            "to this individual device cannot be supported. Enrol one or more other devices of "
+            "the same model as controls and compare again."
         )
-        return out(Verdict.MATCH, eff, reasons)
+        return out(Verdict.INCONCLUSIVE, eff, reasons)
 
     severe = [f for f in (quality.flags if quality else []) if f.severity == "severe"]
     if measurement.valid_pixels < policy.min_valid_pixels:
@@ -231,7 +297,6 @@ def decide(
         )
         return out(Verdict.UNSUITABLE, eff, reasons)
 
-    blockers: list[str] = []
     if eff > policy.non_match_threshold:
         reasons.append(
             f"Statistic {eff:.1f} lies between the non-match threshold ({policy.non_match_threshold:g}) "
@@ -239,12 +304,13 @@ def decide(
         )
         return out(Verdict.INCONCLUSIVE, eff, reasons)
 
+    blockers: list[str] = []
     if measurement.geometry == "cropped":
         blockers.append("the image is a crop, for which non-match conclusions are not supported")
     if quality is not None:
         for f in quality.flags:
             if f.code in _BLOCK_NON_MATCH:
-                blockers.append(f.message)
+                blockers.append(f.message.rstrip("."))
     diag = fingerprint_diagnostics or {}
     n_ref = int(diag.get("n_images", 0))
     if n_ref < policy.min_reference_images_for_non_match:
@@ -266,6 +332,7 @@ def decide(
         )
         return out(Verdict.INCONCLUSIVE, eff, reasons)
 
+    caveats.append(NON_MATCH_CAVEAT)
     reasons.append(
         f"Statistic {eff:.1f} is at or below the non-match threshold of {policy.non_match_threshold:g}, "
         "the image is at native resolution with no detected conditions that would hide the "
