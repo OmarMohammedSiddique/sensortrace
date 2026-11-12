@@ -18,7 +18,8 @@ def audit(db: Session, user_id: uuid.UUID | None, action: str, *, entity_type: s
             entity_type=entity_type,
             entity_id=str(entity_id) if entity_id else "",
             investigation_id=investigation_id,
-            ip=ip,
+            # The authentication dependency stores the request's source address on the session.
+            ip=ip or db.info.get("client_ip"),
             details=details,
         )
     )

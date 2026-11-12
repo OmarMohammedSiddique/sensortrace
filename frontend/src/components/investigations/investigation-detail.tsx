@@ -50,7 +50,7 @@ function DetailsEditor({ investigation, onDone }: { investigation: Investigation
   const invalid = title.trim() === "";
 
   return (
-    <form
+    <form method="post"
       className="mb-6 grid gap-3 rounded-lg bg-card p-4 ring-1 ring-foreground/10 sm:mb-8 sm:grid-cols-[2fr_1fr]"
       onSubmit={(e) => {
         e.preventDefault();
@@ -166,7 +166,7 @@ function RetentionControl({ investigation }: { investigation: Investigation }) {
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80">
-        <form
+        <form method="post"
           className="grid gap-3"
           onSubmit={(e) => {
             e.preventDefault();

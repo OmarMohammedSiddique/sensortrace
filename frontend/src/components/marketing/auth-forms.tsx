@@ -111,7 +111,7 @@ export function SignInForm() {
       }
     >
       <Form {...form}>
-        <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
+        <form method="post" onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
           <FormError message={formError} />
           <FormField
             control={form.control}
@@ -221,7 +221,7 @@ export function RegisterForm() {
       footer={signInLink}
     >
       <Form {...form}>
-        <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
+        <form method="post" onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
           <FormError message={formError} />
           <FormField
             control={form.control}

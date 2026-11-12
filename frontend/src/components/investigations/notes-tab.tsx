@@ -27,7 +27,7 @@ export function NotesTab({ investigationId }: { investigationId: string }) {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-      <form
+      <form method="post"
         className="flex flex-col gap-2 self-start rounded-lg bg-card p-4 ring-1 ring-foreground/10"
         onSubmit={(e) => {
           e.preventDefault();

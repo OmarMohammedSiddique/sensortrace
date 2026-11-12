@@ -99,7 +99,7 @@ function Body({ investigation, onOpenChange, onCreated }: Omit<InvestigationForm
 
   return (
     <Form {...form}>
-      <form onSubmit={onSubmit} noValidate className="grid gap-4">
+      <form method="post" onSubmit={onSubmit} noValidate className="grid gap-4">
         <DialogHeader>
           <DialogTitle>{editing ? "Edit investigation" : "New investigation"}</DialogTitle>
           <DialogDescription>

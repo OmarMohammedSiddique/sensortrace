@@ -55,7 +55,7 @@ function PasswordForm() {
   return (
     <Panel title="Password" icon={Lock}>
       <Form {...form}>
-        <form onSubmit={onSubmit} noValidate className="grid max-w-md gap-4">
+        <form method="post" onSubmit={onSubmit} noValidate className="grid max-w-md gap-4">
           <p className="text-sm leading-relaxed text-muted-foreground">
             Changing your password signs out every other session, so a session opened on another device does not
             survive the change. This browser stays signed in. API tokens keep working until you revoke them.
@@ -266,7 +266,7 @@ function CreateTokenBody({ onClose }: { onClose: () => void }) {
 
   return (
     <Form {...form}>
-      <form onSubmit={onSubmit} noValidate className="grid gap-4">
+      <form method="post" onSubmit={onSubmit} noValidate className="grid gap-4">
         <DialogHeader>
           <DialogTitle>Create an API token</DialogTitle>
           <DialogDescription>

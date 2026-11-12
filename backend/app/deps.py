@@ -112,6 +112,7 @@ def _authenticate(request: Request, db: Session, s: Settings) -> Auth | None:
 
 def get_auth(request: Request, db: Annotated[Session, Depends(get_db)]) -> Auth:
     s = get_settings()
+    db.info["client_ip"] = client_ip(request)
     auth = _authenticate(request, db, s)
     if auth is None:
         raise ApiError(401, "not_authenticated", "Authentication is required.")

@@ -41,7 +41,7 @@ function ProfileForm() {
   return (
     <Panel title="Profile" icon={UserRound}>
       <Form {...form}>
-        <form onSubmit={onSubmit} noValidate className="grid max-w-xl gap-4">
+        <form method="post" onSubmit={onSubmit} noValidate className="grid max-w-xl gap-4">
           <FormError message={formError} />
           <FormField
             control={form.control}
@@ -126,7 +126,7 @@ function RetentionForm() {
   return (
     <Panel title="Default retention for new investigations" icon={CalendarClock}>
       <Form {...form}>
-        <form onSubmit={onSubmit} noValidate className="grid max-w-xl gap-4">
+        <form method="post" onSubmit={onSubmit} noValidate className="grid max-w-xl gap-4">
           <FormError message={formError} />
           <FormField
             control={form.control}

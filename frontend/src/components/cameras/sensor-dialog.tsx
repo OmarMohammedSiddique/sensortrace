@@ -143,7 +143,7 @@ function AddSensorForm({
   });
   return (
     <Form {...form}>
-      <form onSubmit={onSubmit} noValidate className="grid gap-5">
+      <form method="post" onSubmit={onSubmit} noValidate className="grid gap-5">
         <DialogHeader>
           <DialogTitle>Add a sensor</DialogTitle>
           <DialogDescription>A sensor is one imaging chip behind one lens, used in one capture configuration.</DialogDescription>
@@ -207,7 +207,7 @@ function EditSensorForm({ sensor, onDone }: { sensor: Sensor; onDone: () => void
   });
   return (
     <Form {...form}>
-      <form onSubmit={onSubmit} noValidate className="grid gap-5">
+      <form method="post" onSubmit={onSubmit} noValidate className="grid gap-5">
         <DialogHeader>
           <DialogTitle>Edit sensor</DialogTitle>
           <DialogDescription>

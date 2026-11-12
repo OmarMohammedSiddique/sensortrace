@@ -56,7 +56,7 @@ function SaveToInvestigation({ analysis }: { analysis: AnalysisDetail }) {
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80">
-        <form
+        <form method="post"
           className="grid gap-3"
           onSubmit={(e) => {
             e.preventDefault();

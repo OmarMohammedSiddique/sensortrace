@@ -287,7 +287,7 @@ function RegisterCameraForm({
   });
   return (
     <Form {...form}>
-      <form onSubmit={onSubmit} noValidate className="grid gap-5">
+      <form method="post" onSubmit={onSubmit} noValidate className="grid gap-5">
         <DialogHeader>
           <DialogTitle>Register a camera</DialogTitle>
           <DialogDescription>
@@ -329,7 +329,7 @@ export function EditCameraForm({ device, onDone }: { device: Device; onDone: () 
   });
   return (
     <Form {...form}>
-      <form onSubmit={onSubmit} noValidate className="grid gap-5" aria-label="Edit camera details">
+      <form method="post" onSubmit={onSubmit} noValidate className="grid gap-5" aria-label="Edit camera details">
         <p className="text-xs leading-relaxed text-muted-foreground">
           Changing the make, model or image pipeline affects how future comparisons against this camera are
           interpreted. Completed analyses keep the details they were run with.

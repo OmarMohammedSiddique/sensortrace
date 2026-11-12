@@ -93,7 +93,7 @@ function AcquisitionEditor({ evidence }: { evidence: Evidence }) {
     );
   }
   return (
-    <form
+    <form method="post"
       className="pt-3"
       onSubmit={(e) => {
         e.preventDefault();

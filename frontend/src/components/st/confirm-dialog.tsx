@@ -84,7 +84,7 @@ function ConfirmBody({
   };
 
   return (
-    <form
+    <form method="post"
       className="contents"
       onSubmit={(e) => {
         e.preventDefault();
