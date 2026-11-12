@@ -46,14 +46,30 @@ export interface MetricCardProps extends StatProps {
   href?: string;
 }
 
-/** Bordered metric tile for dashboard rows. Wrap a group of them in a `<dl>`. */
+/**
+ * Bordered metric tile for dashboard rows. Wrap a group of them in a `<dl>`.
+ * With `href` the label is the link and its hit area is stretched over the whole tile, so the
+ * `<dt>`/`<dd>` pair stays a valid direct child group of the list (a wrapping `<a>` is not).
+ */
 export function MetricCard({ label, value, unit, hint, mono, loading, icon: Icon, href, className }: MetricCardProps) {
-  const body = (
-    <>
-      <div className="flex items-center justify-between gap-2">
-        <dt className="eyebrow">{label}</dt>
+  return (
+    <div
+      className={cn(
+        "relative block rounded-lg bg-card p-4 ring-1 ring-foreground/10",
+        href && "transition-colors hover:bg-accent/60 has-focus-visible:outline-2",
+        className,
+      )}
+    >
+      <dt className="eyebrow flex items-center justify-between gap-2">
+        {href ? (
+          <Link href={href} className="outline-none after:absolute after:inset-0 after:rounded-lg">
+            {label}
+          </Link>
+        ) : (
+          label
+        )}
         {Icon ? <Icon aria-hidden="true" className="size-3.5 text-muted-foreground/70" /> : null}
-      </div>
+      </dt>
       <dd className="mt-2">
         {loading ? (
           <Skeleton className="h-8 w-16" />
@@ -65,18 +81,6 @@ export function MetricCard({ label, value, unit, hint, mono, loading, icon: Icon
         )}
         {hint ? <span className="mt-1 block text-xs text-muted-foreground">{hint}</span> : null}
       </dd>
-    </>
-  );
-  const classes = cn(
-    "relative block rounded-lg bg-card p-4 ring-1 ring-foreground/10",
-    href && "transition-colors hover:bg-accent/60 focus-visible:outline-2",
-    className,
-  );
-  return href ? (
-    <Link href={href} className={classes}>
-      {body}
-    </Link>
-  ) : (
-    <div className={classes}>{body}</div>
+    </div>
   );
 }

@@ -264,8 +264,8 @@ export function CandidateDetail({ candidate, analysisPolicy, candidateCount }: {
       {/* Fingerprint snapshot */}
       <section>
         <SubHeading>Reference fingerprint used (snapshot at the time of comparison)</SubHeading>
-        <dl className="grid gap-x-8 sm:grid-cols-2">
-          <div className="divide-y">
+        <div className="grid gap-x-8 sm:grid-cols-2">
+          <dl className="divide-y">
             <Snap label="Device">
               <span className="flex flex-wrap items-center gap-2">
                 {snapshot.device_name ?? "-"} <DemoBadge when={snapshot.is_demo} />
@@ -290,8 +290,8 @@ export function CandidateDetail({ candidate, analysisPolicy, candidateCount }: {
               {snapshot.firmware || "-"}
             </Snap>
             <Snap label="Pipeline class">{PIPELINE_LABELS[snapshot.pipeline_class ?? ""] ?? humanize(snapshot.pipeline_class) ?? "-"}</Snap>
-          </div>
-          <div className="divide-y border-t sm:border-t-0">
+          </dl>
+          <dl className="divide-y border-t sm:border-t-0">
             <Snap label="Fingerprint version" mono>
               {snapshot.fingerprint_version !== undefined ? `v${snapshot.fingerprint_version}` : "-"}
             </Snap>
@@ -308,8 +308,8 @@ export function CandidateDetail({ candidate, analysisPolicy, candidateCount }: {
             <Snap label="Algorithm version" mono>
               {snapshot.algorithm_version ?? "-"}
             </Snap>
-          </div>
-        </dl>
+          </dl>
+        </div>
         <p className="mt-2 max-w-prose text-xs leading-relaxed text-muted-foreground">
           Split-half PCE is the fingerprint&apos;s internal consistency: the reference images are split in two halves, a fingerprint is estimated from
           each, and the two are compared. A high value means the reference set carries a stable sensor pattern.

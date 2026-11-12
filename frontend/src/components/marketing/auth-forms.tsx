@@ -55,16 +55,21 @@ function applyApiError<T extends FieldValues>(err: unknown, setError: UseFormSet
   return errorMessage(err);
 }
 
-/** Where to go after authenticating, and a redirect away if a session already exists. */
+/**
+ * Where to go after authenticating, and a redirect away if a session already exists.
+ * A form that is submitting calls `setSubmitting(true)` first: it chooses its own destination, and
+ * this effect (which runs after the form's own navigation) must not replace it with `next`.
+ */
 function useAuthRedirect() {
   const router = useRouter();
   const params = useSearchParams();
   const { status } = useAuth();
   const next = safeNextPath(params.get("next"));
+  const [submitting, setSubmitting] = useState(false);
   useEffect(() => {
-    if (status === "authenticated") router.replace(next);
-  }, [status, next, router]);
-  return { next, rawNext: params.get("next"), router, status };
+    if (status === "authenticated" && !submitting) router.replace(next);
+  }, [status, next, router, submitting]);
+  return { next, rawNext: params.get("next"), router, status, setSubmitting };
 }
 
 /* ------------------------------------------------------------------ sign in */
@@ -77,17 +82,19 @@ type SignInValues = z.infer<typeof signInSchema>;
 
 export function SignInForm() {
   const { signIn } = useAuth();
-  const { next, rawNext, router } = useAuthRedirect();
+  const { next, rawNext, router, setSubmitting } = useAuthRedirect();
   const meta = useMeta();
   const [formError, setFormError] = useState<string | null>(null);
   const form = useForm<SignInValues>({ resolver: zodResolver(signInSchema), defaultValues: { email: "", password: "" } });
 
   const onSubmit = form.handleSubmit(async (values) => {
     setFormError(null);
+    setSubmitting(true);
     try {
       await signIn(values);
       router.replace(next);
     } catch (err) {
+      setSubmitting(false);
       setFormError(applyApiError(err, form.setError, ["email", "password"]));
     }
   });
@@ -163,7 +170,7 @@ type RegisterValues = z.infer<typeof registerSchema>;
 
 export function RegisterForm() {
   const { register } = useAuth();
-  const { next, rawNext, router } = useAuthRedirect();
+  const { next, rawNext, router, setSubmitting } = useAuthRedirect();
   const meta = useMeta();
   const [formError, setFormError] = useState<string | null>(null);
   const form = useForm<RegisterValues>({
@@ -173,10 +180,12 @@ export function RegisterForm() {
 
   const onSubmit = form.handleSubmit(async (values) => {
     setFormError(null);
+    setSubmitting(true);
     try {
       const user = await register(values);
       router.replace(rawNext ? next : user.onboarding_completed ? "/app" : "/app/onboarding");
     } catch (err) {
+      setSubmitting(false);
       setFormError(applyApiError(err, form.setError, ["display_name", "email", "password"]));
     }
   });

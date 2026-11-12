@@ -99,6 +99,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Start the complete stack
+        # The suite registers many accounts from one address; relax the sign-in rate limit for it.
+        env:
+          ST_RATE_AUTH_PER_15MIN: "1000"
+          # Hosted runners have 2 CPUs and about 7 GB of memory.
+          WORKER_CPUS: "2"
+          WORKER_MEM_LIMIT: 4g
         run: docker compose --profile app up --build -d --wait --wait-timeout 600
       - uses: actions/setup-node@v4
         with:

@@ -15,9 +15,12 @@ x-app-env: &app-env
   ST_COOKIE_SECURE: ${ST_COOKIE_SECURE:-false}
   ST_ALLOW_REGISTRATION: ${ST_ALLOW_REGISTRATION:-true}
   ST_WORKER_MEMORY_LIMIT_MB: ${ST_WORKER_MEMORY_LIMIT_MB:-0}
-  # The API is reached only through the web application's proxy; see SECURITY.md before changing.
-  ST_TRUST_FORWARDED_FOR: ${ST_TRUST_FORWARDED_FOR:-true}
+  # Off by default: every browser then shares one rate-limit bucket (the web proxy's address),
+  # which cannot be spoofed. Turn on only behind a reverse proxy that overwrites X-Forwarded-For.
+  ST_TRUST_FORWARDED_FOR: ${ST_TRUST_FORWARDED_FOR:-false}
   SENSORTRACE_FFT_WORKERS: ${WORKER_CPUS:-4}
+  # Sign-in and registration attempts allowed per source address and per account in 15 minutes.
+  ST_RATE_AUTH_PER_15MIN: ${ST_RATE_AUTH_PER_15MIN:-60}
 
 services:
   db:

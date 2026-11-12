@@ -530,8 +530,8 @@ function Completed({ analysis, onExpired }: { analysis: AnalysisDetail; onExpire
         </Panel>
 
         <Panel title="Reproducibility" icon={FileText}>
-          <dl className="grid gap-x-8 md:grid-cols-2">
-            <div className="divide-y">
+          <div className="grid gap-x-8 md:grid-cols-2">
+            <dl className="divide-y">
               <Field label="Analysis id" mono>
                 {analysis.id}
               </Field>
@@ -550,15 +550,15 @@ function Completed({ analysis, onExpired }: { analysis: AnalysisDetail; onExpire
               <Field label="Policy version" mono>
                 {analysis.policy.version ?? "-"}
               </Field>
-            </div>
-            <div className="divide-y border-t md:border-t-0">
+            </dl>
+            <dl className="divide-y border-t md:border-t-0">
               {libraries.map(([name, version]) => (
                 <Field key={name} label={name} mono>
                   {String(version)}
                 </Field>
               ))}
-            </div>
-          </dl>
+            </dl>
+          </div>
           <p className="mt-3 max-w-prose text-xs leading-relaxed text-muted-foreground">
             The same image bytes (see the SHA-256 above), the same fingerprint versions (digests are in each candidate&apos;s details) and the same
             software versions give the same numbers.

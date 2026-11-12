@@ -28,12 +28,15 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label={`Account menu for ${name}`} className="rounded-full">
+        {/* Named by its content: the visible initials followed by a visually hidden description, so the
+            accessible name contains the visible text (WCAG 2.5.3 Label in Name). */}
+        <Button variant="ghost" size="icon" className="rounded-full">
           <Avatar className="size-7">
             <AvatarFallback className="bg-brand-subtle text-[0.6875rem] font-medium text-brand">
               {initials(user.display_name, user.email)}
             </AvatarFallback>
           </Avatar>
+          <span className="sr-only">Account menu for {name}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-60">

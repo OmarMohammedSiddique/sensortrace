@@ -14,7 +14,9 @@ COPY backend/alembic.ini /srv/backend/alembic.ini
 COPY backend/policies /srv/backend/policies
 
 FROM python:3.12-slim
-RUN useradd --system --uid 10001 --no-create-home app
+# Apply pending security updates to the base image's system packages.
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/* \
+    && useradd --system --uid 10001 --no-create-home app
 ENV PATH=/srv/backend/.venv/bin:$PATH PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 \
     MPLCONFIGDIR=/tmp OMP_NUM_THREADS=2
 COPY --from=build /srv/backend /srv/backend

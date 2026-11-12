@@ -130,8 +130,11 @@ are part of CI or the release checklist. Results at the time of writing are in P
 1. Serve the application over HTTPS behind a reverse proxy; set `ST_COOKIE_SECURE=true` and a random
    `ST_SECRET_KEY`.
 2. Change every default credential in `.env` (database, object store).
-3. Have the reverse proxy overwrite `X-Forwarded-For`; only then keep `ST_TRUST_FORWARDED_FOR=true`.
-   Per-IP rate limits are meaningless otherwise.
+3. `ST_TRUST_FORWARDED_FOR` is off by default, so all browsers share one per-address rate-limit
+   bucket (the web proxy's address) and the per-account limit does the real work. Turn it on only
+   behind a reverse proxy that overwrites `X-Forwarded-For`: the web application passes a
+   client-supplied header through, so trusting it without such a proxy lets a client evade the
+   per-address limit (verified in testing).
 4. Set `ST_ALLOW_REGISTRATION=false` once the intended accounts exist.
 5. Encrypt the database and object-store volumes at rest and back them up; restrict who can read them.
 6. Keep images and dependencies patched; run the CI security job.
