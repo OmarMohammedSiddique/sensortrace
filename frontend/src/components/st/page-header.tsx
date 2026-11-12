@@ -58,11 +58,11 @@ export function PageHeader({ title, description, actions, breadcrumb, badges, ey
           </BreadcrumbList>
         </Breadcrumb>
       ) : null}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div className="min-w-0">
           {eyebrow ? <p className="eyebrow mb-1.5">{eyebrow}</p> : null}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-            <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{title}</h1>
+            <h1 className="min-w-0 text-xl font-semibold tracking-tight [overflow-wrap:anywhere] sm:text-2xl">{title}</h1>
             {badges}
           </div>
           {description ? (
