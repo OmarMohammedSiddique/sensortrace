@@ -1,6 +1,8 @@
 # SensorTrace
 
-Camera sensor fingerprinting and image source comparison.
+[![CI](https://github.com/OmarMohammedSiddique/sensortrace/actions/workflows/ci.yml/badge.svg)](https://github.com/OmarMohammedSiddique/sensortrace/actions/workflows/ci.yml)
+
+Camera sensor fingerprinting and image source comparison. Hosted instance: https://sensortrace.vercel.app
 
 SensorTrace tests whether a photograph is consistent with the noise fingerprint of a specific physical
 camera sensor. It uses photo-response non-uniformity (PRNU): tiny, fixed pixel-to-pixel differences in
