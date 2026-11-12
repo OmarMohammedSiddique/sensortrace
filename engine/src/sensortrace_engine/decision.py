@@ -112,7 +112,9 @@ class DecisionPolicy:
     calibrated: bool
     basis: str
     calibration: dict[str, Any] | None = None
-    #: Minimum unsaturated pixels for any conclusion.
+    #: Minimum unsaturated pixels for a conclusion drawn from a statistic below the match
+    #: threshold (non-match or inconclusive). A statistic at or above the match threshold is
+    #: not gated by pixel count: see "quality gates" in the module docstring.
     min_valid_pixels: int = 250_000
     #: Minimum reference images behind a fingerprint for a non-match conclusion.
     min_reference_images_for_non_match: int = 20
@@ -226,6 +228,14 @@ def decide(
 
     if measurement.geometry == "unsupported" or measurement.pce is None:
         return out(Verdict.UNSUITABLE, None, list(measurement.notes) or ["No valid test could be performed."])
+    if not np.isfinite(measurement.pce):
+        # A NaN compares False with every threshold and would otherwise fall through to
+        # "non-match supported"; an infinite value would be read as a match.
+        return out(
+            Verdict.UNSUITABLE,
+            None,
+            ["The statistic is not a finite number, so the computation is invalid. No conclusion is drawn."],
+        )
 
     trials = measurement.search_size * max(int(n_candidates), 1)
     eff = effective_pce(measurement.pce, trials)
@@ -251,26 +261,37 @@ def decide(
             nua["mitigation"] = "calibrated_for_model"
             reasons.append("The policy was calibrated with same-model negatives for this device model.")
             return out(Verdict.MATCH, eff, reasons)
-        controls = [effective_pce(c, trials) for c in (control_pces or [])]
+        # Controls are compared unadjusted. The multiple-testing adjustment exists to make a
+        # match harder to claim; applied to a control it would lower a high control statistic
+        # and make the same-model alternative easier to dismiss as more sensors are searched.
+        controls = [float(c) for c in (control_pces or [])]
         if controls:
-            nua.update(n_controls=len(controls), max_control=max(controls))
-            if max(controls) < policy.match_threshold:
+            finite = [c for c in controls if np.isfinite(c)]
+            # A control whose statistic is not finite was not validly tested: it counts as failed.
+            worst = max(finite) if len(finite) == len(controls) else float("inf")
+            nua.update(n_controls=len(controls), max_control=worst)
+            if worst < policy.match_threshold:
                 nua["mitigation"] = "same_model_controls"
                 reasons.append(
-                    f"{len(controls)} control device(s) of the same model were tested against this "
-                    f"image and stayed below the threshold (highest {max(controls):.1f})."
+                    f"{nua['n_controls']} control device(s) of the same model were tested against this "
+                    f"image and stayed below the threshold (highest {worst:.1f}, unadjusted)."
                 )
                 caveats.append(
-                    f"Support relative to {len(controls)} same-model control device(s) is experimental. "
+                    f"Support relative to {nua['n_controls']} same-model control device(s) is experimental. "
                     "A small control set cannot rule out artefacts shared with other units, "
                     "production batches or software versions."
                 )
                 return out(Verdict.MATCH, eff, reasons)
             nua["mitigation"] = "controls_failed"
             reasons.append(
-                f"A control device of the same model also exceeds the threshold (highest "
-                f"{max(controls):.1f}). The high statistic is at least partly due to artefacts shared "
-                "by this model, so it does not single out one device."
+                (
+                    f"A control device of the same model also reaches the threshold (highest {worst:.1f}, "
+                    "unadjusted). The high statistic is at least partly due to artefacts shared "
+                    "by this model, so it does not single out one device."
+                )
+                if np.isfinite(worst)
+                else "A control device of the same model did not yield a valid statistic, so the "
+                "same-model alternative is not addressed."
             )
             return out(Verdict.INCONCLUSIVE, eff, reasons)
         nua["mitigation"] = "none"
@@ -297,14 +318,33 @@ def decide(
         )
         return out(Verdict.UNSUITABLE, eff, reasons)
 
-    if eff > policy.non_match_threshold:
+    # The non-match line is applied to the unadjusted statistic. The adjustment for the number of
+    # hypotheses only lowers the value: it guards a match claim against chance peaks, and must not
+    # turn an intermediate statistic into support for a non-match merely because more alignments
+    # or candidate sensors were searched.
+    raw = float(measurement.pce)
+    if raw > policy.non_match_threshold:
         reasons.append(
-            f"Statistic {eff:.1f} lies between the non-match threshold ({policy.non_match_threshold:g}) "
-            f"and the match threshold ({policy.match_threshold:g})."
+            f"The statistic (unadjusted {raw:.1f}, adjusted {eff:.1f}) lies between the non-match "
+            f"threshold ({policy.non_match_threshold:g}, applied to the unadjusted value) and the match "
+            f"threshold ({policy.match_threshold:g}, applied to the adjusted value)."
         )
         return out(Verdict.INCONCLUSIVE, eff, reasons)
 
     blockers: list[str] = []
+    lowest = min([raw, *(v for v in measurement.tested.values() if np.isfinite(v))])
+    if lowest <= -policy.match_threshold:
+        blockers.append(
+            f"a strongly negative statistic ({lowest:.1f}) was measured, which is expected neither for "
+            "an unrelated sensor nor for an unaltered image of this sensor (it can arise from "
+            "intensity inversion or other processing)"
+        )
+    if device_class != "conventional":
+        blockers.append(
+            "the sensor is not declared to have a conventional processing pipeline, and on recent smartphones a "
+            "substantial share of genuine images carry no detectable sensor pattern (48 of 360 same-device images "
+            "from twelve 2017-2021 phones in the project's evaluation met every other condition for a non-match)"
+        )
     if measurement.geometry == "cropped":
         blockers.append("the image is a crop, for which non-match conclusions are not supported")
     if quality is not None:
@@ -327,14 +367,14 @@ def decide(
         )
     if blockers:
         reasons.append(
-            f"Statistic {eff:.1f} is at or below the non-match threshold, but a low value cannot "
+            f"Statistic {raw:.1f} is at or below the non-match threshold, but a low value cannot "
             "be read as evidence of a different source because: " + "; ".join(blockers) + "."
         )
         return out(Verdict.INCONCLUSIVE, eff, reasons)
 
     caveats.append(NON_MATCH_CAVEAT)
     reasons.append(
-        f"Statistic {eff:.1f} is at or below the non-match threshold of {policy.non_match_threshold:g}, "
+        f"Statistic {raw:.1f} (unadjusted) is at or below the non-match threshold of {policy.non_match_threshold:g}, "
         "the image is at native resolution with no detected conditions that would hide the "
         "sensor pattern, and the fingerprint meets the quality requirements."
     )

@@ -1,0 +1,401 @@
+{
+  "dataset": {
+    "name": "floreview-subset-v1",
+    "attribution": "FloreView dataset (Baracchi, Shullani, Iuliani, Piva, IEEE Access, 2023). (c) CSP Lab, University of Florence. CC BY-SA 4.0."
+  },
+  "engine": {
+    "algorithm_version": "prnu-wavelet-mle-1.0",
+    "engine_version": "0.1.0",
+    "libraries": {
+      "python": "3.12.16",
+      "numpy": "2.5.4",
+      "scipy": "1.18.1",
+      "PyWavelets": "1.10.0",
+      "pillow": "13.0.0",
+      "opencv-python-headless": "5.0.0.93"
+    }
+  },
+  "protocol": {
+    "target_fpr": 0.01,
+    "target_fnr": 0.01,
+    "reference_line": 60.0,
+    "statistic": "effective signed PCE (adjusted for the alignments searched)",
+    "devices": {
+      "calibration": [],
+      "test": [
+        "D02",
+        "D04",
+        "D10",
+        "D14",
+        "D17",
+        "D19",
+        "D23",
+        "D25",
+        "D30",
+        "D34",
+        "D37",
+        "D43"
+      ]
+    },
+    "models": {
+      "calibration": [],
+      "test": [
+        "apple iphone 12",
+        "apple iphone 13 mini",
+        "apple iphone x",
+        "google pixel 3a",
+        "google pixel 5",
+        "oneplus 8t",
+        "samsung galaxy s10+",
+        "samsung galaxy s20+",
+        "samsung galaxy s21+",
+        "xiaomi redmi note 8t"
+      ]
+    }
+  },
+  "calibration": {
+    "n_same": 0,
+    "n_same_model_diff": 0,
+    "n_different_model_diff": 0,
+    "match_threshold_pooled_negatives": null,
+    "match_threshold_same_model_negatives": null,
+    "match_threshold_selected": null,
+    "non_match_threshold_selected": null,
+    "summary_all": {
+      "n_same": 0,
+      "n_diff": 0
+    },
+    "summary_same_model": {
+      "n_same": 0,
+      "n_diff": 0
+    },
+    "method": "Match threshold: smallest value whose empirical false-positive rate on calibration negatives does not exceed the target, computed on pooled and on same-model negatives; the larger is selected. Non-match threshold: largest value whose empirical miss rate on calibration positives does not exceed the target. A threshold is null when the calibration set is too small to resolve the target."
+  },
+  "test": {
+    "original": {
+      "all_negatives": {
+        "calibrated": {
+          "n_same": 360,
+          "n_diff": 1860,
+          "auc": 0.9306362007168458,
+          "auc_ci_trial_bootstrap": [
+            0.9109069593787336,
+            0.9501137992831541
+          ],
+          "max_diff": 20.33553822187161,
+          "diff_quantiles": {
+            "0.5": 0.00046420598377581415,
+            "0.95": 2.6655320874295816,
+            "0.99": 5.333171609842311
+          },
+          "same_quantiles": {
+            "0.01": -1.5136561857181259,
+            "0.05": -0.101365292377358,
+            "0.5": 4862.588480339385
+          }
+        },
+        "reference_line": {
+          "n_same": 360,
+          "n_diff": 1860,
+          "auc": 0.9306362007168458,
+          "auc_ci_trial_bootstrap": [
+            0.9109069593787336,
+            0.9501137992831541
+          ],
+          "operating_point": {
+            "threshold": 60.0,
+            "n_same": 360,
+            "n_diff": 1860,
+            "false_positives": 0,
+            "false_negatives": 54,
+            "fpr": 0.0,
+            "fnr": 0.15,
+            "fpr_ci": [
+              0.0,
+              0.0019813031462037477
+            ],
+            "fnr_ci": [
+              0.11473672542679375,
+              0.19114190987677857
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 20.33553822187161,
+          "diff_quantiles": {
+            "0.5": 0.00046420598377581415,
+            "0.95": 2.6655320874295816,
+            "0.99": 5.333171609842311
+          },
+          "same_quantiles": {
+            "0.01": -1.5136561857181259,
+            "0.05": -0.101365292377358,
+            "0.5": 4862.588480339385
+          }
+        }
+      },
+      "same_model": {
+        "calibrated": {
+          "n_same": 360,
+          "n_diff": 60,
+          "auc": 0.9381481481481482,
+          "auc_ci_trial_bootstrap": [
+            0.9156018518518518,
+            0.958380787037037
+          ],
+          "max_diff": 4.538838523937084,
+          "diff_quantiles": {
+            "0.5": -0.0628874577091565,
+            "0.95": 3.5822395297093967,
+            "0.99": 4.42267551382239
+          },
+          "same_quantiles": {
+            "0.01": -1.5136561857181259,
+            "0.05": -0.101365292377358,
+            "0.5": 4862.588480339385
+          }
+        },
+        "reference_line": {
+          "n_same": 360,
+          "n_diff": 60,
+          "auc": 0.9381481481481482,
+          "auc_ci_trial_bootstrap": [
+            0.9156018518518518,
+            0.958380787037037
+          ],
+          "operating_point": {
+            "threshold": 60.0,
+            "n_same": 360,
+            "n_diff": 60,
+            "false_positives": 0,
+            "false_negatives": 54,
+            "fpr": 0.0,
+            "fnr": 0.15,
+            "fpr_ci": [
+              0.0,
+              0.05962949228616691
+            ],
+            "fnr_ci": [
+              0.11473672542679375,
+              0.19114190987677857
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 4.538838523937084,
+          "diff_quantiles": {
+            "0.5": -0.0628874577091565,
+            "0.95": 3.5822395297093967,
+            "0.99": 4.42267551382239
+          },
+          "same_quantiles": {
+            "0.01": -1.5136561857181259,
+            "0.05": -0.101365292377358,
+            "0.5": 4862.588480339385
+          }
+        }
+      },
+      "different_model": {
+        "calibrated": {
+          "n_same": 360,
+          "n_diff": 1800,
+          "auc": 0.9303858024691358,
+          "auc_ci_trial_bootstrap": [
+            0.9096766589506173,
+            0.9504621141975309
+          ],
+          "max_diff": 20.33553822187161,
+          "diff_quantiles": {
+            "0.5": 0.0008376254379722488,
+            "0.95": 2.607667084757518,
+            "0.99": 5.3906258727770355
+          },
+          "same_quantiles": {
+            "0.01": -1.5136561857181259,
+            "0.05": -0.101365292377358,
+            "0.5": 4862.588480339385
+          }
+        },
+        "reference_line": {
+          "n_same": 360,
+          "n_diff": 1800,
+          "auc": 0.9303858024691358,
+          "auc_ci_trial_bootstrap": [
+            0.9096766589506173,
+            0.9504621141975309
+          ],
+          "operating_point": {
+            "threshold": 60.0,
+            "n_same": 360,
+            "n_diff": 1800,
+            "false_positives": 0,
+            "false_negatives": 54,
+            "fpr": 0.0,
+            "fnr": 0.15,
+            "fpr_ci": [
+              0.0,
+              0.0020472789343030334
+            ],
+            "fnr_ci": [
+              0.11473672542679375,
+              0.19114190987677857
+            ],
+            "confidence": 0.95,
+            "ci_method": "Clopper-Pearson (exact binomial; assumes independent trials)"
+          },
+          "max_diff": 20.33553822187161,
+          "diff_quantiles": {
+            "0.5": 0.0008376254379722488,
+            "0.95": 2.607667084757518,
+            "0.99": 5.3906258727770355
+          },
+          "same_quantiles": {
+            "0.01": -1.5136561857181259,
+            "0.05": -0.101365292377358,
+            "0.5": 4862.588480339385
+          }
+        }
+      }
+    }
+  },
+  "cropped_search_negatives": {
+    "n": 1050,
+    "note": "Cross-resolution trials between different devices only (true negatives).",
+    "raw_pce_exceeding_reference_line": 0,
+    "adjusted_exceeding_reference_line": 0,
+    "adjusted_fpr_ci": [
+      0.0,
+      0.0035070543962756103
+    ],
+    "raw_pce_max": 32.485192824393444,
+    "adjusted_max": 9.549022262999639
+  },
+  "test_per_device": {
+    "D02": {
+      "model_key": "apple iphone x",
+      "n_same": 30,
+      "same_median": 3349.0316740156463,
+      "same_min": 573.3680173774742,
+      "n_diff": 210,
+      "diff_max": 8.336411842205063,
+      "misses_at_selected": null,
+      "false_matches_at_selected": null
+    },
+    "D14": {
+      "model_key": "apple iphone 13 mini",
+      "n_same": 30,
+      "same_median": 4096.047903448804,
+      "same_min": 146.40756246498898,
+      "n_diff": 210,
+      "diff_max": 5.430592886157119,
+      "misses_at_selected": null,
+      "false_matches_at_selected": null
+    },
+    "D37": {
+      "model_key": "apple iphone 12",
+      "n_same": 30,
+      "same_median": 1446.282960852147,
+      "same_min": 94.03421813763055,
+      "n_diff": 210,
+      "diff_max": 4.547386607828888,
+      "misses_at_selected": null,
+      "false_matches_at_selected": null
+    },
+    "D30": {
+      "model_key": "samsung galaxy s10+",
+      "n_same": 30,
+      "same_median": 71757.42030862432,
+      "same_min": -2.5550781524423276,
+      "n_diff": 210,
+      "diff_max": 14.126284964283629,
+      "misses_at_selected": null,
+      "false_matches_at_selected": null
+    },
+    "D25": {
+      "model_key": "samsung galaxy s20+",
+      "n_same": 30,
+      "same_median": 134.85722440901222,
+      "same_min": -3.479171355951595,
+      "n_diff": 210,
+      "diff_max": 6.253156595792114,
+      "misses_at_selected": null,
+      "false_matches_at_selected": null
+    },
+    "D17": {
+      "model_key": "samsung galaxy s21+",
+      "n_same": 30,
+      "same_median": 51372.97777330081,
+      "same_min": 396.168116190999,
+      "n_diff": 210,
+      "diff_max": 4.758568407208174,
+      "misses_at_selected": null,
+      "false_matches_at_selected": null
+    },
+    "D19": {
+      "model_key": "google pixel 3a",
+      "n_same": 30,
+      "same_median": 11158.85799177147,
+      "same_min": 2535.2091959180243,
+      "n_diff": 210,
+      "diff_max": 6.974980686278989,
+      "misses_at_selected": null,
+      "false_matches_at_selected": null
+    },
+    "D23": {
+      "model_key": "google pixel 3a",
+      "n_same": 30,
+      "same_median": 4683.060118918191,
+      "same_min": 0.59199224807158,
+      "n_diff": 0,
+      "diff_max": null,
+      "misses_at_selected": null,
+      "false_matches_at_selected": null
+    },
+    "D34": {
+      "model_key": "google pixel 5",
+      "n_same": 30,
+      "same_median": 5621.091165060918,
+      "same_min": 1195.2689219151341,
+      "n_diff": 210,
+      "diff_max": 5.924535103029463,
+      "misses_at_selected": null,
+      "false_matches_at_selected": null
+    },
+    "D04": {
+      "model_key": "xiaomi redmi note 8t",
+      "n_same": 30,
+      "same_median": 32729.79355705258,
+      "same_min": 13851.235391457663,
+      "n_diff": 60,
+      "diff_max": 4.538838523937084,
+      "misses_at_selected": null,
+      "false_matches_at_selected": null
+    },
+    "D10": {
+      "model_key": "xiaomi redmi note 8t",
+      "n_same": 30,
+      "same_median": -0.01221587359727328,
+      "same_min": -1.487876297489633,
+      "n_diff": 60,
+      "diff_max": 4.341952066115569,
+      "misses_at_selected": null,
+      "false_matches_at_selected": null
+    },
+    "D43": {
+      "model_key": "oneplus 8t",
+      "n_same": 30,
+      "same_median": 2698.1624998343077,
+      "same_min": -2.5098534536500274,
+      "n_diff": 60,
+      "diff_max": 20.33553822187161,
+      "misses_at_selected": null,
+      "false_matches_at_selected": null
+    }
+  },
+  "leakage": {
+    "test_images": 360,
+    "exact_reference_test_duplicates": 0,
+    "near_duplicate_test_pairs_within_device": 0,
+    "note": "Near duplicates (dHash distance <= 2) are counted, not removed; they make trials less independent."
+  }
+}

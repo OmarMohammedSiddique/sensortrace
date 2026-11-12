@@ -35,8 +35,8 @@ SensorTrace is for analysing your own material or material you are authorised to
 | Account enumeration | Login returns one message for unknown account and wrong password; a dummy hash is verified for unknown accounts so timing is similar. Registration with an existing email returns a generic failure |
 | Sessions | Opaque random token in an `HttpOnly`, `SameSite=Lax` cookie (`Secure` in production), stored only as a SHA-256 hash, 12-hour lifetime, listable and revocable. A password change revokes every other session |
 | CSRF | State-changing requests authenticated by cookie must carry the session's CSRF token in `X-CSRF-Token` (constant-time comparison). CORS allows only configured origins |
-| API tokens | `Bearer st_…`, shown once, stored hashed, revocable, optional expiry. Cannot create tokens, change the password or delete the account |
-| Rate limiting | Redis counters: authentication per IP and per email (fails closed if Redis is unavailable), API requests and uploads per account |
+| API tokens | `Bearer st_…`, shown once, stored hashed, revocable, optional expiry. Cannot create tokens, change the password, manage sessions or delete the account. A password change revokes every token |
+| Rate limiting | Redis counters (fail closed if Redis is unavailable). Sign-in is limited per account. A per-address limit is added only when real client addresses are trusted (`ST_TRUST_FORWARDED_FOR`); otherwise a large shared bucket applies, so one client cannot lock everyone out. API requests, uploads and parallel uploads are limited per account |
 | Roles | The first registered account is the administrator. Administrator endpoints expose configuration and aggregate counts only, never other users' content |
 
 There is no email-based password reset (the product sends no email). An operator can reset a password
@@ -55,9 +55,11 @@ with `python -m app.cli reset-password <email>`, which also revokes the account'
 
 - **Content validation.** File type comes from magic bytes and a real decode. Only JPEG and PNG are
   accepted. Client-declared types and extensions are ignored.
-- **Limits.** 64 MB per file, 512 MB per request (a declared `Content-Length` is required), 60 files per
-  request, 80 megapixels per image checked from the header before decoding, 300 reference images per
-  sensor, a per-account storage quota (5 GB by default) and a cap on concurrent jobs.
+- **Limits.** 64 MB per file, 512 MB per upload request and 1 MB for any other request body, all
+  enforced from the declared `Content-Length` before authentication or parsing; 60 files per request;
+  3 parallel upload requests per account; 80 megapixels per image checked from the header before
+  decoding; 300 reference images per sensor; a per-account storage quota (5 GB by default) and a cap on
+  concurrent jobs.
 - **Filenames** are kept only as sanitised display text. Storage keys are server-generated.
 - **Private storage.** No bucket is public. Files are served only by the API through signed tokens that
   expire after five minutes and are bound to one object and one user; the request must also be
@@ -69,7 +71,10 @@ with `python -m app.cli reset-password <email>`, which also revokes the account'
 
 ### Processing isolation
 
-- Image decoding and analysis run only in the worker, which has no listening port.
+- Fingerprint estimation and comparison run only in the worker, which has no listening port. Uploaded
+  files are also decoded once in the API process to validate them, hash them and make a preview; that
+  decoding runs off the request loop, under the pixel and size limits above, so a crafted file cannot
+  stall other requests (audit finding F-01).
 - RQ forks a new process for each job, with a time limit. A crash or memory exhaustion in one job cannot
   affect another user's job.
 - In the Compose deployment the API, worker and scheduler run as a non-root user with a read-only root
@@ -97,7 +102,7 @@ with `python -m app.cli reset-password <email>`, which also revokes the account'
   scheduler permanently deletes expired investigations, expired exports and old sessions.
 - **Export.** An account or a single investigation can be exported as a ZIP of records (JSON) and
   original files. Internal storage keys and credential hashes are excluded. The archive link expires
-  after seven days.
+  after seven days, and an archive is deleted as soon as any data it contains is deleted or purged.
 - **Deletion.** Deleting evidence, a sensor, a device, an investigation or the account removes the rows
   and the stored objects (originals, previews, fingerprints, visualisations, reports). Account deletion
   requires the password and a typed confirmation and is irreversible. Backups made by the operator are
@@ -111,6 +116,11 @@ with `python -m app.cli reset-password <email>`, which also revokes the account'
 - The secret key signs file tokens; rotating it invalidates outstanding file links only.
 
 ## Testing performed
+
+An independent security audit was carried out on 2026-11-12: `audit/SECURITY_AUDIT.md` lists 21
+findings with reproductions (2 high, 4 medium, the rest low or informational), the route-by-route
+authorisation matrix and what was checked and found sound. Its fixes are covered by
+`backend/tests/test_audit_security.py`.
 
 Automated, in `backend/tests/` (run against real PostgreSQL, Redis and object storage):
 
@@ -145,6 +155,9 @@ are part of CI or the release checklist. Results at the time of writing are in P
 ## Known gaps
 
 - No multi-factor authentication and no single sign-on.
+- The password blocklist is short; there is no breached-password check.
+- Downloads of originals, fingerprints, reports and archives are not written to the audit log, and the
+  audit log is never purged.
 - No email verification or self-service password reset.
 - No per-organisation sharing or roles beyond user and administrator.
 - Storage is not encrypted by the application; encryption at rest is left to the storage layer.

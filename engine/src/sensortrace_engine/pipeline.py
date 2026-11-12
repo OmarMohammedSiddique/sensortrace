@@ -91,6 +91,15 @@ class AnalysisResult:
         }
 
 
+def _control_qualifies(fp: Fingerprint, policy: DecisionPolicy) -> bool:
+    split = (fp.diagnostics.get("split_half") or {}).get("pce")
+    return (
+        fp.n_images >= policy.min_reference_images_for_non_match
+        and split is not None
+        and split >= policy.min_split_half_pce_for_non_match
+    )
+
+
 def summarise(results: Sequence[CandidateResult]) -> dict[str, Any]:
     """Open-set summary over a candidate list. Never forces a selection."""
     matches = [r for r in results if r.decision.verdict is Verdict.MATCH]
@@ -150,6 +159,17 @@ def analyse_questioned(
             and other.fingerprint.shape == cand.fingerprint.shape
             and measurements[j].pce is not None
         ]
+        # A control "staying below the threshold" is a non-match reading of that control, so the
+        # control fingerprint must meet the policy's requirements for a non-match conclusion.
+        # A weak control (few or inconsistent reference images) cannot show a shared artefact
+        # even when one exists. A control that reaches the threshold always counts.
+        unqualified = [
+            j
+            for j in controls
+            if not _control_qualifies(candidates[j].fingerprint, policy)
+            and float(measurements[j].pce) < policy.match_threshold  # type: ignore[arg-type]
+        ]
+        controls = [j for j in controls if j not in unqualified]
         control_pces = [float(measurements[j].pce) for j in controls]  # type: ignore[arg-type]
         d = decide(
             m,
@@ -161,6 +181,14 @@ def analyse_questioned(
             control_pces=control_pces,
             n_candidates=len(candidates),
         )
+        if unqualified and d.nua.get("mitigation") in ("none", "same_model_controls"):
+            d.nua["n_controls_not_counted"] = len(unqualified)
+            d.reasons.append(
+                f"{len(unqualified)} same-model control fingerprint(s) were not counted as controls because "
+                f"they were built from fewer than {policy.min_reference_images_for_non_match} reference images "
+                f"or have a split-half consistency below {policy.min_split_half_pce_for_non_match:g}: a weak "
+                "control cannot show a shared artefact."
+            )
         r = CandidateResult(cand.candidate_id, cand.label, m, d, cand.fingerprint.digest())
         if control_pces and m.pce is not None:
             r.delta_spce = float(m.pce - sum(control_pces) / len(control_pces))

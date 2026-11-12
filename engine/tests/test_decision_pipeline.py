@@ -199,3 +199,17 @@ def test_pipeline_result_is_json_serialisable_and_versioned(trio):
     d = json.loads(blob)
     assert d["provenance"]["algorithm_version"] and d["image"]["sha256"]
     assert d["candidates"][0]["measurement"]["surface_window"]
+
+
+def test_low_statistic_is_never_a_non_match_for_computational_or_unknown_devices():
+    """Measured on recent smartphones: 13% of genuine same-device images score near zero while
+    meeting every other precondition, so a low statistic there cannot support a non-match."""
+    low, clean = meas(0.3), QualityReport(metrics={})
+    for cls in ("computational", "unknown"):
+        d = decide(low, quality=clean, fingerprint_diagnostics=GOOD_FP, device_class=cls)
+        assert d.verdict is Verdict.INCONCLUSIVE
+        assert "conventional processing pipeline" in " ".join(d.reasons)
+    assert (
+        decide(low, quality=clean, fingerprint_diagnostics=GOOD_FP, device_class="conventional").verdict
+        is Verdict.NON_MATCH
+    )

@@ -7,7 +7,9 @@ Protocol (see ``VALIDATION.md``)
   devices only and then applied, unchanged, to test devices: no device
   contributes to both.
 * Reference (enrolment) and test images of a device come from different
-  capture categories and are checked for exact and near duplicates.
+  capture categories. Exact duplicates between the two sets are checked by
+  SHA-256; near duplicates are counted among the test images of a device only
+  (reference images are not perceptually hashed against test images).
 * Every test image is scored against every fingerprint. Trials are stratified
   into same device, same model / different device, and different model, and by
   geometry (native vs cropped search) and condition (original, recompressed).
@@ -329,6 +331,11 @@ def analyse(
     match_thr = stats.threshold_for_fpr(cal_diff, target_fpr)
     match_thr_sm = stats.threshold_for_fpr(cal_sm, target_fpr)
     non_match_thr = stats.threshold_for_fnr(cal_same, target_fnr)
+    if non_match_thr is not None:
+        # threshold_for_fnr counts a miss as ``score < threshold``; a non-match is declared at
+        # ``score <= threshold``. Step one float below so the calibration score sitting exactly
+        # on the threshold is not an extra false non-match beyond the target.
+        non_match_thr = float(np.nextafter(non_match_thr, -np.inf))
     # The stricter of the pooled and same-model thresholds is used.
     candidates = [t for t in (match_thr, match_thr_sm) if t is not None]
     chosen = max(candidates) if candidates else None
@@ -390,18 +397,23 @@ def analyse(
         result["test"][cond] = block
 
     # Experimental strata: crop search (questioned image smaller than the fingerprint).
-    crop_diff = [
-        r["eff_pce"]
+    # Only different-device rows are negatives. A device whose test images are smaller than its own
+    # fingerprint would produce same-device crops, which must not be counted here.
+    crop_rows = [
+        r
         for r in rows
-        if r["geometry"] == "cropped" and r["eff_pce"] is not None and r["condition"] == "original"
+        if r["geometry"] == "cropped"
+        and r["condition"] == "original"
+        and r["device"] != r["candidate"]
+        and r["eff_pce"] is not None
+        and r["pce"] is not None
     ]
-    crop_raw = [
-        r["pce"] for r in rows if r["geometry"] == "cropped" and r["pce"] is not None and r["condition"] == "original"
-    ]
+    crop_diff = [r["eff_pce"] for r in crop_rows]
+    crop_raw = [r["pce"] for r in crop_rows]
     if crop_diff:
         result["cropped_search_negatives"] = {
             "n": len(crop_diff),
-            "note": "All cross-resolution trials are different-device by construction (true negatives).",
+            "note": "Cross-resolution trials between different devices only (true negatives).",
             "raw_pce_exceeding_reference_line": int(np.sum(np.array(crop_raw) >= reference_line)),
             "adjusted_exceeding_reference_line": int(np.sum(np.array(crop_diff) >= reference_line)),
             "adjusted_fpr_ci": list(

@@ -16,7 +16,7 @@ ENGINE_VERSION = "0.1.0"
 ALGORITHM_VERSION = "prnu-wavelet-mle-1.0"
 
 #: Version of the decision policy logic (not of any particular thresholds).
-DECISION_POLICY_VERSION = "policy-1.0"
+DECISION_POLICY_VERSION = "policy-1.1"
 
 
 def library_versions() -> dict[str, str]:

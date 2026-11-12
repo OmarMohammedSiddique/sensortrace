@@ -113,6 +113,10 @@ class Fingerprint:
             meta = json.loads(bytes(z["meta"]).decode())
         if meta.get("format") != FINGERPRINT_FORMAT:
             raise NumericalError(f"unsupported fingerprint format {meta.get('format')}")
+        if k.ndim != 2 or not np.all(np.isfinite(k)):
+            # The digest only shows the samples are the ones that were stored; it cannot show
+            # they are usable. A non-finite sample would silently void every comparison.
+            raise NumericalError("fingerprint data is not a finite 2-D array")
         fp = cls(
             k=k,
             n_images=int(meta["n_images"]),

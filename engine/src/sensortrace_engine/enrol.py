@@ -259,6 +259,17 @@ def enrol(
                         accepted.remove(i)
                     else:
                         outcomes[i].warnings.append(f"Image {msg}.")
+            # The leave-one-out check can only expose a lone foreign image: several images from one
+            # other sensor vouch for each other. A group far below the rest is reported, not removed.
+            low = [outcomes[i].ref_id for j, i in enumerate(candidates) if i in accepted and loo[j] < 0.04 * median]
+            if low:
+                warnings.append(
+                    f"{len(low)} reference image(s) agree far less with the set than the others do "
+                    f"(leave-one-out PCE below 4% of the median {median:.0f}): {', '.join(low[:5])}"
+                    + ("..." if len(low) > 5 else "")
+                    + ". They may come from a different sensor. Screening cannot reliably detect several "
+                    "images from one other device; check the reference set by hand."
+                )
         else:
             warnings.append(
                 f"The references show weak mutual consistency (median leave-one-out PCE {median:.1f} "

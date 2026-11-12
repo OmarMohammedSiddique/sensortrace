@@ -240,8 +240,9 @@ export default function MethodologyPage() {
             of the number of tests.
           </p>
           <p>
-            The Gaussian tail figures stored with each measurement are reference values under an idealised noise
-            model. Real images have heavier tails, so these figures are never presented as error rates.
+            The idealised noise model is used only to scale thresholds with the number of alignments and candidates
+            tested. It is not an error model: on real images unrelated sensors produce elevated values far more often
+            than it predicts, so SensorTrace shows no model-based probability with a result.
           </p>
         </DocSection>
 

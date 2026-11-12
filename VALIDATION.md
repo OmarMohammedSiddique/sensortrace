@@ -3,12 +3,20 @@
 What has been measured, on what data, and what has not. Method description:
 [SCIENTIFIC_METHODOLOGY.md](SCIENTIFIC_METHODOLOGY.md).
 
-**Summary.** The engine was evaluated on real photographs from 13 smartphones released between 2011 and
-2016. Within that scope, on camera-original JPEGs at native resolution, it separated same-device from
-different-device comparisons with no false match at the reference threshold and misses confined to one
-device. **Nothing has been validated for smartphones released since about 2018, for dedicated cameras,
-for cropped or resized images, or for images that passed through messaging or social platforms.** Those
-capabilities are labelled experimental or unsupported in the product.
+**Summary.** The engine was evaluated on real photographs from 25 smartphones in two public datasets.
+
+- **Older phones (13 devices, 2011–2016):** no false match at the reference threshold in 3,680
+  different-device comparisons (560 between units of the same model), and misses confined to one device.
+- **Recent phones (12 devices, 2017–2021):** no false match in 1,860 different-device comparisons, but
+  **15% of genuine same-device photographs were missed**, almost all from four phones, one of which was
+  essentially undetectable. Nothing in the image metadata predicts these misses.
+- **Same-model collisions on recent phones remain untested**: no usable same-model pairs were available.
+- Real crops, recompression, unseen-sensor galleries and small or natural reference sets were measured on
+  the older phones (section 2).
+
+**Nothing has been validated for dedicated cameras, for resized or platform-processed images, or for
+distinguishing units of the same recent phone model.** An independent audit (`audit/`) reviewed the
+method, the code and these results; the full benchmark tables are in `audit/BENCHMARK_RESULTS.md`.
 
 ## 1. Evaluation `vision-subset-v1`
 
@@ -137,61 +145,80 @@ the maximum was 10.7 and none reached 60 (0 – 0.29%). **No true-positive cropp
 evaluation, so detection of genuine crops on real images is not validated.** It is verified on synthetic
 data only.
 
-## 2. Decision policies shipped
+## 2. Further measurements made during the audit
+
+Details and tables: `audit/BENCHMARK_RESULTS.md`. Scripts: `audit/experiments/`.
+
+| Experiment | Data | Result |
+|---|---|---|
+| Recent smartphones, baseline at 60 | FloreView, 12 devices, 30 flat references, 30 natural test images each | 0 / 1,860 false matches (0 – 0.20%); **54 / 360 misses (15.0%, 11.5 – 19.1%)**: Redmi Note 8T 29/30, Galaxy S20+ 14/30, Galaxy S10+ 8/30, OnePlus 8T 2/30, Pixel 3a 1/30, seven phones 0/30 |
+| Unseen sensors (own sensor removed from the gallery) | VISION, 480 images | 0 attributed to a wrong sensor (0 – 0.77%); highest wrong-sensor statistic 17.2 |
+| Real crops, 1024×768 at random offsets | VISION held-out devices, 105 images | True sensor located at the exact offset 105/105; 104/105 at or above 60 after adjustment for 6.8–14.7 million placements; other sensor 0/105 (highest 8.4) |
+| Resampled images (50% downscale; 125% upscale) | Same 105 images, true sensor | Never matched (highest 8.3); whole-image upscales refused as unsupported |
+| Reference sets of 5, 10, 20 flat and 20 natural images | 4 VISION devices (2 same-model pairs), 20 test images each | 0/80 misses and 0/80 same-model false matches in every configuration; lowest same-device statistic 247 |
+| Outcomes for genuine same-device images | Both datasets | Found and fixed: 48 of 360 recent-phone images were being reported as "non-match supported" (section 10 of the benchmark report) |
+
+## 3. Decision policies shipped
 
 | Policy | Thresholds | Status |
 |---|---|---|
 | `literature-reference-uncalibrated` (default) | match 60, non-match 10 | Reference lines; no error rate claimed |
-| `vision-2017-validated` | match 60, non-match 10 | The same lines with the measurements above attached. For the five models with same-model data (iPhone 4s, 5, 5c, 6; Galaxy S3 Mini) the same-model alternative is treated as addressed |
+| `vision-2017-measured` | match 60, non-match 10 | The same uncalibrated lines with the VISION measurements attached for information. It does **not** lift the same-model requirement: per-model evidence is one device pair for four of five models |
 
-The non-match line of 10 is an engineering choice: 99.4% of different-device trials and 1.3% of
-same-device trials (the P9 images) fell at or below it. A non-match conclusion additionally requires the
-quality and fingerprint conditions in the methodology.
+No calibrated policy is shipped. Thresholds derived from the VISION calibration split at 1% targets
+(10.9 and 0.14) were examined and rejected (section 1). A non-match conclusion is available only for
+devices declared conventional and additionally requires the quality and fingerprint conditions in the
+methodology; it remains experimental.
 
-## 3. Verification that is not empirical validation
+## 4. Verification that is not empirical validation
 
 | Check | Result |
 |---|---|
 | Engine unit, property and regression tests on synthetic sensors | Pass (`make test-engine`) |
-| Cross-check against an independent implementation (polimi-ispl/prnu-python) | Shrinkage rule reproduces the reference to correlation > 0.99999; statistics agree within 15% under one definition |
+| Cross-check against an independent implementation (polimi-ispl/prnu-python) | Shrinkage rule reproduces the reference to correlation > 0.99999. On synthetic sensors the statistics agree within 15%; on real JPEGs individual scores differ widely because the two use different wavelet grids |
+| Independent scientific audit (`audit/SCIENTIFIC_AUDIT.md`) | Core numerics confirmed by brute-force reimplementation; every headline figure in this document recomputed from the score file; defects found in the decision layer and fixed |
 | Multiple-testing adjustment against the worked example in Goljan and Fridrich (2008) | Reproduces PCE 53.77 for α = 10⁻⁵, k = 88,836,025 |
 
 These show the implementation does what the methodology says. They say nothing about accuracy on real
 cameras.
 
-## 4. Validation status of each capability
+## 5. Validation status of each capability
 
 | Capability | Status | Basis |
 |---|---|---|
-| Fingerprint from flat-field reference images | Validated within scope | 13 devices |
-| Fingerprint from natural (non-flat) reference images | **Not validated** | Not tested |
-| Fingerprint from fewer than 40 reference images | **Not validated** | Not tested; the literature shows thresholds and power depend on the count |
-| Same-size image, older smartphones (2011–2016), camera-original JPEG | Validated within scope | Section 1 |
-| JPEG recompression to quality 60 at full resolution | Validated within scope | Section 1 |
-| Distinguishing devices of the same model, older smartphones | Validated within scope | 560 trials, 5 model groups |
-| Smartphones released since about 2018 | **Not validated.** Published studies report frequent false matches between same-model devices | Product requires controls or calibration and otherwise answers inconclusive |
+| Fingerprint from 30–40 flat-field reference images | Validated within scope | 25 devices |
+| Fingerprint from 5–20 flat-field or 20 natural images | Measured on 4 older phones only | No miss or false match; too few devices to generalise |
+| Same-size image, older smartphones (2011–2016), camera-original JPEG | Validated within scope | 0/3,680 false matches, 7/520 misses |
+| JPEG recompression to quality 60 at full resolution | Validated within scope | Older phones |
+| Distinguishing units of the same model, older smartphones | Measured: 0/560 | **Seven device pairs in five models**; not enough to claim it per model |
+| Unseen-sensor rejection | Validated within scope | 0/480 on older phones |
+| Detecting a match on recent smartphones (2017–2021) | **Unreliable and device-dependent** | 15% missed overall; 0% to 97% per device |
+| False matches between *different models* of recent smartphones | Measured: 0/1,860 | 12 devices |
+| Distinguishing units of the *same* recent model | **Not validated.** Published studies report frequent false matches | Product requires a same-model control and otherwise answers inconclusive |
 | Same-model control rule | **Experimental** | Logic tested; no real-data validation on affected devices |
 | Dedicated cameras (DSLR, mirrorless, compact) | **Not validated** | No data evaluated |
-| 180° and 90° rotated images | Partly validated | 22 of 520 same-device images matched at 180° on real data; 90° on synthetic only |
-| Cropped images | **Experimental** | False-match behaviour measured; detection on real crops not measured |
-| Resized, zoomed, stabilised or platform-processed images | **Unsupported** | Not tested (VISION contains WhatsApp and Facebook versions; not used) |
-| HDR, portrait, night and other multi-frame modes | **Not validated** | One unexplained failure pattern observed (P9) |
-| Non-match conclusions | **Experimental** | Threshold is an engineering choice; gating rules not empirically validated |
-| Delta-sPCE | **Experimental, information only** | Not validated by its authors or here |
+| 180° rotated images | Validated within scope | 22 of 520 same-device trials on the older phones had their best statistic at 180° |
+| 90° rotated images | Synthetic only | |
+| Cropped images | Measured on older phones for one crop size; **experimental** elsewhere | 104/105 detected, 0/105 and 0/2,330 false matches; statistic varies unpredictably with crop offset |
+| Resized, zoomed, stabilised or platform-processed images | **Unsupported**; verified never to match | 0/210 |
+| HDR, portrait, night and other multi-frame modes | **Not validated** as conditions | Unexplained failure patterns on the Huawei P9 and four recent phones |
+| Non-match conclusions | **Experimental**, conventional devices only | A rule that allowed them for recent phones was wrong 13% of the time and was removed |
+| Delta-sPCE | **Experimental, information only** | Not evaluated; not validated by its authors |
 | PNG and 16-bit input | Verified on synthetic data only | |
-| Quality flags | Heuristics, **not validated** as predictors | |
+| Quality flags | Heuristics, **not validated** as predictors | They did not predict the recent-phone misses |
 
-## 5. Limits of this evaluation
+## 6. Limits of this evaluation
 
-- Thirteen devices, seven models, three brands, all smartphones from 2011–2016. It represents neither
-  current phones nor dedicated cameras.
+- Twenty-five smartphones in total. No dedicated camera. The recent-phone set has no usable same-model
+  pair, and four of its twelve devices behave very differently from the rest, so its averages describe
+  no particular phone.
 - Flat-field references and 40 of them per device: a favourable enrolment condition.
 - 40 test images per device, taken in sequence from the dataset rather than sampled.
 - Negatives share fingerprints and images; intervals assume independence and are optimistic.
 - One run, one decoder version. No cross-platform reproducibility run was made.
 - No independent replication.
 
-## 6. Reproducing
+## 7. Reproducing
 
 ```bash
 make reference-oracle
@@ -211,9 +238,12 @@ re-running the command continues where it stopped. Output goes to `data/eval/vis
 evaluate other data, write a manifest like `engine/evaluation/vision_subset_v1.json` and pass it to
 `sensortrace evaluate`.
 
-## 7. What would most improve confidence
+## 8. What would most improve confidence
 
-1. A set of recent smartphones with several units per model and firmware version.
+1. Recent smartphones with several units per model and firmware version, captured with identical
+   settings (the missing same-model test).
+1. The cause of the undetectable images on the Redmi Note 8T, Galaxy S20+ and S10+ (pixel binning and
+   multi-frame processing are suspects).
 2. Dedicated cameras with several bodies per model.
 3. Natural-image reference sets and smaller reference counts.
 4. Real cropped, resized and platform-processed images with known source.

@@ -10,7 +10,7 @@ from sqlalchemy import func, select
 from .. import schemas as s
 from ..audit import audit
 from ..config import get_settings
-from ..deps import CurrentUser, Db, owned, rate_limit
+from ..deps import CurrentUser, Db, UploadSlot, owned, rate_limit
 from ..errors import ApiError, bad_request, conflict
 from ..jobs import enqueue
 from ..models import Device, Fingerprint, Job, ReferenceImage, Sensor, User
@@ -23,6 +23,7 @@ from ..services import (
     purge_reference,
     purge_sensor,
     read_upload,
+    run_heavy,
     safe_filename,
     store_image,
 )
@@ -212,6 +213,7 @@ async def upload_references(
     sensor_id: uuid.UUID,
     user: CurrentUser,
     db: Db,
+    _slot: UploadSlot,
     files: Annotated[list[UploadFile], File(description="JPEG or PNG reference images")],
 ) -> s.UploadResponse:
     """Upload reference images for a sensor. Each file is validated independently."""
@@ -233,7 +235,7 @@ async def upload_references(
                     f"A sensor can hold at most {cfg.max_reference_images} reference images.",
                 )
             data = await read_upload(f)
-            img, q = ingest_upload(data, "reference")
+            img, q = await run_heavy(ingest_upload, data, "reference")
             if db.scalar(
                 select(ReferenceImage.id).where(
                     ReferenceImage.sensor_id == sensor.id,
@@ -246,7 +248,7 @@ async def upload_references(
                     "This file is already a reference image for this sensor.",
                 )
             check_quota(db, user, len(data))
-            key, pkey = store_image(st, user.id, data, img, "references")
+            key, pkey = await run_heavy(store_image, st, user.id, data, img, "references")
             ref = ReferenceImage(
                 user_id=user.id, sensor_id=sensor.id, filename=name, sha256=img.sha256, size_bytes=img.size_bytes,
                 mime_type=img.mime_type, width=img.width, height=img.height, image_metadata=img.metadata,

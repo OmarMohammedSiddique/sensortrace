@@ -1,0 +1,22 @@
+{
+  "name": "floreview-subset-v1",
+  "attribution": "FloreView dataset (Baracchi, Shullani, Iuliani, Piva, IEEE Access, 2023). (c) CSP Lab, University of Florence. CC BY-SA 4.0.",
+  "root": "../../data/floreview",
+  "reference": {"category": "Flat", "count": 30},
+  "test": {"category": "Nat", "count": 30},
+  "conditions": ["original"],
+  "devices": [
+    {"id": "D02", "dir": "D02_Apple_iPhoneX", "model_key": "apple iphone x", "split": "test"},
+    {"id": "D14", "dir": "D14_Apple_iPhone13mini", "model_key": "apple iphone 13 mini", "split": "test"},
+    {"id": "D37", "dir": "D37_Apple_iPhone12", "model_key": "apple iphone 12", "split": "test"},
+    {"id": "D30", "dir": "D30_Samsung_GalaxyS10+", "model_key": "samsung galaxy s10+", "split": "test"},
+    {"id": "D25", "dir": "D25_Samsung_GalaxyS20+", "model_key": "samsung galaxy s20+", "split": "test"},
+    {"id": "D17", "dir": "D17_Samsung_GalaxyS21+", "model_key": "samsung galaxy s21+", "split": "test"},
+    {"id": "D19", "dir": "D19_Google_Pixel3a", "model_key": "google pixel 3a", "split": "test"},
+    {"id": "D23", "dir": "D23_Google_Pixel3a", "model_key": "google pixel 3a", "split": "test"},
+    {"id": "D34", "dir": "D34_Google_Pixel5", "model_key": "google pixel 5", "split": "test"},
+    {"id": "D04", "dir": "D04_Xiaomi_RedmiNote8T", "model_key": "xiaomi redmi note 8t", "split": "test"},
+    {"id": "D10", "dir": "D10_Xiaomi_RedmiNote8T", "model_key": "xiaomi redmi note 8t", "split": "test"},
+    {"id": "D43", "dir": "D43_OnePlus_8T", "model_key": "oneplus 8t", "split": "test"}
+  ]
+}

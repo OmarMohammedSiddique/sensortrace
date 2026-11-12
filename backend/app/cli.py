@@ -22,10 +22,10 @@ def worker() -> None:
 
     get_storage()  # fail fast if storage is misconfigured
     conn = get_redis()
-    Worker([Queue(QUEUE_NAME, connection=conn)], connection=conn).work(with_scheduler=True)
+    Worker([Queue(QUEUE_NAME, connection=conn)], connection=conn).work()
 
 
-def scheduler(interval: int = 120) -> None:
+def scheduler(interval: int = 30) -> None:
     """Reap interrupted jobs every cycle and run retention purges hourly."""
     from .jobs import purge_expired, reap_interrupted
 

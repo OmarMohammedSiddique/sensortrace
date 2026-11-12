@@ -49,15 +49,20 @@ def _start_session(db: Db, user: User, request: Request, response: Response) -> 
 
 
 def _limit_auth(request: Request, email: str = "") -> None:
+    """Throttle sign-in and registration.
+
+    The per-account bucket is what stops password guessing. The per-address bucket is applied only
+    when the deployment can see real client addresses; otherwise every browser shares the proxy's
+    address, and a per-address limit would let one client lock everybody out. In that case a much
+    larger shared bucket caps abuse without making lockout cheap.
+    """
     cfg = get_settings()
-    rate_limit(f"auth-ip:{client_ip(request)}", cfg.rate_auth_per_15min, 900, fail_closed=True)
+    if cfg.trust_forwarded_for:
+        rate_limit(f"auth-ip:{client_ip(request)}", cfg.rate_auth_per_15min, 900, fail_closed=True)
+    else:
+        rate_limit("auth-shared", cfg.rate_auth_per_15min * 50, 900, fail_closed=True)
     if email:
-        rate_limit(
-            f"auth-email:{email.lower()[:200]}",
-            cfg.rate_auth_per_15min,
-            900,
-            fail_closed=True,
-        )
+        rate_limit(f"auth-email:{email.lower()[:200]}", cfg.rate_auth_per_15min, 900, fail_closed=True)
 
 
 @router.post("/register", response_model=s.SessionInfo, status_code=201)
@@ -107,7 +112,7 @@ def register(body: s.RegisterIn, request: Request, response: Response, db: Db) -
 
 @router.post("/login", response_model=s.SessionInfo)
 def login(body: s.LoginIn, request: Request, response: Response, db: Db) -> s.SessionInfo:
-    email = body.email.strip().lower()
+    email = body.email.replace("\x00", "").strip().lower()
     _limit_auth(request, email)
     user = db.scalar(select(User).where(User.email == email))
     ok = verify_password(user.password_hash if user else None, body.password)
@@ -182,6 +187,8 @@ def change_password(body: s.PasswordIn, auth: CurrentAuth, request: Request, db:
         )  # type: ignore[union-attr]
         .values(revoked_at=utcnow())
     )
+    # API tokens are credentials too: a password change after a suspected compromise must end them.
+    db.execute(update(ApiToken).where(ApiToken.user_id == auth.user.id, ApiToken.revoked_at.is_(None)).values(revoked_at=utcnow()))
     audit(db, auth.user.id, "account.password_changed", ip=client_ip(request))
     db.commit()
 
@@ -206,7 +213,10 @@ def list_sessions(auth: CurrentAuth, db: Db) -> list[s.SessionOut]:
 
 
 @router.delete("/sessions/{session_id}", status_code=204)
-def revoke_session(session_id: uuid.UUID, user: CurrentUser, db: Db) -> None:
+def revoke_session(session_id: uuid.UUID, auth: CurrentAuth, db: Db) -> None:
+    if auth.kind != "session":
+        raise ApiError(403, "session_required", "Sessions can only be managed from an interactive session.")
+    user = auth.user
     sess = db.get(AuthSession, session_id)
     if sess is None or sess.user_id != user.id:
         raise not_found("Session")

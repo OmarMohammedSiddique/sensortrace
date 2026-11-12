@@ -55,7 +55,8 @@ export default function PrivacyPage() {
             A self-hosted installation collects no usage data at all. The hosted deployment on Vercel records
             aggregate page views and page-load performance with Vercel Web Analytics and Speed Insights. These use
             no cookies, store no identifier in your browser and are sent to this site&apos;s own address; they show
-            which pages are visited and how fast they load, not who visited or what was uploaded.
+            which pages are visited and how fast they load, not who visited or what was uploaded. Record identifiers
+            and query strings are removed from page addresses before they are reported.
           </p>
           <p>
             The session cookie that keeps you signed in is not readable by scripts and is used for nothing else. A

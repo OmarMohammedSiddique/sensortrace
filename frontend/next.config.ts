@@ -23,7 +23,6 @@ const csp = [
 ].join("; ");
 
 const securityHeaders = [
-  { key: "Content-Security-Policy", value: csp },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "no-referrer" },
   { key: "X-Frame-Options", value: "DENY" },
@@ -41,7 +40,13 @@ const nextConfig: NextConfig = {
   // resolved at build time, which would bake API_INTERNAL_URL into the image.
   // See src/app/api/v1/[...path]/route.ts, which reads the env var per request.
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // The page policy is NOT applied to /api: those responses are proxied from the backend and
+      // keep its stricter policy ("default-src 'none'", plus "sandbox" on file downloads). Setting
+      // the page policy there replaced it.
+      { source: "/((?!api/).*)", headers: [{ key: "Content-Security-Policy", value: csp }] },
+    ];
   },
   turbopack: {
     rules: {

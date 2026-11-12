@@ -122,7 +122,13 @@ class S3Storage:
             try:
                 self._c.head_bucket(Bucket=name)
             except ClientError:
-                self._c.create_bucket(Bucket=name)
+                try:
+                    self._c.create_bucket(Bucket=name)
+                except ClientError as exc:
+                    # The API, worker and scheduler start together and may all try to create the
+                    # bucket; losing that race is not an error.
+                    if exc.response.get("Error", {}).get("Code") not in ("BucketAlreadyExists", "BucketAlreadyOwnedByYou"):
+                        raise
             # Block every form of public access where the service supports it.
             try:
                 self._c.put_public_access_block(

@@ -1,0 +1,4296 @@
+{
+  "seed": 20261112,
+  "reference_line": 60.0,
+  "E1_open_set": {
+    "note": "Gallery of same-resolution sensors. 'unseen' removes the image's own sensor, so every match would be a false identification.",
+    "all_devices_unseen_sensor": {
+      "images": 480,
+      "images_with_any_match": 0,
+      "images_matching_a_wrong_sensor": 0,
+      "images_with_multiple_matches": 0,
+      "wrong_sensor_rate_ci95": [
+        0.0,
+        0.007655710149586598
+      ],
+      "highest_adjusted_statistic_for_a_wrong_sensor": 17.16912246489057
+    },
+    "all_devices_own_sensor_in_gallery": {
+      "images": 520,
+      "images_with_any_match": 513,
+      "images_matching_a_wrong_sensor": 0,
+      "images_with_multiple_matches": 0,
+      "images_matching_only_their_own_sensor": 513,
+      "wrong_sensor_rate_ci95": [
+        0.0,
+        0.007068895934995991
+      ],
+      "highest_adjusted_statistic_for_a_wrong_sensor": 16.969039484035264
+    },
+    "held_out_devices_unseen_sensor": {
+      "images": 280,
+      "images_with_any_match": 0,
+      "images_matching_a_wrong_sensor": 0,
+      "images_with_multiple_matches": 0,
+      "wrong_sensor_rate_ci95": [
+        0.0,
+        0.013088164703296644
+      ],
+      "highest_adjusted_statistic_for_a_wrong_sensor": 18.712557489087104
+    },
+    "held_out_devices_own_sensor_in_gallery": {
+      "images": 280,
+      "images_with_any_match": 280,
+      "images_matching_a_wrong_sensor": 0,
+      "images_with_multiple_matches": 0,
+      "images_matching_only_their_own_sensor": 280,
+      "wrong_sensor_rate_ci95": [
+        0.0,
+        0.013088164703296644
+      ],
+      "highest_adjusted_statistic_for_a_wrong_sensor": 18.28726691690437
+    }
+  },
+  "E2_threshold_free_held_out": {
+    "n_same": 280,
+    "n_diff": 880,
+    "auc": 1.0,
+    "equal_error_rate": 0.0,
+    "tpr_at_fpr_0.01": 1.0,
+    "tpr_at_fpr_0.001": null,
+    "note": "880 negatives resolve false-positive rates down to about 1/880 only; lower operating points are not reported."
+  },
+  "E3_real_crops": {
+    "n": 105,
+    "crop_pixels": [
+      768,
+      1024
+    ],
+    "true_sensor": {
+      "located_at_true_offset": 105,
+      "adjusted_at_or_above_60": 104,
+      "adjusted_min": 19.697296766041294,
+      "adjusted_median": 983.3854856119467
+    },
+    "other_sensor": {
+      "adjusted_at_or_above_60": 0,
+      "adjusted_max": 8.39662132214414,
+      "raw_max": 39.97807594527455
+    },
+    "per_image": [
+      {
+        "device": "D01",
+        "image": "D01_I_nat_0001.jpg",
+        "crop_offset": [
+          259,
+          906
+        ],
+        "crop_own": {
+          "pce": 3740.048419628998,
+          "eff": 3708.6035061835883,
+          "shift": [
+            259,
+            906
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 28.284318912670084,
+          "eff": 0.28052749558259804,
+          "candidate": "D26"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 29.24247797574273,
+          "eff": 1.2244012336237986
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 26.477549389987452,
+          "eff": 0.41356847373207084
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D01",
+        "image": "D01_I_nat_0002.jpg",
+        "crop_offset": [
+          914,
+          436
+        ],
+        "crop_own": {
+          "pce": 547.2063891807816,
+          "eff": 515.8119005865439,
+          "shift": [
+            914,
+            436
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 38.019955258501035,
+          "eff": 7.980361717971274,
+          "candidate": "D26"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 25.950613174457917,
+          "eff": -0.013616984733525106
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 22.973940879780976,
+          "eff": -1.0186459197665751
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D01",
+        "image": "D01_I_nat_0003.jpg",
+        "crop_offset": [
+          767,
+          1120
+        ],
+        "crop_own": {
+          "pce": 3547.2694884903294,
+          "eff": 3515.8250353052745,
+          "shift": [
+            767,
+            1120
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 27.480252962949226,
+          "eff": 0.045864007647551476,
+          "candidate": "D26"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 28.805302639960633,
+          "eff": 0.9467343436129526
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 22.54266473353168,
+          "eff": -1.6707423910061396
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D01",
+        "image": "D01_I_nat_0004.jpg",
+        "crop_offset": [
+          672,
+          1364
+        ],
+        "crop_own": {
+          "pce": 906.3081888051249,
+          "eff": 874.8900391205583,
+          "shift": [
+            672,
+            1364
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 27.051119739473744,
+          "eff": 0.0008746942191686044,
+          "candidate": "D26"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 24.22226917901003,
+          "eff": -1.1283742355327009
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 23.77386717132866,
+          "eff": -0.29333850414550455
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D01",
+        "image": "D01_I_nat_0005.jpg",
+        "crop_offset": [
+          241,
+          884
+        ],
+        "crop_own": {
+          "pce": 321.5819808853898,
+          "eff": 290.2305446510364,
+          "shift": [
+            241,
+            884
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 34.13703984484496,
+          "eff": 4.473351857600268,
+          "candidate": "D26"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 29.4673021943796,
+          "eff": 1.3750890942109568
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 28.874601046791188,
+          "eff": 1.9089150802786665
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D01",
+        "image": "D01_I_nat_0006.jpg",
+        "crop_offset": [
+          1006,
+          1030
+        ],
+        "crop_own": {
+          "pce": 634.976299208235,
+          "eff": 603.5735044037247,
+          "shift": [
+            1006,
+            1030
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 25.844885900307606,
+          "eff": -0.31835929918147626,
+          "candidate": "D26"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 28.744321402433417,
+          "eff": 0.9097852032408948
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 26.635250710890755,
+          "eff": 0.48803049817935423
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D01",
+        "image": "D01_I_nat_0007.jpg",
+        "crop_offset": [
+          138,
+          862
+        ],
+        "crop_own": {
+          "pce": 3888.5078068392363,
+          "eff": 3857.0625701538765,
+          "shift": [
+            138,
+            862
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 27.194203951462242,
+          "eff": 0.008555374031400066,
+          "candidate": "D26"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 28.519146222488946,
+          "eff": 0.7775372701876216
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 23.82284212096145,
+          "eff": -0.2653703372670995
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D01",
+        "image": "D01_I_nat_0008.jpg",
+        "crop_offset": [
+          771,
+          121
+        ],
+        "crop_own": {
+          "pce": 777.0242302880935,
+          "eff": 745.6120366006396,
+          "shift": [
+            771,
+            121
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 29.692235020742828,
+          "eff": 1.0110250471277062,
+          "candidate": "D26"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 24.608146795399485,
+          "eff": -0.6800946416639981
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 25.97636052476944,
+          "eff": 0.21030820642943313
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D01",
+        "image": "D01_I_nat_0009.jpg",
+        "crop_offset": [
+          382,
+          1021
+        ],
+        "crop_own": {
+          "pce": 4324.832728638037,
+          "eff": 4293.386670780991,
+          "shift": [
+            382,
+            1021
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 36.41674059613727,
+          "eff": 6.507307108042147,
+          "candidate": "D26"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 26.90975367626586,
+          "eff": 0.09019652620319052
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 24.41469007752387,
+          "eff": -0.045211954690943634
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D01",
+        "image": "D01_I_nat_0010.jpg",
+        "crop_offset": [
+          951,
+          139
+        ],
+        "crop_own": {
+          "pce": 4700.3302417839805,
+          "eff": 4668.883599623569,
+          "shift": [
+            951,
+            139
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 26.777131272786775,
+          "eff": -0.009023558227947301,
+          "candidate": "D26"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 37.557078161176015,
+          "eff": 8.282060509507875
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 27.068425277972672,
+          "eff": 0.7145171220421841
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D01",
+        "image": "D01_I_nat_0011.jpg",
+        "crop_offset": [
+          548,
+          1367
+        ],
+        "crop_own": {
+          "pce": 2441.5265308460575,
+          "eff": 2410.086129084998,
+          "shift": [
+            548,
+            1367
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 28.522604355691872,
+          "eff": 0.38000225239909413,
+          "candidate": "D26"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 31.55941977204468,
+          "eff": 2.9581407387716876
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 26.848752061911547,
+          "eff": 0.5958561534887346
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D01",
+        "image": "D01_I_nat_0012.jpg",
+        "crop_offset": [
+          255,
+          995
+        ],
+        "crop_own": {
+          "pce": 888.6907083213272,
+          "eff": 857.2732667636586,
+          "shift": [
+            255,
+            995
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 32.37221091124934,
+          "eff": 2.98118641427278,
+          "candidate": "D26"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 26.151181069626833,
+          "eff": -0.0005850441359596647
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 30.611280441445604,
+          "eff": 3.283509594969742
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D01",
+        "image": "D01_I_nat_0013.jpg",
+        "crop_offset": [
+          219,
+          312
+        ],
+        "crop_own": {
+          "pce": 1467.812881312887,
+          "eff": 1436.3811461151809,
+          "shift": [
+            219,
+            312
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 30.79482677880161,
+          "eff": 1.7585767537640036,
+          "candidate": "D26"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 30.13671842556828,
+          "eff": 1.8502302784036653
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 25.225868361227253,
+          "eff": 0.024414447175118544
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D01",
+        "image": "D01_I_nat_0014.jpg",
+        "crop_offset": [
+          1150,
+          15
+        ],
+        "crop_own": {
+          "pce": 1087.7151065793641,
+          "eff": 1056.2910155824825,
+          "shift": [
+            1150,
+            15
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 30.555658715470614,
+          "eff": 1.5870910887305842,
+          "candidate": "D26"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 28.20946623023401,
+          "eff": 0.6074015363391728
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 25.087747782063907,
+          "eff": 0.009364882348266294
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D01",
+        "image": "D01_I_nat_0015.jpg",
+        "crop_offset": [
+          1147,
+          1049
+        ],
+        "crop_own": {
+          "pce": 371.753543862049,
+          "eff": 340.3878482909441,
+          "shift": [
+            1147,
+            1049
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 30.189144380777595,
+          "eff": 1.3336373168429436,
+          "candidate": "D26"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 30.53639928271638,
+          "eff": 2.1498202330950305
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 25.122676874795008,
+          "eff": 0.012529455067064797
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D06",
+        "image": "D06_I_nat_0001.jpg",
+        "crop_offset": [
+          1654,
+          1960
+        ],
+        "crop_own": {
+          "pce": 804.144989459691,
+          "eff": 771.1867366241896,
+          "shift": [
+            1654,
+            1960
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 31.176547417299705,
+          "eff": 1.0011976412795012,
+          "candidate": "D15"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 28.666905293788105,
+          "eff": 0.3739598808003126
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 29.31517121153146,
+          "eff": 1.5474108914876883
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D06",
+        "image": "D06_I_nat_0002.jpg",
+        "crop_offset": [
+          371,
+          297
+        ],
+        "crop_own": {
+          "pce": 4323.348412240728,
+          "eff": 4290.3560728991415,
+          "shift": [
+            371,
+            297
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 27.186294254828212,
+          "eff": -0.4204950697557154,
+          "candidate": "D15"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 29.015158500063666,
+          "eff": 0.5382847832346994
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 30.854972044303683,
+          "eff": 2.713459249499675
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D06",
+        "image": "D06_I_nat_0003.jpg",
+        "crop_offset": [
+          378,
+          599
+        ],
+        "crop_own": {
+          "pce": 2037.6087339947644,
+          "eff": 2004.6250415283812,
+          "shift": [
+            378,
+            599
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 29.16938325442512,
+          "eff": 0.08578810158793315,
+          "candidate": "D15"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 29.679497645154367,
+          "eff": 0.9065078217528785
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 27.674762628866517,
+          "eff": 0.5382404905360639
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D06",
+        "image": "D06_I_nat_0004.jpg",
+        "crop_offset": [
+          1378,
+          1154
+        ],
+        "crop_own": {
+          "pce": 500.84355454959353,
+          "eff": 467.9112951516885,
+          "shift": [
+            1378,
+            1154
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 29.70596306666934,
+          "eff": 0.2512369059014826,
+          "candidate": "D15"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 32.31110075547073,
+          "eff": 2.803146517916221
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 29.105895522787797,
+          "eff": 1.4020835047932292
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D06",
+        "image": "D06_I_nat_0005.jpg",
+        "crop_offset": [
+          1477,
+          560
+        ],
+        "crop_own": {
+          "pce": 3436.317284882503,
+          "eff": 3403.3269298725195,
+          "shift": [
+            1477,
+            560
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 31.673386237416032,
+          "eff": 1.3224589198746732,
+          "candidate": "D15"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 28.176807736374837,
+          "eff": 0.18448614489720258
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 24.403925562374397,
+          "eff": -0.505961655370054
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D06",
+        "image": "D06_I_nat_0006.jpg",
+        "crop_offset": [
+          1049,
+          990
+        ],
+        "crop_own": {
+          "pce": 716.5005814513823,
+          "eff": 683.5475344392974,
+          "shift": [
+            1049,
+            990
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 39.97807594527455,
+          "eff": 8.39662132214414,
+          "candidate": "D15"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 29.03730484459763,
+          "eff": 0.5494659940268976
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 25.431006248527893,
+          "eff": -0.030163071169901776
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D06",
+        "image": "D06_I_nat_0007.jpg",
+        "crop_offset": [
+          708,
+          518
+        ],
+        "crop_own": {
+          "pce": 234.19563107273441,
+          "eff": 201.3454075425508,
+          "shift": [
+            708,
+            518
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 29.49218124607256,
+          "eff": 0.17652424007208667,
+          "candidate": "D15"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 30.415483868097706,
+          "eff": 1.3797742149697119
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 28.12358416689246,
+          "eff": 0.7803780480710539
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D06",
+        "image": "D06_I_nat_0008.jpg",
+        "crop_offset": [
+          88,
+          1965
+        ],
+        "crop_own": {
+          "pce": 460.03177996100106,
+          "eff": 427.10571628322265,
+          "shift": [
+            88,
+            1965
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 33.44205136122296,
+          "eff": 2.632103475461664,
+          "candidate": "D15"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 28.046234153335693,
+          "eff": 0.14354188409183793
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 27.45679008103656,
+          "eff": 0.43262290306258216
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D06",
+        "image": "D06_I_nat_0009.jpg",
+        "crop_offset": [
+          1374,
+          1973
+        ],
+        "crop_own": {
+          "pce": 470.8645657937752,
+          "eff": 437.9367496508185,
+          "shift": [
+            1374,
+            1973
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 29.377442171366905,
+          "eff": 0.14107403742531985,
+          "candidate": "D15"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 26.929067643868052,
+          "eff": -0.009541121772074692
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 24.48470329452924,
+          "eff": -0.44273094845774663
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D06",
+        "image": "D06_I_nat_0010.jpg",
+        "crop_offset": [
+          524,
+          1717
+        ],
+        "crop_own": {
+          "pce": 508.9404131498788,
+          "eff": 476.00704601812237,
+          "shift": [
+            524,
+            1717
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 34.277694231919114,
+          "eff": 3.311564386701948,
+          "candidate": "D15"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 25.316674841832068,
+          "eff": -0.9264034160116176
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 30.431023546037494,
+          "eff": 2.378148360026029
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D06",
+        "image": "D06_I_nat_0011.jpg",
+        "crop_offset": [
+          1165,
+          223
+        ],
+        "crop_own": {
+          "pce": 2323.1096630297025,
+          "eff": 2290.1239551159324,
+          "shift": [
+            1165,
+            223
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 32.84054367926769,
+          "eff": 2.16353520538846,
+          "candidate": "D15"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 33.27383186502656,
+          "eff": 3.5973548480013653
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 25.47773543433854,
+          "eff": -0.022922857282990157
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D06",
+        "image": "D06_I_nat_0012.jpg",
+        "crop_offset": [
+          683,
+          1407
+        ],
+        "crop_own": {
+          "pce": 576.3977018506578,
+          "eff": 543.4563456229498,
+          "shift": [
+            683,
+            1407
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 28.897521317697237,
+          "eff": 0.03272767529103756,
+          "candidate": "D15"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 27.011645010995373,
+          "eff": -0.003543194501033255
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 32.163647624539976,
+          "eff": 3.7967972390347735
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D06",
+        "image": "D06_I_nat_0013.jpg",
+        "crop_offset": [
+          1038,
+          751
+        ],
+        "crop_own": {
+          "pce": 2100.1403786971073,
+          "eff": 2067.1561976267026,
+          "shift": [
+            1038,
+            751
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 30.352482844630078,
+          "eff": 0.5364983497515885,
+          "candidate": "D15"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 30.624684426955152,
+          "eff": 1.5242505811729754
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 25.110857720624036,
+          "eff": -0.10960268080302647
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D06",
+        "image": "D06_I_nat_0014.jpg",
+        "crop_offset": [
+          386,
+          774
+        ],
+        "crop_own": {
+          "pce": 1113.1578673282754,
+          "eff": 1080.1878823921925,
+          "shift": [
+            386,
+            774
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 32.58819602682935,
+          "eff": 1.9732295001447702,
+          "candidate": "D15"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 34.29422281056757,
+          "eff": 4.471934789699259
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 23.899825380553985,
+          "eff": -1.028354264119351
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D06",
+        "image": "D06_I_nat_0015.jpg",
+        "crop_offset": [
+          819,
+          729
+        ],
+        "crop_own": {
+          "pce": 520.782537527116,
+          "eff": 487.8476140108448,
+          "shift": [
+            819,
+            729
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 36.36350989427017,
+          "eff": 5.1058140243553565,
+          "candidate": "D15"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 30.93710022879015,
+          "eff": 1.7468956145096626
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 24.408511784858504,
+          "eff": -0.5022328424462421
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D11",
+        "image": "D11_I_nat_0001.jpg",
+        "crop_offset": [
+          1005,
+          353
+        ],
+        "crop_own": {
+          "pce": 3132.269776182391,
+          "eff": 3099.28036110806,
+          "shift": [
+            1005,
+            353
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 39.07085376912586,
+          "eff": 7.556685396484053,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 33.23389721168152,
+          "eff": 3.563743236340836
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 27.505139204133346,
+          "eff": 0.45531070401042734
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D11",
+        "image": "D11_I_nat_0002.jpg",
+        "crop_offset": [
+          1356,
+          1846
+        ],
+        "crop_own": {
+          "pce": 1124.1451734418367,
+          "eff": 1091.1748915732999,
+          "shift": [
+            1356,
+            1846
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 30.83211394006783,
+          "eff": 0.79535324112062,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 27.17555442316984,
+          "eff": 0.0002165526305343623
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 25.647066916762878,
+          "eff": -0.005201270648271161
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D11",
+        "image": "D11_I_nat_0003.jpg",
+        "crop_offset": [
+          1427,
+          319
+        ],
+        "crop_own": {
+          "pce": 3371.382292705329,
+          "eff": 3338.3921241411385,
+          "shift": [
+            1427,
+            319
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 36.26929071528114,
+          "eff": 5.022537428478436,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 28.737230720673555,
+          "eff": 0.40532117704977777
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 30.620032297560076,
+          "eff": 2.5265120943166144
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D11",
+        "image": "D11_I_nat_0004.jpg",
+        "crop_offset": [
+          1516,
+          1817
+        ],
+        "crop_own": {
+          "pce": 260.2840208591364,
+          "eff": 227.41792037587805,
+          "shift": [
+            1516,
+            1817
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 33.587290501002386,
+          "eff": 2.7480296551464347,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 35.81235941118823,
+          "eff": 5.816678025442019
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 25.264705429361772,
+          "eff": -0.06470157600017641
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D11",
+        "image": "D11_I_nat_0005.jpg",
+        "crop_offset": [
+          3,
+          557
+        ],
+        "crop_own": {
+          "pce": 709.2350907187514,
+          "eff": 676.2825341541446,
+          "shift": [
+            3,
+            557
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 34.17488626859527,
+          "eff": 3.2264506874383856,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 30.1153871100213,
+          "eff": 1.1797463469767373
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 28.326800250382227,
+          "eff": 0.8996225013966935
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D11",
+        "image": "D11_I_nat_0006.jpg",
+        "crop_offset": [
+          1417,
+          413
+        ],
+        "crop_own": {
+          "pce": 800.2796078679135,
+          "eff": 767.3215601672186,
+          "shift": [
+            1417,
+            413
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 34.84993935079174,
+          "eff": 3.791954350051095,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 31.397804763977728,
+          "eff": 2.088440831702593
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 26.841267354009148,
+          "eff": 0.18565595735925874
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D11",
+        "image": "D11_I_nat_0007.jpg",
+        "crop_offset": [
+          523,
+          168
+        ],
+        "crop_own": {
+          "pce": 1950.431878669054,
+          "eff": 1917.4489200294631,
+          "shift": [
+            523,
+            168
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 29.740340717100366,
+          "eff": 0.26424636592773393,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 28.51912020346616,
+          "eff": 0.3112918038179786
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 30.71296826352402,
+          "eff": 2.6001398069786625
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D11",
+        "image": "D11_I_nat_0008.jpg",
+        "crop_offset": [
+          905,
+          1104
+        ],
+        "crop_own": {
+          "pce": 4324.691446070869,
+          "eff": 4291.699104343962,
+          "shift": [
+            905,
+            1104
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 29.67319335544245,
+          "eff": 0.23908553503760732,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 31.401088372879457,
+          "eff": 2.0909261839166384
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 24.08864219071416,
+          "eff": -0.8051365388016094
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D11",
+        "image": "D11_I_nat_0009.jpg",
+        "crop_offset": [
+          1586,
+          2066
+        ],
+        "crop_own": {
+          "pce": 2357.3537500574575,
+          "eff": 2324.367833382536,
+          "shift": [
+            1586,
+            2066
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 30.861974303568406,
+          "eff": 0.812586492130068,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 30.530895229918965,
+          "eff": 1.4589957896591308
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 27.635556446836627,
+          "eff": 0.5186234718735248
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D11",
+        "image": "D11_I_nat_0010.jpg",
+        "crop_offset": [
+          1009,
+          2069
+        ],
+        "crop_own": {
+          "pce": 2456.2018504064745,
+          "eff": 2423.21536396165,
+          "shift": [
+            1009,
+            2069
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 36.27978018139787,
+          "eff": 5.031800186241936,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 26.511401902056555,
+          "eff": -0.08930736912477767
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 25.665417089061968,
+          "eff": -0.004052513182670869
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D11",
+        "image": "D11_I_nat_0011.jpg",
+        "crop_offset": [
+          122,
+          700
+        ],
+        "crop_own": {
+          "pce": 434.78936941709196,
+          "eff": 401.8677394384961,
+          "shift": [
+            122,
+            700
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 33.463265134365734,
+          "eff": 2.6489732363066736,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 29.41656475210191,
+          "eff": 0.7530956439106746
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 26.91840000764267,
+          "eff": 0.21195471625410683
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D11",
+        "image": "D11_I_nat_0012.jpg",
+        "crop_offset": [
+          1026,
+          636
+        ],
+        "crop_own": {
+          "pce": 2748.793092891143,
+          "eff": 2715.80516128414,
+          "shift": [
+            1026,
+            636
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 31.36316238853018,
+          "eff": 1.1187425242111275,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 28.388927825987974,
+          "eff": 0.25991402893031523
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 24.745856021697264,
+          "eff": -0.2718732862851919
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D11",
+        "image": "D11_I_nat_0013.jpg",
+        "crop_offset": [
+          373,
+          107
+        ],
+        "crop_own": {
+          "pce": 992.5146804751433,
+          "eff": 959.5483943939118,
+          "shift": [
+            373,
+            107
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 34.21400220080258,
+          "eff": 3.2587884889278937,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 29.211092139705855,
+          "eff": 0.6400064344539109
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 26.963129051881317,
+          "eff": 0.22786214091341897
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D11",
+        "image": "D11_I_nat_0014.jpg",
+        "crop_offset": [
+          1300,
+          1763
+        ],
+        "crop_own": {
+          "pce": 3698.1598871976885,
+          "eff": 3665.1688470444656,
+          "shift": [
+            1300,
+            1763
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 36.96316560379998,
+          "eff": 5.639594153767274,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 29.801646180516144,
+          "eff": 0.9808271116527931
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 27.031325554044983,
+          "eff": 0.2530168433986127
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D11",
+        "image": "D11_I_nat_0015.jpg",
+        "crop_offset": [
+          1434,
+          1382
+        ],
+        "crop_own": {
+          "pce": 960.538110549704,
+          "eff": 927.5729628863553,
+          "shift": [
+            1434,
+            1382
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 32.017762934111836,
+          "eff": 1.5594322253182937,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 27.542823713224752,
+          "eff": 0.0303588080604384
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 30.24083479023666,
+          "eff": 2.230834554118248
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D15",
+        "image": "D15_I_nat_0001.jpg",
+        "crop_offset": [
+          650,
+          1342
+        ],
+        "crop_own": {
+          "pce": 1218.6064109009433,
+          "eff": 1185.633799627641,
+          "shift": [
+            650,
+            1342
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 33.14023726328274,
+          "eff": 2.3945400780139834,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 26.255989055279105,
+          "eff": -0.1841001048398523
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 24.29772449925534,
+          "eff": -0.597130981160972
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D15",
+        "image": "D15_I_nat_0002.jpg",
+        "crop_offset": [
+          572,
+          633
+        ],
+        "crop_own": {
+          "pce": 5515.12005256624,
+          "eff": 5482.126054559034,
+          "shift": [
+            572,
+            633
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 33.64143838253478,
+          "eff": 2.7915002816972785,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 28.05685159880392,
+          "eff": 0.14670694325977604
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 24.87451644084435,
+          "eff": -0.20513882443295703
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D15",
+        "image": "D15_I_nat_0003.jpg",
+        "crop_offset": [
+          1205,
+          1188
+        ],
+        "crop_own": {
+          "pce": 5037.611465534693,
+          "eff": 5004.618037624818,
+          "shift": [
+            1205,
+            1188
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 31.92390924837383,
+          "eff": 1.4938043339791436,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 24.757533894766315,
+          "eff": -1.7630961626997266
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 27.991041790003234,
+          "eff": 0.7056820648679472
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D15",
+        "image": "D15_I_nat_0004.jpg",
+        "crop_offset": [
+          370,
+          1532
+        ],
+        "crop_own": {
+          "pce": 124.80325174941503,
+          "eff": 92.1016621988028,
+          "shift": [
+            370,
+            1532
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 30.569593786598556,
+          "eff": 0.64930441668342,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 26.753234827862162,
+          "eff": -0.03263881795966816
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 25.324860774846012,
+          "eff": -0.0505875186950055
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D15",
+        "image": "D15_I_nat_0005.jpg",
+        "crop_offset": [
+          1482,
+          744
+        ],
+        "crop_own": {
+          "pce": 322.43719399109386,
+          "eff": 289.5441050944091,
+          "shift": [
+            1482,
+            744
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 32.0747736091432,
+          "eff": 1.5996593361027687,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 25.98292739732434,
+          "eff": -0.33048520089835415
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 30.513574629416848,
+          "eff": 2.4427147213637297
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D15",
+        "image": "D15_I_nat_0006.jpg",
+        "crop_offset": [
+          1680,
+          1904
+        ],
+        "crop_own": {
+          "pce": 780.1836265815472,
+          "eff": 747.2266787140089,
+          "shift": [
+            1680,
+            1904
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 31.992369486333875,
+          "eff": 1.5416016926932241,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 32.21634186582198,
+          "eff": 2.727016091035801
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 30.290581875808353,
+          "eff": 2.2691675268998774
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D15",
+        "image": "D15_I_nat_0007.jpg",
+        "crop_offset": [
+          1632,
+          914
+        ],
+        "crop_own": {
+          "pce": 629.7182391010607,
+          "eff": 596.7718065909579,
+          "shift": [
+            1632,
+            914
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 34.24693502099609,
+          "eff": 3.2860584681346943,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 28.545278560839307,
+          "eff": 0.3220554657410475
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 28.11592348189924,
+          "eff": 0.7759925702115085
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D15",
+        "image": "D15_I_nat_0008.jpg",
+        "crop_offset": [
+          1057,
+          1860
+        ],
+        "crop_own": {
+          "pce": 682.1983406431556,
+          "eff": 649.2477028290858,
+          "shift": [
+            1057,
+            1860
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 33.04877685695943,
+          "eff": 2.323500052597333,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 29.93321630769036,
+          "eff": 1.0628886779360436
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 25.02485346254513,
+          "eff": -0.1404970267849143
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D15",
+        "image": "D15_I_nat_0009.jpg",
+        "crop_offset": [
+          1261,
+          673
+        ],
+        "crop_own": {
+          "pce": 8741.584578748967,
+          "eff": 8708.588363395189,
+          "shift": [
+            1261,
+            673
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 36.77952317000614,
+          "eff": 5.475465694082143,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 28.891703919492425,
+          "eff": 0.4775041284567707
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 26.99056148445732,
+          "eff": 0.2378513303818196
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D15",
+        "image": "D15_I_nat_0010.jpg",
+        "crop_offset": [
+          510,
+          1316
+        ],
+        "crop_own": {
+          "pce": 6651.91342505204,
+          "eff": 6618.918399872227,
+          "shift": [
+            510,
+            1316
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 32.58198435043187,
+          "eff": 1.968597036184286,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 25.594195935135616,
+          "eff": -0.6323621223952749
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 24.060978745899746,
+          "eff": -0.8356573897844121
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D15",
+        "image": "D15_I_nat_0011.jpg",
+        "crop_offset": [
+          1547,
+          179
+        ],
+        "crop_own": {
+          "pce": 902.954496107172,
+          "eff": 869.9916049975038,
+          "shift": [
+            1547,
+            179
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 38.3046272960698,
+          "eff": 6.853491162724531,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 27.85550879609057,
+          "eff": 0.09189302615407413
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 25.920383943915784,
+          "eff": 0.002635835027620921
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D15",
+        "image": "D15_I_nat_0012.jpg",
+        "crop_offset": [
+          1577,
+          11
+        ],
+        "crop_own": {
+          "pce": 1773.7666409789124,
+          "eff": 1740.7853923661153,
+          "shift": [
+            1577,
+            11
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 34.01877320880851,
+          "eff": 3.0979677035326567,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 28.61743007207009,
+          "eff": 0.35248283538443026
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 24.69593849509901,
+          "eff": -0.3007563849409229
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D15",
+        "image": "D15_I_nat_0013.jpg",
+        "crop_offset": [
+          130,
+          946
+        ],
+        "crop_own": {
+          "pce": 1261.8462592762364,
+          "eff": 1228.8726993507325,
+          "shift": [
+            130,
+            946
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 32.91310685398359,
+          "eff": 2.218990039942184,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 32.20915331885918,
+          "eff": 2.7212575890358854
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 24.701646197227902,
+          "eff": -0.297366693044188
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D15",
+        "image": "D15_I_nat_0014.jpg",
+        "crop_offset": [
+          61,
+          1723
+        ],
+        "crop_own": {
+          "pce": 1750.215685076269,
+          "eff": 1717.2346907067101,
+          "shift": [
+            61,
+            1723
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 29.094812354484507,
+          "eff": 0.06897525936417434,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 26.993599186742447,
+          "eff": -0.004599403964909262
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 23.905138038664184,
+          "eff": -1.0215837002705381
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D15",
+        "image": "D15_I_nat_0015.jpg",
+        "crop_offset": [
+          492,
+          1283
+        ],
+        "crop_own": {
+          "pce": 1217.934502964448,
+          "eff": 1184.961906969867,
+          "shift": [
+            492,
+            1283
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 32.05405538138072,
+          "eff": 1.585009323015105,
+          "candidate": "D06"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 26.88834203397671,
+          "eff": -0.013615546614421133
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 24.603687119281883,
+          "eff": -0.35873715694628844
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D26",
+        "image": "D26_I_nat_0001.jpg",
+        "crop_offset": [
+          249,
+          809
+        ],
+        "crop_own": {
+          "pce": 4193.3953558267485,
+          "eff": 4161.949527297065,
+          "shift": [
+            249,
+            809
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 27.401847957264504,
+          "eff": 0.03288479349344354,
+          "candidate": "D01"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 26.311876568773464,
+          "eff": 0.0022846399861830243
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 28.402573675328153,
+          "eff": 1.5666403675463527
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D26",
+        "image": "D26_I_nat_0002.jpg",
+        "crop_offset": [
+          751,
+          1338
+        ],
+        "crop_own": {
+          "pce": 1788.7528100115203,
+          "eff": 1757.3171682968332,
+          "shift": [
+            751,
+            1338
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 29.443364765076705,
+          "eff": 0.8600570138001253,
+          "candidate": "D01"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 26.913692591725205,
+          "eff": 0.0911534428183708
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 34.84387305887164,
+          "eff": 7.021099299390864
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D26",
+        "image": "D26_I_nat_0003.jpg",
+        "crop_offset": [
+          829,
+          1435
+        ],
+        "crop_own": {
+          "pce": 372.3663922704906,
+          "eff": 341.00054715990234,
+          "shift": [
+            829,
+            1435
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 33.3974010126045,
+          "eff": 3.8363780055338834,
+          "candidate": "D01"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 27.301275276151724,
+          "eff": 0.2059981114436971
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 27.402639351493786,
+          "eff": 0.9084717374694093
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D26",
+        "image": "D26_I_nat_0004.jpg",
+        "crop_offset": [
+          154,
+          1501
+        ],
+        "crop_own": {
+          "pce": 4089.381712303166,
+          "eff": 4057.9360757345216,
+          "shift": [
+            154,
+            1501
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 30.135924147543285,
+          "eff": 1.2978613060544362,
+          "candidate": "D01"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 26.540036932738566,
+          "eff": 0.021584430685631366
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 24.921622137246516,
+          "eff": 0.0005524158217276419
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D26",
+        "image": "D26_I_nat_0005.jpg",
+        "crop_offset": [
+          1104,
+          120
+        ],
+        "crop_own": {
+          "pce": 1035.8312447457656,
+          "eff": 1004.4086378431173,
+          "shift": [
+            1104,
+            120
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 31.598988950766252,
+          "eff": 2.3645372181876905,
+          "candidate": "D01"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 27.43452304678516,
+          "eff": 0.25420705753812695
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 28.092968542884158,
+          "eff": 1.3520884373076063
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D26",
+        "image": "D26_I_nat_0006.jpg",
+        "crop_offset": [
+          909,
+          72
+        ],
+        "crop_own": {
+          "pce": 704.9216120275728,
+          "eff": 673.513706848967,
+          "shift": [
+            909,
+            72
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 36.09681919983572,
+          "eff": 6.216890152105727,
+          "candidate": "D01"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 32.52799754946827,
+          "eff": 3.764757797464158
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 31.14366776667995,
+          "eff": 3.7308448247712893
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D26",
+        "image": "D26_I_nat_0007.jpg",
+        "crop_offset": [
+          319,
+          523
+        ],
+        "crop_own": {
+          "pce": 438.10654400053755,
+          "eff": 406.72716335063495,
+          "shift": [
+            319,
+            523
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 29.5320909068932,
+          "eff": 0.9129899642307407,
+          "candidate": "D01"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 34.31400757579202,
+          "eff": 5.321708197685234
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 28.84134146437811,
+          "eff": 1.884255906568586
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D26",
+        "image": "D26_I_nat_0008.jpg",
+        "crop_offset": [
+          1101,
+          1262
+        ],
+        "crop_own": {
+          "pce": 1634.0348392239785,
+          "eff": 1602.600887661169,
+          "shift": [
+            1101,
+            1262
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 25.536911612761944,
+          "eff": -0.543046745968415,
+          "candidate": "D01"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 29.609751955620126,
+          "eff": 1.4730444048728049
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 23.856276138102242,
+          "eff": -0.2472133262922277
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D26",
+        "image": "D26_I_nat_0009.jpg",
+        "crop_offset": [
+          261,
+          609
+        ],
+        "crop_own": {
+          "pce": 441.1640630915811,
+          "eff": 409.7841541306747,
+          "shift": [
+            261,
+            609
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 27.410609146913863,
+          "eff": 0.0342354475194766,
+          "candidate": "D01"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 31.297077132382302,
+          "eff": 2.7459455367576076
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 29.889705792261847,
+          "eff": 2.6942376038116396
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D26",
+        "image": "D26_I_nat_0010.jpg",
+        "crop_offset": [
+          168,
+          276
+        ],
+        "crop_own": {
+          "pce": 4822.384506143123,
+          "eff": 4790.937693704515,
+          "shift": [
+            168,
+            276
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 31.977709913159952,
+          "eff": 2.6629923827457906,
+          "candidate": "D01"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 31.803484153014335,
+          "eff": 3.158156010943594
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 25.855501362056035,
+          "eff": 0.16985020827966563
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D26",
+        "image": "D26_I_nat_0011.jpg",
+        "crop_offset": [
+          908,
+          1305
+        ],
+        "crop_own": {
+          "pce": 1208.7316363846503,
+          "eff": 1177.3045843175357,
+          "shift": [
+            908,
+            1305
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 34.60194480710274,
+          "eff": 4.880477777559933,
+          "candidate": "D01"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 26.689587919072107,
+          "eff": 0.04410387292291151
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 24.401208897691756,
+          "eff": -0.04804209735398155
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D26",
+        "image": "D26_I_nat_0012.jpg",
+        "crop_offset": [
+          697,
+          489
+        ],
+        "crop_own": {
+          "pce": 197.84477562906528,
+          "eff": 166.56169235791737,
+          "shift": [
+            697,
+            489
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 30.90337651844204,
+          "eff": 1.837850026210081,
+          "candidate": "D01"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 28.310811485876137,
+          "eff": 0.6614866592093778
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 21.217840786933763,
+          "eff": -5.457439529144613
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D26",
+        "image": "D26_I_nat_0013.jpg",
+        "crop_offset": [
+          1082,
+          64
+        ],
+        "crop_own": {
+          "pce": 728.351620209453,
+          "eff": 696.9422266422397,
+          "shift": [
+            1082,
+            64
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 32.76738241553728,
+          "eff": 3.3064208286480867,
+          "candidate": "D01"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 27.24122837596535,
+          "eff": 0.18565916581885814
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 27.206171566270164,
+          "eff": 0.7925943098511494
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D26",
+        "image": "D26_I_nat_0014.jpg",
+        "crop_offset": [
+          1036,
+          1363
+        ],
+        "crop_own": {
+          "pce": 572.7420153480073,
+          "eff": 541.3448414213404,
+          "shift": [
+            1036,
+            1363
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 35.546242696989175,
+          "eff": 5.720428433499683,
+          "candidate": "D01"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 26.2558828217924,
+          "eff": 0.0005255114486880162
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 24.22471005412135,
+          "eff": -0.09387315375245936
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D26",
+        "image": "D26_I_nat_0015.jpg",
+        "crop_offset": [
+          448,
+          239
+        ],
+        "crop_own": {
+          "pce": 615.2796971538293,
+          "eff": 583.8785556444502,
+          "shift": [
+            448,
+            239
+          ],
+          "rotation": 0,
+          "search": 6760964,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 29.658972591177438,
+          "eff": 0.9904066792010783,
+          "candidate": "D01"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 30.48294496468681,
+          "eff": 2.1091513363972254
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 25.639282423848844,
+          "eff": 0.10689517312903281
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D29",
+        "image": "D29_I_nat_0001.jpg",
+        "crop_offset": [
+          854,
+          602
+        ],
+        "crop_own": {
+          "pce": 1854.5910169508204,
+          "eff": 1821.6089452717924,
+          "shift": [
+            854,
+            602
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 31.077414407883843,
+          "eff": 0.9404157810428329,
+          "candidate": "D34"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 27.353970914990747,
+          "eff": 0.008715021649124606
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 26.541737707749945,
+          "eff": 0.09804812393942322
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D29",
+        "image": "D29_I_nat_0002.jpg",
+        "crop_offset": [
+          521,
+          1536
+        ],
+        "crop_own": {
+          "pce": 2192.9056349140255,
+          "eff": 2159.9207806553386,
+          "shift": [
+            521,
+            1536
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 29.27960424803709,
+          "eff": 0.11358386639733173,
+          "candidate": "D34"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 30.150226053936162,
+          "eff": 1.2025021367250506
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 27.695938775386963,
+          "eff": 0.5489451928692783
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D29",
+        "image": "D29_I_nat_0003.jpg",
+        "crop_offset": [
+          1633,
+          144
+        ],
+        "crop_own": {
+          "pce": 343.9335740039634,
+          "eff": 311.03351971032964,
+          "shift": [
+            1633,
+            144
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 33.927668014736,
+          "eff": 3.023428705080637,
+          "candidate": "D34"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 27.39169004594434,
+          "eff": 0.012033837828749198
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 32.03491357180424,
+          "eff": 3.687552345293213
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D29",
+        "image": "D29_I_nat_0004.jpg",
+        "crop_offset": [
+          77,
+          1931
+        ],
+        "crop_own": {
+          "pce": 304.1023829836262,
+          "eff": 271.21605151402315,
+          "shift": [
+            77,
+            1931
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 32.243550919483056,
+          "eff": 1.7202864701508025,
+          "candidate": "D34"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 31.99268453362723,
+          "eff": 2.5490095788170635
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 30.291729969544786,
+          "eff": 2.2700538961594052
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D29",
+        "image": "D29_I_nat_0005.jpg",
+        "crop_offset": [
+          622,
+          488
+        ],
+        "crop_own": {
+          "pce": 877.9700775904204,
+          "eff": 845.0082590989991,
+          "shift": [
+            622,
+            488
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 31.97665449967113,
+          "eff": 1.5305943851648476,
+          "candidate": "D34"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 27.34836868851567,
+          "eff": 0.00826617064162189
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 27.86357925077005,
+          "eff": 0.6363003847733917
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D29",
+        "image": "D29_I_nat_0006.jpg",
+        "crop_offset": [
+          633,
+          1838
+        ],
+        "crop_own": {
+          "pce": 334.9962826920635,
+          "eff": 302.09901092708037,
+          "shift": [
+            633,
+            1838
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 29.61731435158903,
+          "eff": 0.21893753569959962,
+          "candidate": "D34"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 28.988747856423224,
+          "eff": 0.5250595358968978
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 24.975511852105512,
+          "eff": -0.1601876424412482
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D29",
+        "image": "D29_I_nat_0007.jpg",
+        "crop_offset": [
+          259,
+          1517
+        ],
+        "crop_own": {
+          "pce": 1639.3753311213102,
+          "eff": 1606.3956322381773,
+          "shift": [
+            259,
+            1517
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 30.14559078496081,
+          "eff": 0.4364361223317867,
+          "candidate": "D34"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 27.348292008692297,
+          "eff": 0.008260106673914667
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 28.207138846051357,
+          "eff": 0.8287367345838245
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D29",
+        "image": "D29_I_nat_0008.jpg",
+        "crop_offset": [
+          1448,
+          1546
+        ],
+        "crop_own": {
+          "pce": 585.0473458362535,
+          "eff": 552.1051017280961,
+          "shift": [
+            1448,
+            1546
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 33.386879816146944,
+          "eff": 2.588332198037253,
+          "candidate": "D34"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 26.68843192122652,
+          "eff": -0.044885023915019105
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 26.971578310523324,
+          "eff": 0.23092010130929722
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D29",
+        "image": "D29_I_nat_0009.jpg",
+        "crop_offset": [
+          794,
+          1321
+        ],
+        "crop_own": {
+          "pce": 795.7424137958147,
+          "eff": 762.784609470309,
+          "shift": [
+            794,
+            1321
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 33.95276446350751,
+          "eff": 3.043928389280064,
+          "candidate": "D34"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 26.152923568306157,
+          "eff": -0.2335578458479129
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 25.82536031199005,
+          "eff": 8.153230338345415e-05
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D29",
+        "image": "D29_I_nat_0010.jpg",
+        "crop_offset": [
+          266,
+          1207
+        ],
+        "crop_own": {
+          "pce": 1016.3525731161294,
+          "eff": 983.3854856119467,
+          "shift": [
+            266,
+            1207
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 33.528937324335324,
+          "eff": 2.701334087758467,
+          "candidate": "D34"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 31.37736819187548,
+          "eff": 2.0729877875307663
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 30.88502841076798,
+          "eff": 2.7375671146001026
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D29",
+        "image": "D29_I_nat_0011.jpg",
+        "crop_offset": [
+          389,
+          1586
+        ],
+        "crop_own": {
+          "pce": 2033.4456916797635,
+          "eff": 2000.4620328162785,
+          "shift": [
+            389,
+            1586
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 29.19980648412354,
+          "eff": 0.0931149708765167,
+          "candidate": "D34"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 29.691062895873802,
+          "eff": 0.913464824810546
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 24.026127385839988,
+          "eff": -0.8751527098664506
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D29",
+        "image": "D29_I_nat_0012.jpg",
+        "crop_offset": [
+          611,
+          1346
+        ],
+        "crop_own": {
+          "pce": 2673.4993750592434,
+          "eff": 2640.5117849608,
+          "shift": [
+            611,
+            1346
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 29.35307917709694,
+          "eff": 0.13398785289132767,
+          "candidate": "D34"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 28.421308061738287,
+          "eff": 0.27234440437334545
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 27.697535207088624,
+          "eff": 0.5497552748399289
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D29",
+        "image": "D29_I_nat_0013.jpg",
+        "crop_offset": [
+          1052,
+          1037
+        ],
+        "crop_own": {
+          "pce": 1392.3360744777033,
+          "eff": 1359.360012457954,
+          "shift": [
+            1052,
+            1037
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 30.148054670336705,
+          "eff": 0.43758235302623305,
+          "candidate": "D34"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 25.970527563521223,
+          "eff": -0.3383391304843245
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 27.173132536064966,
+          "eff": 0.308675863642057
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D29",
+        "image": "D29_I_nat_0014.jpg",
+        "crop_offset": [
+          1553,
+          1773
+        ],
+        "crop_own": {
+          "pce": 1118.6567719820218,
+          "eff": 1085.6866376996284,
+          "shift": [
+            1553,
+            1773
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 31.720996317834597,
+          "eff": 1.3545748904726052,
+          "candidate": "D34"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 26.60762239537012,
+          "eff": -0.0631232977960352
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 23.822153025112044,
+          "eff": -1.1307290110700194
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D29",
+        "image": "D29_I_nat_0015.jpg",
+        "crop_offset": [
+          302,
+          1049
+        ],
+        "crop_own": {
+          "pce": 962.2720207417156,
+          "eff": 929.3068093801451,
+          "shift": [
+            302,
+            1049
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 30.231878713409188,
+          "eff": 0.4772421884865549,
+          "candidate": "D34"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 35.26990038380371,
+          "eff": 5.3312866492505
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 24.672119827025536,
+          "eff": -0.31514761466607083
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D34",
+        "image": "D34_I_nat_0001.jpg",
+        "crop_offset": [
+          698,
+          1777
+        ],
+        "crop_own": {
+          "pce": 133.27378053068173,
+          "eff": 100.55084280927456,
+          "shift": [
+            698,
+            1777
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 29.74818848118599,
+          "eff": 0.26725334051233207,
+          "candidate": "D29"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 27.704910725843618,
+          "eff": 0.058473931318831766
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 27.54582097074277,
+          "eff": 0.47473350033253847
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D34",
+        "image": "D34_I_nat_0002.jpg",
+        "crop_offset": [
+          435,
+          785
+        ],
+        "crop_own": {
+          "pce": 529.847893913514,
+          "eff": 496.9118272441877,
+          "shift": [
+            435,
+            785
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 29.924395248048768,
+          "eff": 0.33828836106491406,
+          "candidate": "D29"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 33.6022407761498,
+          "eff": 3.875656701043218
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 26.49575428849104,
+          "eff": 0.08678148508201038
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D34",
+        "image": "D34_I_nat_0003.jpg",
+        "crop_offset": [
+          1251,
+          1908
+        ],
+        "crop_own": {
+          "pce": 567.9173837676137,
+          "eff": 534.9769249558381,
+          "shift": [
+            1251,
+            1908
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 30.325045574704216,
+          "eff": 0.5227960527831911,
+          "candidate": "D29"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 29.984515100866748,
+          "eff": 1.0954251092281997
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 26.319514219576146,
+          "eff": 0.04943478903351661
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D34",
+        "image": "D34_I_nat_0004.jpg",
+        "crop_offset": [
+          449,
+          1178
+        ],
+        "crop_own": {
+          "pce": 1257.9470965781104,
+          "eff": 1224.9736194927711,
+          "shift": [
+            449,
+            1178
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 31.680699976830955,
+          "eff": 1.3273784001070588,
+          "candidate": "D29"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 29.517452348768693,
+          "eff": 0.8108562286740814
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 27.989433076516377,
+          "eff": 0.704791123898336
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D34",
+        "image": "D34_I_nat_0005.jpg",
+        "crop_offset": [
+          26,
+          68
+        ],
+        "crop_own": {
+          "pce": 155.553557262594,
+          "eff": 122.78678924809996,
+          "shift": [
+            26,
+            68
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 33.01381942428171,
+          "eff": 2.2964706140897553,
+          "candidate": "D29"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 26.69177106101648,
+          "eff": -0.044202958058552344
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 29.174358242181217,
+          "eff": 1.449198191663265
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D34",
+        "image": "D34_I_nat_0006.jpg",
+        "crop_offset": [
+          431,
+          2205
+        ],
+        "crop_own": {
+          "pce": 450.3378897644549,
+          "eff": 417.4134680878908,
+          "shift": [
+            431,
+            2205
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 29.913497466737073,
+          "eff": 0.33370467681550176,
+          "candidate": "D29"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 29.738511394872024,
+          "eff": 0.9421832021951076
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 28.818876286397778,
+          "eff": 1.2094114498040833
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D34",
+        "image": "D34_I_nat_0007.jpg",
+        "crop_offset": [
+          1472,
+          2116
+        ],
+        "crop_own": {
+          "pce": 303.8975549617065,
+          "eff": 271.01130381585085,
+          "shift": [
+            1472,
+            2116
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 34.027940376151626,
+          "eff": 3.1054862840185353,
+          "candidate": "D29"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 29.36794203783457,
+          "eff": 0.7257712932232403
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 23.885846180194104,
+          "eff": -1.0463098650767622
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D34",
+        "image": "D34_I_nat_0008.jpg",
+        "crop_offset": [
+          94,
+          608
+        ],
+        "crop_own": {
+          "pce": 51.78482196297596,
+          "eff": 19.697296766041294,
+          "shift": [
+            94,
+            608
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 29.04034972779439,
+          "eff": 0.057750743407927685,
+          "candidate": "D29"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 28.56829215990207,
+          "eff": 0.33164379769119395
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 26.20421500675781,
+          "eff": 0.030283071122486443
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D34",
+        "image": "D34_I_nat_0009.jpg",
+        "crop_offset": [
+          907,
+          1737
+        ],
+        "crop_own": {
+          "pce": 1107.6994396347686,
+          "eff": 1074.7296044305153,
+          "shift": [
+            907,
+            1737
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 29.364131904251998,
+          "eff": 0.13718310459730024,
+          "candidate": "D29"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 30.81856676409343,
+          "eff": 1.6615025470067892
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 24.498819260089146,
+          "eff": -0.4322056272172312
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D34",
+        "image": "D34_I_nat_0010.jpg",
+        "crop_offset": [
+          1440,
+          1341
+        ],
+        "crop_own": {
+          "pce": 1169.5908911316537,
+          "eff": 1136.6194410532025,
+          "shift": [
+            1440,
+            1341
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 33.72711624455844,
+          "eff": 2.8605529247295727,
+          "candidate": "D29"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 30.05975255134926,
+          "eff": 1.1436739888024787
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 24.669019879954263,
+          "eff": -0.3170499233006039
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D34",
+        "image": "D34_I_nat_0011.jpg",
+        "crop_offset": [
+          1281,
+          1490
+        ],
+        "crop_own": {
+          "pce": 441.4598712224572,
+          "eff": 408.53701869381314,
+          "shift": [
+            1281,
+            1490
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 33.13025574825807,
+          "eff": 2.386764820507551,
+          "candidate": "D29"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 29.678946161433558,
+          "eff": 0.9061765038973706
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 25.306504142883522,
+          "eff": -0.05469577977320282
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D34",
+        "image": "D34_I_nat_0012.jpg",
+        "crop_offset": [
+          8,
+          349
+        ],
+        "crop_own": {
+          "pce": 1101.507733802161,
+          "eff": 1068.538070263564,
+          "shift": [
+            8,
+            349
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 35.162168781691314,
+          "eff": 4.058323001505292,
+          "candidate": "D29"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 31.388149737096047,
+          "eff": 2.0811369194700924
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 28.123009454950004,
+          "eff": 0.7800487605399781
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D34",
+        "image": "D34_I_nat_0013.jpg",
+        "crop_offset": [
+          244,
+          695
+        ],
+        "crop_own": {
+          "pce": 2611.539201927534,
+          "eff": 2578.551907708266,
+          "shift": [
+            244,
+            695
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 34.438820838618234,
+          "eff": 3.4457233259007958,
+          "candidate": "D29"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 32.2338024401958,
+          "eff": 2.741013162118809
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 30.641756982639127,
+          "eff": 2.5436843509545506
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D34",
+        "image": "D34_I_nat_0014.jpg",
+        "crop_offset": [
+          217,
+          886
+        ],
+        "crop_own": {
+          "pce": 1353.7607760012454,
+          "eff": 1320.7854029157168,
+          "shift": [
+            217,
+            886
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 33.131071594790996,
+          "eff": 2.3874001338448694,
+          "candidate": "D29"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 28.39646345682891,
+          "eff": 0.2627859185661961
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 34.56220581493927,
+          "eff": 5.905072023155879
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      },
+      {
+        "device": "D34",
+        "image": "D34_I_nat_0015.jpg",
+        "crop_offset": [
+          1422,
+          705
+        ],
+        "crop_own": {
+          "pce": 560.9340189809639,
+          "eff": 527.9943200639863,
+          "shift": [
+            1422,
+            705
+          ],
+          "rotation": 0,
+          "search": 14650692,
+          "located": true
+        },
+        "crop_other": {
+          "pce": 27.296200687985277,
+          "eff": -0.3452484212455888,
+          "candidate": "D29"
+        },
+        "resized_0.5_own": {
+          "geometry": "cropped",
+          "pce": 32.513607627955324,
+          "eff": 2.9671789274732823
+        },
+        "upscaled_1.25_region_own": {
+          "geometry": "cropped",
+          "pce": 25.979483666865583,
+          "eff": 0.005980835391054098
+        },
+        "upscaled_1.25_full_own": {
+          "geometry": "unsupported"
+        }
+      }
+    ]
+  },
+  "E4_incompatible_transforms": {
+    "n": 105,
+    "resized_0.5_true_sensor": {
+      "geometry": [
+        "cropped"
+      ],
+      "adjusted_at_or_above_60": 0,
+      "adjusted_max": 8.282060509507875
+    },
+    "upscaled_1.25_region_true_sensor": {
+      "geometry": [
+        "cropped"
+      ],
+      "adjusted_at_or_above_60": 0,
+      "adjusted_max": 7.021099299390864
+    },
+    "upscaled_1.25_full_image": {
+      "geometry": [
+        "unsupported"
+      ]
+    },
+    "note": "These are true same-sensor images. Not matching them is the documented behaviour: resampled images are unsupported."
+  },
+  "E5_reference_sets": [
+    {
+      "device": "D06",
+      "reference_type": "flat",
+      "requested": 5,
+      "accepted": 5,
+      "split_half_pce": 34455.66496249488,
+      "same_device": {
+        "n": 20,
+        "min": 418.1039041796369,
+        "median": 1660.4938072907114,
+        "below_60": 0
+      },
+      "same_model_other_device": {
+        "candidate_images_from": "D15",
+        "n": 20,
+        "max": 7.395587923628771,
+        "at_or_above_60": 0
+      }
+    },
+    {
+      "device": "D06",
+      "reference_type": "flat",
+      "requested": 10,
+      "accepted": 10,
+      "split_half_pce": 113731.7297068887,
+      "same_device": {
+        "n": 20,
+        "min": 584.6940114141671,
+        "median": 2758.7167203581503,
+        "below_60": 0
+      },
+      "same_model_other_device": {
+        "candidate_images_from": "D15",
+        "n": 20,
+        "max": 17.158979748753822,
+        "at_or_above_60": 0
+      }
+    },
+    {
+      "device": "D06",
+      "reference_type": "flat",
+      "requested": 20,
+      "accepted": 20,
+      "split_half_pce": 325675.93541401206,
+      "same_device": {
+        "n": 20,
+        "min": 846.6702993596241,
+        "median": 4248.28281054614,
+        "below_60": 0
+      },
+      "same_model_other_device": {
+        "candidate_images_from": "D15",
+        "n": 20,
+        "max": 14.807338057916546,
+        "at_or_above_60": 0
+      }
+    },
+    {
+      "device": "D06",
+      "reference_type": "natural",
+      "requested": 20,
+      "accepted": 20,
+      "split_half_pce": 12749.64168971244,
+      "same_device": {
+        "n": 20,
+        "min": 256.4788424815905,
+        "median": 1470.824751234995,
+        "below_60": 0
+      },
+      "same_model_other_device": {
+        "candidate_images_from": "D15",
+        "n": 20,
+        "max": 6.933189431819311,
+        "at_or_above_60": 0
+      }
+    },
+    {
+      "device": "D15",
+      "reference_type": "flat",
+      "requested": 5,
+      "accepted": 5,
+      "split_half_pce": 33277.718397783654,
+      "same_device": {
+        "n": 20,
+        "min": 945.2815382124667,
+        "median": 3083.5881597240623,
+        "below_60": 0
+      },
+      "same_model_other_device": {
+        "candidate_images_from": "D06",
+        "n": 20,
+        "max": 9.157412582548684,
+        "at_or_above_60": 0
+      }
+    },
+    {
+      "device": "D15",
+      "reference_type": "flat",
+      "requested": 10,
+      "accepted": 10,
+      "split_half_pce": 108774.32869602424,
+      "same_device": {
+        "n": 20,
+        "min": 1583.3259581560994,
+        "median": 5193.059137114869,
+        "below_60": 0
+      },
+      "same_model_other_device": {
+        "candidate_images_from": "D06",
+        "n": 20,
+        "max": 4.906427305899877,
+        "at_or_above_60": 0
+      }
+    },
+    {
+      "device": "D15",
+      "reference_type": "flat",
+      "requested": 20,
+      "accepted": 20,
+      "split_half_pce": 313074.10283677274,
+      "same_device": {
+        "n": 20,
+        "min": 2412.4891306359664,
+        "median": 7889.704558728183,
+        "below_60": 0
+      },
+      "same_model_other_device": {
+        "candidate_images_from": "D06",
+        "n": 20,
+        "max": 11.239285920012195,
+        "at_or_above_60": 0
+      }
+    },
+    {
+      "device": "D15",
+      "reference_type": "natural",
+      "requested": 20,
+      "accepted": 20,
+      "split_half_pce": 25179.012124060482,
+      "same_device": {
+        "n": 20,
+        "min": 1525.6568488636613,
+        "median": 3579.6257881204374,
+        "below_60": 0
+      },
+      "same_model_other_device": {
+        "candidate_images_from": "D06",
+        "n": 20,
+        "max": 11.79183991482209,
+        "at_or_above_60": 0
+      }
+    },
+    {
+      "device": "D29",
+      "reference_type": "flat",
+      "requested": 5,
+      "accepted": 5,
+      "split_half_pce": 2622.3337865727226,
+      "same_device": {
+        "n": 20,
+        "min": 1236.6318993936272,
+        "median": 1828.1413650129214,
+        "below_60": 0
+      },
+      "same_model_other_device": {
+        "candidate_images_from": "D34",
+        "n": 20,
+        "max": 7.8483613664596446,
+        "at_or_above_60": 0
+      }
+    },
+    {
+      "device": "D29",
+      "reference_type": "flat",
+      "requested": 10,
+      "accepted": 10,
+      "split_half_pce": 10057.951970235961,
+      "same_device": {
+        "n": 20,
+        "min": 2197.572762589487,
+        "median": 3682.922121800607,
+        "below_60": 0
+      },
+      "same_model_other_device": {
+        "candidate_images_from": "D34",
+        "n": 20,
+        "max": 6.711763825257163,
+        "at_or_above_60": 0
+      }
+    },
+    {
+      "device": "D29",
+      "reference_type": "flat",
+      "requested": 20,
+      "accepted": 20,
+      "split_half_pce": 36755.85429651744,
+      "same_device": {
+        "n": 20,
+        "min": 3844.325688741942,
+        "median": 6527.367954606046,
+        "below_60": 0
+      },
+      "same_model_other_device": {
+        "candidate_images_from": "D34",
+        "n": 20,
+        "max": 7.244748376367622,
+        "at_or_above_60": 0
+      }
+    },
+    {
+      "device": "D29",
+      "reference_type": "natural",
+      "requested": 20,
+      "accepted": 20,
+      "split_half_pce": 13605.34622139351,
+      "same_device": {
+        "n": 20,
+        "min": 2449.676326437818,
+        "median": 4985.840292573483,
+        "below_60": 0
+      },
+      "same_model_other_device": {
+        "candidate_images_from": "D34",
+        "n": 20,
+        "max": 5.063337325130827,
+        "at_or_above_60": 0
+      }
+    },
+    {
+      "device": "D34",
+      "reference_type": "flat",
+      "requested": 5,
+      "accepted": 5,
+      "split_half_pce": 12268.090442794488,
+      "same_device": {
+        "n": 20,
+        "min": 247.1456907816758,
+        "median": 1587.1381122009557,
+        "below_60": 0
+      },
+      "same_model_other_device": {
+        "candidate_images_from": "D29",
+        "n": 20,
+        "max": 8.752817616108674,
+        "at_or_above_60": 0
+      }
+    },
+    {
+      "device": "D34",
+      "reference_type": "flat",
+      "requested": 10,
+      "accepted": 10,
+      "split_half_pce": 41364.814899446195,
+      "same_device": {
+        "n": 20,
+        "min": 529.9360659526126,
+        "median": 2835.5034114346163,
+        "below_60": 0
+      },
+      "same_model_other_device": {
+        "candidate_images_from": "D29",
+        "n": 20,
+        "max": 10.720337801479939,
+        "at_or_above_60": 0
+      }
+    },
+    {
+      "device": "D34",
+      "reference_type": "flat",
+      "requested": 20,
+      "accepted": 20,
+      "split_half_pce": 128517.67266856985,
+      "same_device": {
+        "n": 20,
+        "min": 919.7529623121479,
+        "median": 4836.2134105275445,
+        "below_60": 0
+      },
+      "same_model_other_device": {
+        "candidate_images_from": "D29",
+        "n": 20,
+        "max": 12.121308688006401,
+        "at_or_above_60": 0
+      }
+    },
+    {
+      "device": "D34",
+      "reference_type": "natural",
+      "requested": 20,
+      "accepted": 20,
+      "split_half_pce": 24545.927422143024,
+      "same_device": {
+        "n": 20,
+        "min": 839.7706378017824,
+        "median": 4069.0420192838474,
+        "below_60": 0
+      },
+      "same_model_other_device": {
+        "candidate_images_from": "D29",
+        "n": 20,
+        "max": 7.236996671591674,
+        "at_or_above_60": 0
+      }
+    }
+  ]
+}

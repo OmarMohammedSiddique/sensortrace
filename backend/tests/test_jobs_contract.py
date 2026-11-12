@@ -100,8 +100,7 @@ def test_transient_failures_are_retried_then_reported_without_leaking_details(ap
 
     monkeypatch.setitem(jobs.HANDLERS, "fingerprint", flaky)
     for attempt in (1, 2):
-        with pytest.raises(ConnectionError):  # re-raised so the queue schedules a retry
-            jobs.execute(jid)
+        jobs.execute(jid)  # fails, and puts itself back on the queue
         j = c.get(f"{API}/jobs/{jid}").json()
         assert j["status"] == "queued" and j["stage"] == "retrying" and j["attempts"] == attempt
     jobs.execute(jid)
@@ -112,10 +111,8 @@ def test_transient_failures_are_retried_then_reported_without_leaking_details(ap
     sid2 = _sensor_with_refs(c, 95)
     started2 = c.post(f"{API}/sensors/{sid2}/fingerprints").json()
     monkeypatch.setitem(jobs.HANDLERS, "fingerprint", lambda job_id: (_ for _ in ()).throw(ConnectionError("10.0.0.5 secret detail")))
-    for _ in range(jobs.MAX_ATTEMPTS - 1):
-        with pytest.raises(ConnectionError):
-            jobs.execute(started2["job"]["id"])
-    jobs.execute(started2["job"]["id"])
+    for _ in range(jobs.MAX_ATTEMPTS):
+        jobs.execute(started2["job"]["id"])
     j2 = c.get(f"{API}/jobs/{started2['job']['id']}").json()
     assert j2["status"] == "failed" and "secret" not in j2["error"] and "10.0.0.5" not in j2["error"]
     fp2 = c.get(f"{API}/fingerprints/{started2['fingerprint']['id']}").json()
@@ -304,7 +301,9 @@ def test_s3_storage_roundtrip_against_local_object_store():
         socket.create_connection(("127.0.0.1", port), timeout=1).close()
     except OSError:
         pytest.skip("object store not running")
-    prefix = f"test-{uuid.uuid4().hex[:8]}"
+    # Fixed bucket names: every new bucket costs the object store several volumes, so creating
+    # fresh ones per run eventually exhausts it. Objects are removed at the end instead.
+    prefix = "sensortrace-test"
     st = S3Storage(Settings(storage_backend="s3", s3_endpoint_url=f"http://127.0.0.1:{port}", s3_access_key=os.environ.get("ST_TEST_S3_ACCESS_KEY", "sensortrace"),
                             s3_secret_key=os.environ.get("ST_TEST_S3_SECRET_KEY", "sensortrace-dev-secret"), s3_bucket_evidence=f"{prefix}-evidence",
                             s3_bucket_derived=f"{prefix}-derived", s3_bucket_results=f"{prefix}-results"))  # fmt: skip
@@ -353,8 +352,12 @@ def test_queue_outage_fails_the_job_instead_of_leaving_it_queued(app, settings, 
 
 
 def test_interrupted_jobs_are_reaped(app, settings):
+    """A worker that dies stops refreshing its heartbeat; the reaper then fails the job."""
     from datetime import timedelta
 
+    from rq import Queue
+
+    from app.deps import get_redis
     from app.models import utcnow
 
     settings.jobs_inline = False
@@ -362,22 +365,53 @@ def test_interrupted_jobs_are_reaped(app, settings):
     sid = _sensor_with_refs(c, 101)
     started = c.post(f"{API}/sensors/{sid}/fingerprints").json()
     jid = started["job"]["id"]
-    assert jobs.reap_interrupted() == 0  # still held by the queue
-    # Simulate a worker that took the job and died: the message is gone, the row says running.
-    from rq import Queue
+    long_ago = utcnow() - timedelta(minutes=10)
+    with session_scope() as db:
+        db.get(Job, jid).created_at = long_ago
+    assert jobs.reap_interrupted() == 0  # queued, and its message is still waiting
 
-    from app.deps import get_redis
-
+    # A worker takes the job and is alive: heartbeat present.
     Queue(jobs.QUEUE_NAME, connection=get_redis()).empty()
     with session_scope() as db:
         j = db.get(Job, jid)
-        j.status, j.created_at = "running", utcnow() - timedelta(minutes=10)
-    assert jobs.reap_interrupted() == 1
+        j.status, j.started_at = "running", long_ago
+    get_redis().set(jobs._heartbeat_key(jid), "1", ex=60)
+    assert jobs.reap_interrupted() == 0
+
+    # The worker is killed: the heartbeat expires. Stale entries in the queue library's own
+    # registries must not keep the job looking alive.
+    get_redis().delete(jobs._heartbeat_key(jid))
+    get_redis().zadd(f"rq:scheduled:{jobs.QUEUE_NAME}", {jid: 9999999999})
+    try:
+        assert jobs.reap_interrupted() == 1
+    finally:
+        get_redis().zrem(f"rq:scheduled:{jobs.QUEUE_NAME}", jid)
     j = c.get(f"{API}/jobs/{jid}").json()
     assert j["status"] == "failed" and "interrupted" in j["error"]
     assert c.get(f"{API}/fingerprints/{started['fingerprint']['id']}").json()["status"] == "failed"
     settings.jobs_inline = True
     assert c.post(f"{API}/sensors/{sid}/fingerprints").status_code == 202
+
+
+def test_running_job_writes_and_clears_a_heartbeat(app, settings, monkeypatch):
+    from app.deps import get_redis
+
+    settings.jobs_inline = False
+    c = make_user(app)
+    sid = _sensor_with_refs(c, 104)
+    started = c.post(f"{API}/sensors/{sid}/fingerprints").json()
+    jid = started["job"]["id"]
+    seen = {}
+    real = jobs.HANDLERS["fingerprint"]
+
+    def spy(job_id):
+        seen["during"] = bool(get_redis().exists(jobs._heartbeat_key(job_id)))
+        return real(job_id)
+
+    monkeypatch.setitem(jobs.HANDLERS, "fingerprint", spy)
+    _burst_worker()
+    assert seen["during"] is True and not get_redis().exists(jobs._heartbeat_key(jid))
+    assert c.get(f"{API}/jobs/{jid}").json()["status"] == "succeeded"
 
 
 def test_http_dispatch_runs_jobs_through_the_signed_internal_endpoint(app, settings, monkeypatch):
@@ -467,3 +501,37 @@ def test_platform_connection_variables_are_accepted(monkeypatch):
     s = Settings()
     assert s.database_url == "postgresql+psycopg://u:p@host/db?sslmode=require"
     assert s.redis_url == "rediss://default:x@host:6379" and s.internal_base_url == "https://sensortrace.example.app"
+
+
+def test_bucket_creation_tolerates_a_concurrent_creator():
+    """Services that start together race to create the buckets; the loser must not crash."""
+    from botocore.exceptions import ClientError
+
+    from app.storage import S3Storage
+
+    calls = []
+
+    class Client:
+        def head_bucket(self, Bucket):
+            raise ClientError({"Error": {"Code": "404"}}, "HeadBucket")
+
+        def create_bucket(self, Bucket):
+            calls.append(Bucket)
+            raise ClientError({"Error": {"Code": "BucketAlreadyExists"}}, "CreateBucket")
+
+        def put_public_access_block(self, **kw):
+            pass
+
+    st = S3Storage.__new__(S3Storage)
+    st._buckets = {"evidence": "e", "derived": "d", "results": "r"}
+    st._c = Client()
+    st.ensure_buckets()
+    assert calls == ["e", "d", "r"]
+
+    class Denied(Client):
+        def create_bucket(self, Bucket):
+            raise ClientError({"Error": {"Code": "AccessDenied"}}, "CreateBucket")
+
+    st._c = Denied()
+    with pytest.raises(ClientError):
+        st.ensure_buckets()

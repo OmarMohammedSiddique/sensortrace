@@ -12,7 +12,7 @@ from sqlalchemy import func, or_, select
 from .. import schemas as s
 from ..audit import audit
 from ..config import get_settings
-from ..deps import CurrentUser, Db, owned, rate_limit
+from ..deps import CurrentUser, Db, UploadSlot, owned, rate_limit
 from ..errors import ApiError, bad_request
 from ..models import Analysis, AuditLog, Evidence, Investigation, Note, User, utcnow
 from ..services import (
@@ -22,6 +22,7 @@ from ..services import (
     purge_evidence,
     purge_investigation,
     read_upload,
+    run_heavy,
     safe_filename,
     store_image,
 )
@@ -72,6 +73,7 @@ def list_investigations(user: CurrentUser, db: Db, status: s.InvestigationStatus
     stmt = select(Investigation).where(Investigation.user_id == user.id)
     if status:
         stmt = stmt.where(Investigation.status == status)
+    q = (q or "").replace("\x00", "")
     if q:
         like = f"%{q.replace('%', r'\%').replace('_', r'\_')}%"
         stmt = stmt.where(or_(Investigation.title.ilike(like), Investigation.reference.ilike(like)))
@@ -230,7 +232,7 @@ def list_evidence(user: CurrentUser, db: Db, investigation_id: uuid.UUID | None 
 
 
 @router.post("/evidence", response_model=s.UploadResponse)
-async def upload_evidence(user: CurrentUser, db: Db, files: Annotated[list[UploadFile], File(description="JPEG or PNG images")],
+async def upload_evidence(user: CurrentUser, db: Db, _slot: UploadSlot, files: Annotated[list[UploadFile], File(description="JPEG or PNG images")],
                           investigation_id: Annotated[uuid.UUID | None, Form()] = None,
                           category: Annotated[s.EvidenceCategory, Form()] = "questioned",
                           acquisition: Annotated[str | None, Form(description="JSON object matching the Acquisition schema", max_length=8000)] = None,
@@ -256,9 +258,9 @@ async def upload_evidence(user: CurrentUser, db: Db, files: Annotated[list[Uploa
         name = safe_filename(f.filename)
         try:
             data = await read_upload(f)
-            img, q = ingest_upload(data, "questioned")
+            img, q = await run_heavy(ingest_upload, data, "questioned")
             check_quota(db, user, len(data))
-            key, pkey = store_image(st, user.id, data, img, "evidence")
+            key, pkey = await run_heavy(store_image, st, user.id, data, img, "evidence")
             ev = Evidence(
                 user_id=user.id, investigation_id=inv.id if inv else None, filename=name, category=category, sha256=img.sha256,
                 size_bytes=img.size_bytes, mime_type=img.mime_type, width=img.width, height=img.height, dhash=img.dhash,

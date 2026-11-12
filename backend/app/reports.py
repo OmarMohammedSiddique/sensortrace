@@ -79,7 +79,8 @@ LIMITATIONS = [
     "A fingerprint represents one sensor in one capture configuration. Other lenses, resolutions or modes of the same device require their own fingerprints.",
     "Thresholds marked uncalibrated carry no measured error rate. Calibrated thresholds apply only to the device models "
     "and image conditions of the validation data they were derived from.",
-    "Idealised-model figures (Gaussian tail values) are reference numbers under textbook assumptions that real images violate. They are not error rates.",
+    "No error rate is attached to the statistic. Textbook noise models underestimate how often unrelated sensors produce "
+    "elevated values on real images, so no model-based probability is reported.",
 ]
 
 
@@ -129,8 +130,16 @@ def _styles() -> dict[str, ParagraphStyle]:
     }
 
 
-def _p(text: Any, style: ParagraphStyle) -> Paragraph:
-    return Paragraph(escape("" if text is None else str(text)), style)
+#: A table cell cannot be split across pages, so very long values are shortened in the report.
+MAX_CELL_CHARS = 1500
+TRUNCATION_MARK = " [... shortened in this report; the full text is kept in the application]"
+
+
+def _p(text: Any, style: ParagraphStyle, *, limit: int | None = MAX_CELL_CHARS) -> Paragraph:
+    value = "" if text is None else str(text)
+    if limit is not None and len(value) > limit:
+        value = value[:limit].rstrip() + TRUNCATION_MARK
+    return Paragraph(escape(value), style)
 
 
 def _num(v: Any, fmt: str = "{:,.2f}") -> str:
@@ -451,8 +460,6 @@ def build_analysis_report(*, report_id: str, generated_at: datetime, generated_b
             ("Offset in fingerprint grid", str(mm_.get("shift"))),
             ("Pixels used", f"{mm_.get('valid_pixels', 0):,} ({(mm_.get('valid_fraction') or 0) * 100:.1f} %)"),
             ("Statistic by rotation", ", ".join(f"{k}: {v:,.2f}" for k, v in (mm_.get("tested") or {}).items()) or "n/a"),
-            ("Idealised-model tail, single test", _sci(mm_.get("p_value_gaussian"))),
-            ("Idealised-model tail, all alignments", _sci(mm_.get("p_false_alarm_gaussian"))),
         ]  # fmt: skip
         exp = c.get("experimental")
         if exp and exp.get("delta_spce") is not None:
@@ -471,12 +478,6 @@ def build_analysis_report(*, report_id: str, generated_at: datetime, generated_b
             "none": "NOT addressed: no calibration or control devices for this model",
         }.get(nua.get("mitigation", ""), "Not applicable to this outcome")))  # fmt: skip
         el.append(_kv(rows2, st))
-        el.append(
-            _p(
-                "Idealised-model figures assume independent Gaussian noise, which real images violate. They are reference values, not error rates.",
-                st["small"],
-            )
-        )
         if dec.get("reasons"):
             el.append(_p("Basis for the outcome", st["h2"]))
             for r in dec["reasons"]:
@@ -540,6 +541,18 @@ def build_analysis_report(*, report_id: str, generated_at: datetime, generated_b
                 st["body"],
             )
         )
+
+        held = (cal or {}).get("held_out_operating_point")
+        if held:
+            el.append(_p("Reference measurements attached to this policy", st["h2"]))
+            el.append(_kv([
+                ("Dataset", cal.get("dataset")), ("Attribution", cal.get("attribution")),
+                ("Held-out devices", f"{held.get('devices')} devices: {held.get('false_positives')}/{held.get('n_diff')} false matches (95% upper bound {held.get('fpr_ci', [0, 0])[1]:.2%}); "
+                                     f"{held.get('false_negatives')}/{held.get('n_same')} misses (95% upper bound {held.get('fnr_ci', [0, 0])[1]:.2%})"),
+                ("Threshold selection", cal.get("threshold_selection")),
+            ], st))  # fmt: skip
+            el.append(_p("Measured on the named dataset with one candidate per comparison. These figures describe that dataset; they are not "
+                         "error rates for this comparison and do not address devices of the same model.", st["small"]))  # fmt: skip
 
     # 6, 7, 8 ------------------------------------------------------------- text
     el.append(_p("6. Interpretation", st["h1"]))
@@ -667,7 +680,7 @@ def build_investigation_report(*, report_id: str, generated_at: datetime, genera
     for n in notes:
         el.append(_p(_fmt_dt(n["created_at"]), st["small"]))
         for line in str(n["body"]).splitlines() or [""]:
-            el.append(_p(line, st["body"]))
+            el.append(_p(line, st["body"], limit=None))  # flowing text, not a table cell
         el.append(Spacer(1, 4))
     if not notes:
         el.append(_p("No notes.", st["body"]))

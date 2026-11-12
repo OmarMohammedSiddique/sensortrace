@@ -14,7 +14,7 @@ import { PIPELINE_LABELS } from "@/lib/domain";
 import { formatNumber, formatPce, formatSmall, humanize, pluralize } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-import { explainNua, formatScientific, GEOMETRY, rotationLabel } from "./explain";
+import { explainNua, GEOMETRY, rotationLabel } from "./explain";
 
 function Row({ label, value, children }: { label: string; value: React.ReactNode; children?: React.ReactNode }) {
   return (
@@ -210,15 +210,6 @@ export function CandidateDetail({ candidate, analysisPolicy, candidateCount }: {
                   cropped relative to the fingerprint.
                 </Row>
               ) : null}
-              <Row label="Tail value, one alignment" value={formatScientific(m.p_value_gaussian)}>
-                <strong className="font-medium text-foreground">Idealised model, not an error rate.</strong> How often pure Gaussian noise would
-                exceed this PCE at a single alignment. Real images do not follow that model, so this is a reference figure only.
-              </Row>
-              <Row label="Tail value, all alignments" value={formatScientific(m.p_false_alarm_gaussian)}>
-                <strong className="font-medium text-foreground">Idealised model, not an error rate.</strong> The same figure after allowing for every
-                alignment tried for this sensor. It is not the chance that the outcome is wrong, and not the chance that the image came from another
-                camera.
-              </Row>
             </>
           ) : null}
         </dl>
