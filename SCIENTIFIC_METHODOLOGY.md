@@ -2,7 +2,7 @@
 
 This document describes exactly what SensorTrace computes, where each step comes from, what it assumes
 and where it stops being reliable. The implementation is in `engine/src/sensortrace_engine/`. The
-algorithm version described here is `prnu-wavelet-mle-1.0`; decision logic `policy-1.0`.
+algorithm version described here is `prnu-wavelet-mle-1.0`; decision logic `policy-1.1`.
 
 Validation results are in [VALIDATION.md](VALIDATION.md). Source notes with per-paper detail are in
 `docs/research/literature-notes.md`.
@@ -76,13 +76,18 @@ $$\hat\sigma^2 = \min_w \max\bigl(0,\ \overline{c^2}_{w\times w} - \sigma_0^2\bi
 
 **Implementation choices that differ between published codes** (recorded because they change scores):
 
-- *Boundary handling.* The image is extended by symmetric reflection to a multiple of 16 pixels plus a
-  16-pixel guard band, transformed with periodic boundary handling and cropped. The widely used Python
-  port extends symmetrically inside the transform instead. A decimated wavelet transform is not
-  shift-invariant, so the two conventions sample the image on different grids: the same filter on a grid
-  offset by one pixel yields a residual correlated at about 0.96–0.97 with the original. Fingerprints and
-  questioned images always use the same convention here, so this does not affect matching of full-size
-  images. It does reduce the statistic slightly for cropped images whose offset is not a multiple of 16.
+- *Boundary handling and sampling grid.* The image is extended by symmetric reflection to a multiple of
+  16 pixels plus a 16-pixel guard band, transformed with periodic boundary handling and cropped. The
+  widely used Python port extends symmetrically inside the transform instead. A decimated wavelet
+  transform is not shift-invariant, so the two conventions sample the image on different grids.
+  Fingerprints and questioned images of the same size always use the same grid here. **The effect of the
+  grid is not small on real images.** On a synthetic white-noise sensor, moving the grid by one pixel
+  gives a residual correlated at about 0.96 with the original; on VISION camera JPEGs the correlation is
+  0.55 to 0.65, and the same-device statistic of an individual image changes by between −77% and +86%
+  depending on the device, with no systematic loss (median ratio 0.94 over 16 images) and no effect on
+  different-device statistics (audit finding F-06). Consequences: scores from this engine are not
+  comparable image-by-image with scores from an implementation using another grid, and the statistic of
+  a crop whose offset is not a multiple of 16 cannot be predicted from the full-frame statistic.
 - *Window averaging at sub-band borders* replicates the edge value.
 - Images with a side under 64 pixels are refused rather than analysed with fewer levels.
 
@@ -94,7 +99,9 @@ standard operations remove the classical kinds (Chen et al. 2008; Goljan, Fridri
 - **Zero-mean.** The mean, then every column mean and row mean, is subtracted on each of the four 2×2
   colour-filter-array phases separately. This removes demosaicing periodicities and row/column readout
   patterns.
-- **Wiener filtering in the frequency domain.** The magnitude spectrum is flattened: with $F$ the DFT of
+- **Wiener filtering in the frequency domain.** Chen et al. (2008) describe a 3×3 Wiener filter on the
+  spectrum; this engine uses the variant of the Binghamton toolbox, which applies the adaptive rule of
+  3.2 to the magnitude. The magnitude spectrum is flattened: with $F$ the DFT of
   the pattern and $|F|/\sqrt{MN}$ its normalised magnitude, the same adaptive rule as in 3.2 (with
   $\sigma$ the standard deviation of the pattern) estimates the "noise" part of the magnitude, and each
   frequency is scaled by the ratio. Spectral peaks such as the JPEG 8×8 grid are attenuated.
@@ -129,14 +136,19 @@ natural scenes need roughly twice as many images.
 2. A leave-one-out check on a central crop (512 px, smaller for very large sets) computes, for each
    image, the PCE between its residual and the fingerprint estimated from all the other images. If the
    set is mutually consistent (median at least 50) an image scoring below 5 is rejected as probably from
-   a different sensor. These two numbers are data-hygiene heuristics, not forensic thresholds.
+   a different sensor. These two numbers are data-hygiene heuristics, not forensic thresholds. **This
+   check exposes a lone foreign image only.** Several images from one other sensor vouch for each other
+   and are accepted (audit finding F-07: 3 foreign images among 15 produced a fingerprint that matched
+   both devices). A group scoring below 4% of the median is reported as a warning, not removed. The
+   reference set must be assembled from one device; screening is not a substitute for that.
 
 The accepted images are then accumulated at full resolution, one at a time.
 
 **Diagnostics stored with every fingerprint:** number of images, per-image statistics, screening
 outcomes, the *split-half* PCE and correlation between fingerprints estimated from two disjoint halves of
-the set, spectrum peakiness and JPEG-grid energy, algorithm and library versions, the SHA-256 of every
-reference file used, and a digest of the fingerprint samples. Re-running the same algorithm version on
+the set, algorithm and library versions, the SHA-256 of every
+reference file used, and a digest of the fingerprint samples. The web platform adds spectrum peakiness
+and JPEG-grid energy; fingerprints made with the command-line tool do not carry those. Re-running the same algorithm version on
 the same files reproduces the digest.
 
 A fingerprint represents one sensor in one capture configuration. Other lenses, resolutions, aspect
@@ -163,7 +175,7 @@ sign matters: a strong negative correlation is not evidence of a match.
 
 | Relation of image to fingerprint | Tested | Trials |
 |---|---|---|
-| Same pixel dimensions | zero shift, at 0° and 180° | 2 |
+| Same pixel dimensions | zero shift, at 0° and 180° (all four rotations for square images) | 2 (4 if square) |
 | Transposed dimensions | zero shift, at 90° and 270° | 2 |
 | Smaller in both dimensions (a crop) | every placement inside the fingerprint, at each rotation that fits | (H−h+1)(W−w+1) per rotation |
 | Larger in either dimension, or otherwise incompatible | **not tested** ("unsupported") | 0 |
@@ -188,8 +200,11 @@ PCE** ("adjusted statistic") and applies thresholds to that. For large values th
 subtracting $2\ln k$. The formula reproduces the worked example of Goljan and Fridrich (2008): at
 $\alpha = 10^{-5}$ with $k = 88{,}836{,}025$ the required PCE is 53.77.
 
-The Gaussian tail figures stored with each measurement are reference values under this idealised model.
-Real images have heavier tails (Goljan et al. 2009). They are never presented as error rates.
+The idealised model is used only to scale thresholds with the number of hypotheses. It is not an
+error model: on the VISION evaluation 4.7% of different-model trials exceed the value the model puts at
+2.0%, and at PCE 60 the model gives 4.7×10⁻¹⁵ where Goljan et al. (2009) measured 2.4×10⁻⁵. The
+Gaussian tail figures remain in the API payload for completeness, labelled as idealised; they are not
+shown in the application or in reports (audit finding F-08).
 
 ## 4. Image quality assessment (`quality.py`)
 
@@ -205,7 +220,7 @@ conclusions the policy may draw. They are not findings.
 | Outcome | Meaning |
 |---|---|
 | Evidence supports a match | The adjusted statistic is at or above the match threshold, and the same-model alternative has been addressed (below) |
-| Evidence supports a non-match | The adjusted statistic is at or below the non-match threshold **and** all of: native-resolution geometry, no flagged condition that could hide a match, at least 250,000 usable pixels, a fingerprint from at least 20 reference images with split-half PCE at least 100 |
+| Evidence supports a non-match | The statistic, **not** adjusted for the number of candidates or alignments, is at or below the non-match threshold and not strongly negative, **and** all of: native-resolution geometry, no flagged condition that could hide a match, at least 250,000 usable pixels, a fingerprint from at least 20 reference images with split-half PCE at least 100 |
 | Inconclusive | Anything between the thresholds; a low statistic under conditions that could hide a match; a high statistic for which the same-model alternative is not addressed |
 | Insufficient quality or unsupported analysis | Unsupported geometry; too few usable pixels; a severe quality condition together with a statistic below the match threshold |
 
@@ -234,7 +249,9 @@ supports a match only if one of these holds:
 
 1. the active policy is calibrated with same-model negatives for that device model; or
 2. at least one **other physical device of the same make and model** was enrolled and compared with the
-   same image, and every such control stayed below the match threshold. This is labelled experimental: a
+   same image, its fingerprint meets the same quality requirements as for a non-match conclusion (at
+   least 20 reference images, split-half PCE at least 100), and every such control stayed below the
+   match threshold on the unadjusted statistic. This is labelled experimental: a
    small control set cannot rule out artefacts shared with other units, batches or software versions.
 
 Otherwise the outcome is inconclusive and the reason is stated. If a control also exceeds the threshold,
@@ -275,10 +292,16 @@ of fingerprints.
 - **Independent reference method** (`tests/test_reference_implementation.py`). The engine is compared
   with polimi-ispl/prnu-python, used as a development-only oracle. With the reference's transform
   convention this engine's shrinkage rule reproduces the reference residual to a correlation above
-  0.99999. End to end the residuals correlate above 0.95, the difference being the transform sampling
-  grid described in 3.2; fingerprints correlate above 0.97; and the two pipelines' statistics agree
-  within 15% for same-sensor images and both stay low for different-sensor images. The reference's own
-  score (global maximum, 4×4 exclusion) is higher for unrelated sensors, as documented.
+  0.99999. End to end, **on the synthetic sensor**, the residuals correlate above 0.95, fingerprints above
+  0.97, and the two pipelines' statistics agree within 15% for same-sensor images while both stay low
+  for different-sensor images. On real camera JPEGs the two implementations use different transform
+  grids and individual scores differ widely (0.55 residual correlation and 6,370 against 11,828 on one
+  VISION image; see 3.2), though both detect the same images. The reference's own score (global
+  maximum, 4×4 exclusion) is higher for unrelated sensors, as documented.
+- **Independent audit** (`audit/SCIENTIFIC_AUDIT.md`, `tests/test_audit_independent.py`): brute-force
+  implementations of each definition written by a separate reviewer confirm the filter, the estimator,
+  the statistic, the crop search and the statistics functions, and found defects in the decision layer
+  that were fixed in decision logic `policy-1.1`.
 - **Empirical evaluation on real images**: VALIDATION.md.
 
 Synthetic sensors (`synthetic.py`) are used for unit tests and onboarding only. They follow the textbook
