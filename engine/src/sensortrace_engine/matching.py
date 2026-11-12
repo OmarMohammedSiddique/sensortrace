@@ -295,6 +295,7 @@ def compare(residual: Residual, fingerprint: Fingerprint) -> ComparisonMeasureme
         mode = "cropped"
 
     best: ComparisonMeasurement | None = None
+    best_valid = False
     tested: dict[str, float] = {}
     search = 0
     for rot in rotations:
@@ -331,15 +332,31 @@ def compare(residual: Residual, fingerprint: Fingerprint) -> ComparisonMeasureme
                         sc_ -= surface.shape[1]
                     m.offgrid_peak_shift = (sr_, sc_)
             best = m
+            # pce_at returns 0.0 when the correlation energy is zero or not finite. That is
+            # "no statistic", not "a statistic of zero", and must not be scored as a low value.
+            best_valid = bool(np.isfinite(res.peak_value) and np.isfinite(res.energy) and res.energy > 0.0)
 
     assert best is not None and best.pce is not None
+    if not best_valid:
+        return ComparisonMeasurement(
+            geometry="unsupported",
+            tested=tested,
+            search_size=search,
+            valid_pixels=best.valid_pixels,
+            valid_fraction=best.valid_fraction,
+            notes=[
+                "The correlation between the image residual and the fingerprint has no measurable "
+                "energy or is not finite (for example a residual that is identically zero, or a "
+                "fingerprint containing invalid values). No statistic could be computed."
+            ],
+        )
     best.tested = tested
     best.search_size = search
     best.p_value_gaussian, best.p_false_alarm_gaussian = gaussian_tail(best.pce, search)
     if geometry == "rotated" or (geometry == "native" and best.rotation not in (0, None)):
         best.notes.append(
-            f"Best statistic found with the image rotated by {best.rotation} degrees relative to "
-            "the fingerprint's stored pixel grid."
+            f"Best statistic found after rotating the stored image by {best.rotation} degrees "
+            "counter-clockwise to align it with the fingerprint's pixel grid."
         )
     if geometry == "cropped":
         best.notes.append(
