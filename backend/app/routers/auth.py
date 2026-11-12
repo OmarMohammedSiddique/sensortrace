@@ -107,7 +107,7 @@ def register(body: s.RegisterIn, request: Request, response: Response, db: Db) -
 
 @router.post("/login", response_model=s.SessionInfo)
 def login(body: s.LoginIn, request: Request, response: Response, db: Db) -> s.SessionInfo:
-    email = body.email.strip().lower()
+    email = body.email.replace("\x00", "").strip().lower()
     _limit_auth(request, email)
     user = db.scalar(select(User).where(User.email == email))
     ok = verify_password(user.password_hash if user else None, body.password)

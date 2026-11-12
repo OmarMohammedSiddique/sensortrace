@@ -6,12 +6,15 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from fastapi.concurrency import run_in_threadpool
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .config import get_settings
+from .db import db_gate, session_scope
+from .deps import authenticate
 from .errors import ApiError
 from .routers import (
     account,
@@ -67,15 +70,34 @@ def create_app() -> FastAPI:
     app.add_middleware(CORSMiddleware, allow_origins=cfg.allowed_origins, allow_credentials=True,
                        allow_methods=["GET", "POST", "PATCH", "DELETE"], allow_headers=["Content-Type", "X-CSRF-Token", "Authorization"])  # fmt: skip
 
+    def early_auth(request: Request) -> JSONResponse | None:
+        try:
+            with session_scope() as db:
+                if authenticate(request, db, cfg) is None:
+                    return _err(401, "not_authenticated", "Authentication is required.")
+        except ApiError as exc:
+            return _err(exc.status, exc.code, exc.message, exc.details)
+        return None
+
     @app.middleware("http")
     async def guard(request: Request, call_next):
-        if request.method in ("POST", "PUT", "PATCH"):
+        if request.method in ("POST", "PUT", "PATCH", "DELETE"):
             # Bodies must declare their length so the limit is enforced before anything is buffered.
             length = request.headers.get("content-length")
             if length is None and request.headers.get("transfer-encoding"):
                 return _err(411, "length_required", "Requests must declare a Content-Length.")
-            if length and (not length.isdigit() or int(length) > cfg.max_request_bytes):
-                return _err(413, "request_too_large", f"Request body exceeds the limit of {cfg.max_request_bytes // (1024 * 1024)} MB.")
+            # The framework reads and parses a body before it resolves the route's dependencies, that is
+            # before authentication. Only uploads may be large, and uploads are authenticated here first.
+            upload = request.headers.get("content-type", "").lower().startswith("multipart/form-data")
+            limit = cfg.max_request_bytes if upload else min(cfg.max_json_bytes, cfg.max_request_bytes)
+            if length and (not length.isdigit() or int(length) > limit):
+                shown = f"{limit // (1024 * 1024)} MB" if limit >= 1024 * 1024 else f"{limit // 1024} KB"
+                return _err(413, "request_too_large", f"Request body exceeds the limit of {shown}.")
+            if upload:
+                async with db_gate():
+                    refused = await run_in_threadpool(early_auth, request)
+                if refused is not None:
+                    return refused
         response = await call_next(request)
         h = response.headers
         h.setdefault("X-Content-Type-Options", "nosniff")

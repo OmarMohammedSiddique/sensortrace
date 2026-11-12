@@ -5,6 +5,7 @@ from __future__ import annotations
 import hmac
 import logging
 import uuid
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from datetime import timedelta
 from typing import Annotated, Any, TypeVar
@@ -75,7 +76,12 @@ class Auth:
     session: AuthSession | None = None
 
 
-def _authenticate(request: Request, db: Session, s: Settings) -> Auth | None:
+def same_secret(sent: str, expected: str) -> bool:
+    """Constant-time comparison that also accepts (and rejects) non-ASCII input instead of raising."""
+    return hmac.compare_digest(sent.encode("utf-8", "surrogateescape"), expected.encode("utf-8", "surrogateescape"))
+
+
+def authenticate(request: Request, db: Session, s: Settings) -> Auth | None:
     header = request.headers.get("authorization", "")
     if header.lower().startswith("bearer "):
         raw = header[7:].strip()
@@ -102,7 +108,7 @@ def _authenticate(request: Request, db: Session, s: Settings) -> Auth | None:
         return None
     if request.method not in SAFE_METHODS:
         sent = request.headers.get("x-csrf-token", "")
-        if not sent or not hmac.compare_digest(sent, sess.csrf_token):
+        if not sent or not same_secret(sent, sess.csrf_token):
             raise ApiError(403, "csrf_failed", "Missing or invalid CSRF token.")
     if now - sess.last_seen_at > timedelta(minutes=5):
         sess.last_seen_at = now
@@ -113,7 +119,7 @@ def _authenticate(request: Request, db: Session, s: Settings) -> Auth | None:
 def get_auth(request: Request, db: Annotated[Session, Depends(get_db)]) -> Auth:
     s = get_settings()
     db.info["client_ip"] = client_ip(request)
-    auth = _authenticate(request, db, s)
+    auth = authenticate(request, db, s)
     if auth is None:
         raise ApiError(401, "not_authenticated", "Authentication is required.")
     rate_limit(f"api:{auth.user.id}", s.rate_api_per_minute, 60)
@@ -128,6 +134,29 @@ def get_user(auth: Annotated[Auth, Depends(get_auth)]) -> User:
 CurrentUser = Annotated[User, Depends(get_user)]
 CurrentAuth = Annotated[Auth, Depends(get_auth)]
 Db = Annotated[Session, Depends(get_db)]
+
+#: Upload requests one account may have in progress at once. Each one holds a database slot while its
+#: images are decoded, so without a bound a single account could occupy all of them.
+MAX_PARALLEL_UPLOADS = 3
+_uploading: dict[uuid.UUID, int] = {}
+
+
+async def upload_slot(user: CurrentUser) -> AsyncIterator[None]:
+    # Runs on the event loop (an async dependency), so the counter needs no lock.
+    n = _uploading.get(user.id, 0)
+    if n >= MAX_PARALLEL_UPLOADS:
+        raise ApiError(429, "too_many_uploads", "Too many uploads are in progress for this account. Wait for one to finish.")
+    _uploading[user.id] = n + 1
+    try:
+        yield
+    finally:
+        if _uploading.get(user.id, 0) <= 1:
+            _uploading.pop(user.id, None)
+        else:
+            _uploading[user.id] -= 1
+
+
+UploadSlot = Annotated[None, Depends(upload_slot)]
 
 T = TypeVar("T")
 

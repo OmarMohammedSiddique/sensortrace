@@ -20,6 +20,10 @@ def download(token: str, user: CurrentUser) -> Response:
     data = read_file_token(token)
     if data is None or data.get("u") != str(user.id):
         raise not_found("File")
+    # Every object key starts with its owner's id. Checking it here means that even a validly signed
+    # token (a leaked or default signing key) cannot name another account's object.
+    if not str(data.get("k", "")).startswith(f"{user.id}/"):
+        raise not_found("File")
     try:
         blob = get_storage().get(data["b"], data["k"])
     except (KeyError, ValueError):

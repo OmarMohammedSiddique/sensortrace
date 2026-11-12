@@ -31,6 +31,7 @@ from ..models import (
     Report,
     Sensor,
     User,
+    utcnow,
 )
 from ..security import verify_password
 from ..services import file_url, purge_user, quota, storage_used
@@ -78,6 +79,7 @@ def usage(user: CurrentUser, db: Db) -> s.Usage:
 def audit_history(user: CurrentUser, db: Db, action: Annotated[str | None, Query(max_length=64)] = None,
                   limit: Annotated[int, Query(ge=1, le=200)] = 50, offset: Annotated[int, Query(ge=0)] = 0) -> s.Page[s.AuditOut]:  # fmt: skip
     stmt = select(AuditLog).where(AuditLog.user_id == user.id)
+    action = (action or "").replace("\x00", "")
     if action:
         stmt = stmt.where(AuditLog.action.startswith(action, autoescape=True))
     total = db.scalar(select(func.count()).select_from(stmt.subquery())) or 0
@@ -92,7 +94,7 @@ def audit_history(user: CurrentUser, db: Db, action: Annotated[str | None, Query
 
 def export_out(ex: DataExport, user: User) -> s.ExportOut:
     o = s.ExportOut.model_validate(ex)
-    if ex.status == "ready":
+    if ex.status == "ready" and not (ex.expires_at and ex.expires_at < utcnow()):
         o.download_url = file_url(
             "results",
             ex.object_key,
@@ -150,6 +152,7 @@ def delete_export(export_id: uuid.UUID, user: CurrentUser, db: Db) -> None:
     ex = owned(db, DataExport, export_id, user, "Export")
     if ex.object_key:
         get_storage().delete("results", ex.object_key)
+    audit(db, user.id, "export.deleted", entity_type="export", entity_id=ex.id, scope=ex.scope)
     db.delete(ex)
     db.commit()
 
@@ -175,9 +178,11 @@ def delete_account(
         raise ApiError(403, "invalid_credentials", "Password is incorrect.")
     uid = auth.user.id
     removed = purge_user(db, auth.user)
-    # The audit trail keeps only the fact of deletion, detached from any personal data.
+    # The audit trail keeps only the fact of deletion, detached from any personal data
+    # (so not the source address either, which ``audit`` would otherwise take from the request).
     for row in db.scalars(select(AuditLog).where(AuditLog.user_id == uid)):
         db.delete(row)
+    db.info.pop("client_ip", None)
     audit(
         db,
         None,

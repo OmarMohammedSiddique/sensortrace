@@ -242,8 +242,13 @@ def execute(job_id: str) -> None:
     """Entry point run by the worker (or inline in tests)."""
     jid = uuid.UUID(job_id)
     with session_scope() as db:
-        job = db.get(m.Job, jid)
+        # The row is locked while it is claimed, so concurrent invocations cannot both start the job.
+        job = db.get(m.Job, jid, with_for_update=True)
         if job is None or job.status not in ACTIVE:
+            return
+        # http dispatch has no queue that hands a job to exactly one worker: a repeated or replayed
+        # call to the internal endpoint must not run a job that an invocation is already running.
+        if job.status == "running" and get_settings().job_dispatch == "http" and not get_settings().jobs_inline:
             return
         if job.cancel_requested:
             job.status, job.stage, job.finished_at = (

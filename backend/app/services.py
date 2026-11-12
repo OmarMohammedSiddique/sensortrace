@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import asyncio
 import re
 import unicodedata
 import uuid
-from typing import Any
+import weakref
+from collections.abc import Callable
+from typing import Any, TypeVar
 
+import anyio
 from fastapi import UploadFile
 from sensortrace_engine.errors import EngineError
 from sensortrace_engine.ingest import (
@@ -16,7 +20,7 @@ from sensortrace_engine.ingest import (
     make_preview,
 )
 from sensortrace_engine.quality import QualityReport, assess_quality
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from .config import get_settings
@@ -35,6 +39,8 @@ from .models import (
 )
 from .security import make_file_token
 from .storage import Storage, get_storage
+
+T = TypeVar("T")
 
 
 def safe_filename(name: str | None) -> str:
@@ -69,6 +75,22 @@ async def read_upload(file: UploadFile) -> bytes:
             )
         chunks.append(chunk)
     return b"".join(chunks)
+
+
+#: Decoding a large image (and scaling its preview) takes tens of seconds of CPU and hundreds of
+#: megabytes. It must never run on the event loop, where every other request would wait for it, and
+#: only a few may run at once.
+HEAVY_SLOTS = 2
+_heavy: weakref.WeakKeyDictionary[asyncio.AbstractEventLoop, anyio.CapacityLimiter] = weakref.WeakKeyDictionary()
+
+
+async def run_heavy(fn: Callable[..., T], *args: Any) -> T:
+    """Run image processing in a worker thread, at most ``HEAVY_SLOTS`` at a time."""
+    loop = asyncio.get_running_loop()
+    limiter = _heavy.get(loop)
+    if limiter is None:
+        limiter = _heavy[loop] = anyio.CapacityLimiter(HEAVY_SLOTS)
+    return await anyio.to_thread.run_sync(fn, *args, limiter=limiter)
 
 
 def ingest_upload(data: bytes, role: str) -> tuple[IngestedImage, QualityReport]:
@@ -167,18 +189,42 @@ def _drop_reference_objects(ref: ReferenceImage) -> None:
     _rm(st, "derived", ref.preview_key)
 
 
+def purge_exports(db: Session, user_id: uuid.UUID, investigation_id: uuid.UUID | None = None, *, account: bool = True) -> None:
+    """Delete export archives that hold a copy of data which is being permanently deleted.
+
+    An archive contains the original files, so it must not outlive them. ``investigation_id`` selects
+    that investigation's own archives; ``account`` selects the whole-account archives, which contain
+    everything. An export that is still being built is removed too: its job finds the row gone and
+    discards what it produced.
+    """
+    scopes = []
+    if account:
+        scopes.append(DataExport.scope == "account")
+    if investigation_id is not None:
+        scopes.append(DataExport.investigation_id == investigation_id)
+    if not scopes:
+        return
+    st = get_storage()
+    for ex in db.scalars(select(DataExport).where(DataExport.user_id == user_id, or_(*scopes))):
+        _rm(st, "results", ex.object_key)
+        db.delete(ex)
+
+
 def purge_fingerprint(db: Session, fp: Fingerprint) -> None:
+    purge_exports(db, fp.user_id)
     _drop_fingerprint_objects(fp)
     db.delete(fp)
 
 
 def purge_reference(db: Session, ref: ReferenceImage) -> None:
+    purge_exports(db, ref.user_id)
     _drop_reference_objects(ref)
     db.delete(ref)
 
 
 def purge_sensor(db: Session, sensor: Sensor) -> None:
     # Rows are removed by the ORM cascade from the sensor; only stored objects need explicit removal.
+    purge_exports(db, sensor.user_id)
     for fp in sensor.fingerprints:
         _drop_fingerprint_objects(fp)
     for ref in sensor.references:
@@ -187,6 +233,7 @@ def purge_sensor(db: Session, sensor: Sensor) -> None:
 
 
 def purge_device(db: Session, device: Device) -> None:
+    purge_exports(db, device.user_id)
     for s in device.sensors:
         for fp in s.fingerprints:
             _drop_fingerprint_objects(fp)
@@ -196,11 +243,13 @@ def purge_device(db: Session, device: Device) -> None:
 
 
 def purge_report(db: Session, rep: Report) -> None:
+    purge_exports(db, rep.user_id, rep.investigation_id)
     _rm(get_storage(), "results", rep.object_key)
     db.delete(rep)
 
 
 def purge_analysis(db: Session, an: Analysis) -> None:
+    purge_exports(db, an.user_id, an.investigation_id)
     _rm(get_storage(), "derived", an.residual_visual_key)
     for rep in db.scalars(select(Report).where(Report.analysis_id == an.id)):
         purge_report(db, rep)
@@ -209,6 +258,7 @@ def purge_analysis(db: Session, an: Analysis) -> None:
 
 def purge_evidence(db: Session, ev: Evidence) -> None:
     st = get_storage()
+    purge_exports(db, ev.user_id, ev.investigation_id)
     for an in db.scalars(select(Analysis).where(Analysis.evidence_id == ev.id)):
         purge_analysis(db, an)
     _rm(st, "evidence", ev.object_key)
@@ -217,7 +267,8 @@ def purge_evidence(db: Session, ev: Evidence) -> None:
 
 
 def purge_investigation(db: Session, inv: Investigation) -> None:
-    """Delete an investigation with all its evidence, analyses, notes and reports."""
+    """Delete an investigation with all its evidence, analyses, notes, reports and export archives."""
+    purge_exports(db, inv.user_id, inv.id)
     for ev in db.scalars(select(Evidence).where(Evidence.investigation_id == inv.id)):
         purge_evidence(db, ev)
     for an in db.scalars(select(Analysis).where(Analysis.investigation_id == inv.id)):

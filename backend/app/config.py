@@ -46,6 +46,7 @@ class Settings(BaseSettings):
     max_image_pixels: int = 80_000_000
     max_files_per_request: int = 60
     max_request_bytes: int = 512 * 1024 * 1024  # whole multipart request
+    max_json_bytes: int = 1024 * 1024  # any request body that is not a multipart upload
     max_reference_images: int = 300
     max_candidates_per_analysis: int = 50
     user_storage_quota_bytes: int = 5 * 1024**3
