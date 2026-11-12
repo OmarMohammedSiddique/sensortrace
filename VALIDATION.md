@@ -197,7 +197,7 @@ cameras.
 | Distinguishing units of the *same* recent model | **Not validated.** Published studies report frequent false matches | Product requires a same-model control and otherwise answers inconclusive |
 | Same-model control rule | **Experimental** | Logic tested; no real-data validation on affected devices |
 | Dedicated cameras (DSLR, mirrorless, compact) | **Not validated** | No data evaluated |
-| 180° rotated images | Validated within scope | 22 of 520 and 25 of 360 same-device trials had their best statistic at 180° |
+| 180° rotated images | Validated within scope | 22 of 520 same-device trials on the older phones had their best statistic at 180° |
 | 90° rotated images | Synthetic only | |
 | Cropped images | Measured on older phones for one crop size; **experimental** elsewhere | 104/105 detected, 0/105 and 0/2,330 false matches; statistic varies unpredictably with crop offset |
 | Resized, zoomed, stabilised or platform-processed images | **Unsupported**; verified never to match | 0/210 |
