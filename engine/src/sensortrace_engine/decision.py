@@ -339,6 +339,12 @@ def decide(
             "an unrelated sensor nor for an unaltered image of this sensor (it can arise from "
             "intensity inversion or other processing)"
         )
+    if device_class != "conventional":
+        blockers.append(
+            "the sensor is not declared to have a conventional processing pipeline, and on recent smartphones a "
+            "substantial share of genuine images carry no detectable sensor pattern (48 of 360 same-device images "
+            "from twelve 2017-2021 phones in the project's evaluation met every other condition for a non-match)"
+        )
     if measurement.geometry == "cropped":
         blockers.append("the image is a crop, for which non-match conclusions are not supported")
     if quality is not None:
