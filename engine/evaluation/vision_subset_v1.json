@@ -1,7 +1,7 @@
 {
   "name": "vision-subset-v1",
   "attribution": "VISION dataset (Shullani et al., EURASIP Journal on Information Security, 2017). (c) CSP Lab, University of Florence. CC BY-SA 4.0.",
-  "root": "../data/vision",
+  "root": "../../data/vision",
   "reference": {"category": "flat", "count": 40},
   "test": {"category": "nat", "count": 40},
   "conditions": ["original", "jpeg90", "jpeg75", "jpeg60"],

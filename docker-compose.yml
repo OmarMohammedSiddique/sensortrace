@@ -1,0 +1,144 @@
+# SensorTrace local stack. Start everything:  docker compose up --build
+# Development services only (run API/worker/web on the host):  docker compose up -d db redis objectstore
+name: sensortrace
+
+x-app-env: &app-env
+  ST_ENVIRONMENT: ${ST_ENVIRONMENT:-development}
+  ST_SECRET_KEY: ${ST_SECRET_KEY:-dev-only-secret-change-me-dev-only-secret-change-me}
+  ST_DATABASE_URL: postgresql+psycopg://sensortrace:${POSTGRES_PASSWORD:-sensortrace}@db:5432/sensortrace
+  ST_REDIS_URL: redis://redis:6379/0
+  ST_STORAGE_BACKEND: s3
+  ST_S3_ENDPOINT_URL: http://objectstore:8333
+  ST_S3_ACCESS_KEY: ${S3_ACCESS_KEY:-sensortrace}
+  ST_S3_SECRET_KEY: ${S3_SECRET_KEY:-sensortrace-dev-secret}
+  ST_ALLOWED_ORIGINS: '["http://localhost:${WEB_PORT:-3100}"]'
+  ST_COOKIE_SECURE: ${ST_COOKIE_SECURE:-false}
+  ST_ALLOW_REGISTRATION: ${ST_ALLOW_REGISTRATION:-true}
+  ST_WORKER_MEMORY_LIMIT_MB: ${ST_WORKER_MEMORY_LIMIT_MB:-0}
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: sensortrace
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sensortrace}
+      POSTGRES_DB: sensortrace
+    ports: ["127.0.0.1:${DB_PORT:-54329}:5432"]
+    volumes: ["db-data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sensortrace -d sensortrace"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports: ["127.0.0.1:${REDIS_PORT:-63799}:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  objectstore:
+    # S3-compatible object storage for local use (SeaweedFS, Apache-2.0).
+    # In production point ST_S3_* at any S3-compatible service instead.
+    image: chrislusf/seaweedfs:4.07
+    command: ["server", "-dir=/data", "-ip.bind=0.0.0.0", "-master.volumeSizeLimitMB=1024", "-volume.max=50",
+              "-s3", "-s3.port=8333", "-s3.config=/etc/seaweedfs/s3.json"]
+    configs:
+      - source: s3-identities
+        target: /etc/seaweedfs/s3.json
+    ports: ["127.0.0.1:${S3_PORT:-9100}:8333"]
+    volumes: ["object-data:/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 8333"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  migrate:
+    build: {context: ., dockerfile: backend/Dockerfile}
+    command: ["alembic", "upgrade", "head"]
+    environment: *app-env
+    depends_on:
+      db: {condition: service_healthy}
+    profiles: ["app"]
+
+  api:
+    build: {context: ., dockerfile: backend/Dockerfile}
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]
+    environment: *app-env
+    ports: ["127.0.0.1:${API_PORT:-8100}:8000"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      redis: {condition: service_healthy}
+      objectstore: {condition: service_healthy}
+    read_only: true
+    tmpfs: ["/tmp"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=3).status == 200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    profiles: ["app"]
+
+  worker:
+    build: {context: ., dockerfile: backend/Dockerfile}
+    command: ["python", "-m", "app.cli", "worker"]
+    environment: *app-env
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      redis: {condition: service_healthy}
+      objectstore: {condition: service_healthy}
+    # Media processing is isolated: no published ports, read-only filesystem, no capabilities,
+    # bounded memory and CPU. Each job additionally runs in its own forked process.
+    read_only: true
+    tmpfs: ["/tmp"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: ${WORKER_MEM_LIMIT:-6g}
+    cpus: ${WORKER_CPUS:-4}
+    pids_limit: 256
+    profiles: ["app"]
+
+  scheduler:
+    build: {context: ., dockerfile: backend/Dockerfile}
+    command: ["python", "-m", "app.cli", "scheduler"]
+    environment: *app-env
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      objectstore: {condition: service_healthy}
+    read_only: true
+    tmpfs: ["/tmp"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    profiles: ["app"]
+
+  web:
+    build: {context: frontend}
+    environment:
+      API_INTERNAL_URL: http://api:8000
+      PORT: "3000"
+    ports: ["127.0.0.1:${WEB_PORT:-3100}:3000"]
+    depends_on:
+      api: {condition: service_healthy}
+    read_only: true
+    tmpfs: ["/tmp", "/app/.next/cache"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    profiles: ["app"]
+
+configs:
+  s3-identities:
+    content: |
+      {"identities": [{"name": "sensortrace",
+        "credentials": [{"accessKey": "${S3_ACCESS_KEY:-sensortrace}", "secretKey": "${S3_SECRET_KEY:-sensortrace-dev-secret}"}],
+        "actions": ["Admin", "Read", "Write", "List", "Tagging"]}]}
+
+volumes:
+  db-data:
+  object-data:
