@@ -158,23 +158,25 @@ A deployment runs at `https://sensortrace.vercel.app` (project `sensortrace`).
 | Retention purge | Daily Vercel Cron calling an internal endpoint with `CRON_SECRET` |
 | Registration | Closed, except for the first account (`ST_ALLOW_REGISTRATION=false`, `ST_ALLOW_FIRST_ACCOUNT=true`) |
 
-Deploy or update:
+The project is connected to the GitHub repository: every push to `main` builds and deploys to
+production, and pull requests get preview deployments. The root `vercel.json` declares the two
+services (`frontend/` and `backend/`); the engine is installed into the API service from `../engine`.
+
+To deploy by hand from a checkout:
 
 ```bash
-scripts/build_vercel_bundle.sh
+npx vercel@latest deploy --prod
 ```
 
-```bash
-cd .vercel-bundle && npx vercel@latest deploy --prod
-```
-
-The script assembles `.vercel-bundle/` (web, API code, engine source, flat requirements, `vercel.json`);
-it is not committed. After a schema change, run the migrations against the unpooled database URL from
-`vercel env pull` before deploying:
+After a schema change, run the migrations against the unpooled database URL (from `vercel env pull`)
+before the change reaches `main`:
 
 ```bash
 cd backend && ST_DATABASE_URL="postgresql+psycopg://..." uv run alembic upgrade head
 ```
+
+Vercel Web Analytics and Speed Insights are included in the hosted build only (they render when the
+`VERCEL` environment variable is present) and must be enabled for the project in the Vercel dashboard.
 
 **Limits that differ from the container deployment**
 
