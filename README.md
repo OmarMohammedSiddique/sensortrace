@@ -17,6 +17,15 @@ probability of origin. It is not certified forensic software and makes no claim 
 admissibility. Read [SCIENTIFIC_METHODOLOGY.md](SCIENTIFIC_METHODOLOGY.md) and
 [VALIDATION.md](VALIDATION.md) before relying on a result.
 
+## Preview
+
+[![SensorTrace launch video: enrolling a sensor, comparing a photo and the four outcomes](docs/media/sensortrace-launch.jpg)](docs/media/sensortrace-launch.mp4)
+
+A 20-second launch video with sound. Select the image to play it. It is rendered from the application's
+own components; the questioned photo, its file name and the statistic in the comparison scene are
+illustrative, and the struck-out percentage is the kind of figure SensorTrace never reports. See
+[docs/media](docs/media/README.md).
+
 ## Status
 
 Release candidate. [PROJECT_STATUS.md](PROJECT_STATUS.md) lists every requirement with its verification
@@ -65,7 +74,7 @@ More detail, configuration and production notes: [DEPLOYMENT.md](DEPLOYMENT.md).
 | [`engine/`](engine) | Scientific engine (Python package and CLI). Independent of the web application |
 | [`backend/`](backend) | REST API, background jobs, storage, reports (FastAPI) |
 | [`frontend/`](frontend) | Web application (Next.js) |
-| [`docs/`](docs) | Decision records, research notes, API description |
+| [`docs/`](docs) | Decision records, research notes, API description, media |
 | [`scripts/`](scripts) | Dataset and reference-implementation fetch scripts |
 
 ## Documentation
