@@ -63,7 +63,7 @@ def reset_password(email: str) -> int:
         if new != getpass.getpass("Repeat: "):
             print("Passwords do not match.", file=sys.stderr)
             return 1
-        problem = password_problem(new, user.email)
+        problem = password_problem(new, user.email, user.display_name or "")
         if problem:
             print(problem, file=sys.stderr)
             return 1

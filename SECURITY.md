@@ -31,7 +31,7 @@ SensorTrace is for analysing your own material or material you are authorised to
 | Control | Implementation |
 |---|---|
 | Password storage | Argon2id (argon2-cffi defaults), automatic re-hash when parameters change |
-| Password policy | 10–256 characters, not a common password, not the email address, at least 5 distinct characters |
+| Password policy | 10–256 characters, at least 5 distinct characters, and a zxcvbn strength score of at least 3 (about 10^8 guesses). The estimate runs offline against lists of breached and common passwords, words, names, keyboard patterns and dates, and treats the email address and display name as known to an attacker |
 | Account enumeration | Login returns one message for unknown account and wrong password; a dummy hash is verified for unknown accounts so timing is similar. Registration with an existing email returns a generic failure |
 | Sessions | Opaque random token in an `HttpOnly`, `SameSite=Lax` cookie (`Secure` in production), stored only as a SHA-256 hash, 12-hour lifetime, listable and revocable. A password change revokes every other session |
 | CSRF | State-changing requests authenticated by cookie must carry the session's CSRF token in `X-CSRF-Token` (constant-time comparison). CORS allows only configured origins |
@@ -155,7 +155,6 @@ are part of CI or the release checklist. Results at the time of writing are in P
 ## Known gaps
 
 - No multi-factor authentication and no single sign-on.
-- The password blocklist is short; there is no breached-password check.
 - Downloads of originals, fingerprints, reports and archives are not written to the audit log, and the
   audit log is never purged.
 - No email verification or self-service password reset.
