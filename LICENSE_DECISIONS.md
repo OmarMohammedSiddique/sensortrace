@@ -39,6 +39,9 @@ code only and does not license any third-party patent (see Patents below).
 | redis-py, RQ | MIT / BSD-2-Clause | |
 | boto3 / botocore | Apache-2.0 | |
 | argon2-cffi | MIT | |
+| pyotp | MIT | TOTP codes for two-step verification |
+| cryptography | Apache-2.0 or BSD-3-Clause | Encrypts stored TOTP secrets (AES-GCM) |
+| qrcode (npm) | MIT | Draws the authenticator setup QR code in the browser |
 | ReportLab (open-source edition) | BSD | |
 | Next.js, React, Tailwind CSS, shadcn/ui, Radix, TanStack Query, Recharts, lucide | MIT / ISC | Front-end; see `frontend/package.json` |
 | Geist typeface | SIL OFL 1.1 | Self-hosted through `next/font` |

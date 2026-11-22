@@ -37,10 +37,13 @@ SensorTrace is for analysing your own material or material you are authorised to
 | CSRF | State-changing requests authenticated by cookie must carry the session's CSRF token in `X-CSRF-Token` (constant-time comparison). CORS allows only configured origins |
 | API tokens | `Bearer st_…`, shown once, stored hashed, revocable, optional expiry. Cannot create tokens, change the password, manage sessions or delete the account. A password change revokes every token |
 | Rate limiting | Redis counters (fail closed if Redis is unavailable). Sign-in is limited per account. A per-address limit is added only when real client addresses are trusted (`ST_TRUST_FORWARDED_FOR`); otherwise a large shared bucket applies, so one client cannot lock everyone out. API requests, uploads and parallel uploads are limited per account |
+| Two-step verification | Optional TOTP authenticator (RFC 6238) with ten single-use recovery codes. Once on, sign-in needs the password and a current code. Setup needs the password and a confirming code and signs out other sessions; turning it off needs the password and a code. Secrets are encrypted with a key derived from `ST_SECRET_KEY` (changing that key makes them unreadable, so affected accounts need the operator command below), recovery codes are stored hashed, and a code cannot be used twice. API tokens cannot manage it |
 | Roles | The first registered account is the administrator. Administrator endpoints expose configuration and aggregate counts only, never other users' content |
 
 There is no email-based password reset (the product sends no email). An operator can reset a password
-with `python -m app.cli reset-password <email>`, which also revokes the account's sessions and tokens.
+with `python -m app.cli reset-password <email>`, which also revokes the account's sessions and tokens,
+and can turn off two-step verification for someone who lost both the authenticator and the recovery
+codes with `python -m app.cli disable-mfa <email>`. Confirm the person's identity first.
 
 ### Authorisation
 
@@ -154,7 +157,7 @@ are part of CI or the release checklist. Results at the time of writing are in P
 
 ## Known gaps
 
-- No multi-factor authentication and no single sign-on.
+- No single sign-on, and no WebAuthn or passkeys as a second factor.
 - The password blocklist is short; there is no breached-password check.
 - Downloads of originals, fingerprints, reports and archives are not written to the audit log, and the
   audit log is never purged.
