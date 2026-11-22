@@ -77,6 +77,7 @@ function useAuthRedirect() {
 const signInSchema = z.object({
   email: z.string().trim().min(1, "Enter your email address.").max(320),
   password: z.string().min(1, "Enter your password.").max(256),
+  code: z.string().trim().max(32),
 });
 type SignInValues = z.infer<typeof signInSchema>;
 
@@ -85,17 +86,28 @@ export function SignInForm() {
   const { next, rawNext, router, setSubmitting } = useAuthRedirect();
   const meta = useMeta();
   const [formError, setFormError] = useState<string | null>(null);
-  const form = useForm<SignInValues>({ resolver: zodResolver(signInSchema), defaultValues: { email: "", password: "" } });
+  // Set once the server says the password is right and the account has two-step verification.
+  const [needsCode, setNeedsCode] = useState(false);
+  const form = useForm<SignInValues>({ resolver: zodResolver(signInSchema), defaultValues: { email: "", password: "", code: "" } });
 
   const onSubmit = form.handleSubmit(async (values) => {
     setFormError(null);
+    if (needsCode && !values.code) {
+      form.setError("code", { type: "required", message: "Enter the code from your authenticator app." });
+      return;
+    }
     setSubmitting(true);
     try {
-      await signIn(values);
+      await signIn({ email: values.email, password: values.password, ...(needsCode ? { code: values.code } : {}) });
       router.replace(next);
     } catch (err) {
       setSubmitting(false);
-      setFormError(applyApiError(err, form.setError, ["email", "password"]));
+      if (err instanceof ApiError && err.code === "mfa_required") {
+        setNeedsCode(true);
+        return;
+      }
+      if (err instanceof ApiError && err.code === "invalid_code") form.setValue("code", "");
+      setFormError(applyApiError(err, form.setError, ["email", "password", "code"]));
     }
   });
   const registerHref = rawNext ? `/register?next=${encodeURIComponent(next)}` : "/register";
@@ -146,9 +158,28 @@ export function SignInForm() {
               </FormItem>
             )}
           />
+          {needsCode ? (
+            <FormField
+              control={form.control}
+              name="code"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Authentication code</FormLabel>
+                  <FormControl>
+                    <Input autoComplete="one-time-code" autoCapitalize="off" spellCheck={false} autoFocus className="h-9 font-mono" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Two-step verification is on for this account. Enter the 6-digit code from your authenticator app, or one
+                    of your recovery codes.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ) : null}
           <Button type="submit" size="lg" className="mt-1 h-9" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting ? <LoaderCircle aria-hidden="true" className="animate-spin" /> : null}
-            {form.formState.isSubmitting ? "Signing in" : "Sign in"}
+            {form.formState.isSubmitting ? "Signing in" : needsCode ? "Verify and sign in" : "Sign in"}
           </Button>
         </form>
       </Form>

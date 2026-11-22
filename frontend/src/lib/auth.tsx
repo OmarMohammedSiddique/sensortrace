@@ -27,8 +27,8 @@ export interface AuthContextValue {
   csrfToken: string | null;
   /** Set when /auth/me failed for a reason other than being signed out. */
   error: Error | null;
-  /** Throws ApiError (show `error.message`). */
-  signIn: (input: { email: string; password: string }) => Promise<User>;
+  /** Throws ApiError (show `error.message`). Throws code `mfa_required` when the account needs a second factor: retry with `code`. */
+  signIn: (input: { email: string; password: string; code?: string }) => Promise<User>;
   /** Throws ApiError; `error.fieldIssues` lists per-field validation messages. */
   register: (input: { email: string; password: string; display_name?: string }) => Promise<User>;
   /** Ends the session and navigates to `redirectTo` (default "/"). */

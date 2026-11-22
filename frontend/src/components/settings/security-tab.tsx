@@ -1,8 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { KeyRound, Laptop, Lock, Plus, TerminalSquare } from "lucide-react";
-import { useState, useSyncExternalStore } from "react";
+import { Download, KeyRound, Laptop, Lock, Plus, ShieldCheck, TerminalSquare } from "lucide-react";
+import QRCode from "qrcode";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -17,8 +18,19 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useChangePassword, useCreateToken, useRevokeSession, useRevokeToken, useSessions, useTokens } from "@/lib/api/account-hooks";
-import type { SessionOut, TokenCreated, TokenOut } from "@/lib/api/types";
+import {
+  useChangePassword,
+  useCreateToken,
+  useDisableMfa,
+  useEnableMfa,
+  useReplaceRecoveryCodes,
+  useRevokeSession,
+  useRevokeToken,
+  useSessions,
+  useStartMfa,
+  useTokens,
+} from "@/lib/api/account-hooks";
+import type { MfaSetupOut, SessionOut, TokenCreated, TokenOut } from "@/lib/api/types";
 import { useUser } from "@/lib/auth";
 import { toastSuccess } from "@/lib/toast";
 
@@ -110,6 +122,349 @@ function PasswordForm() {
           </div>
         </form>
       </Form>
+    </Panel>
+  );
+}
+
+/* ---------------------------------------------------- two-step verification */
+
+const codeField = z.string().trim().min(1, "Enter a code.").max(32, "At most 32 characters.");
+
+function RecoveryCodes({ codes, onDone, doneLabel }: { codes: string[]; onDone: () => void; doneLabel: string }) {
+  const text = codes.join("\n");
+  const download = () => {
+    const url = URL.createObjectURL(new Blob([`SensorTrace recovery codes\nEach code signs in once.\n\n${text}\n`], { type: "text/plain" }));
+    const a = Object.assign(document.createElement("a"), { href: url, download: "sensortrace-recovery-codes.txt" });
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+  return (
+    <div className="grid gap-4">
+      <Notice tone="warning" title="These codes will not be shown again" role="alert">
+        Each code signs in once in place of an authenticator code. Keep them somewhere safe, such as a password manager.
+        If you lose your device and these codes, an administrator has to turn two-step verification off for you.
+      </Notice>
+      <ul aria-label="Recovery codes" className="grid grid-cols-2 gap-x-6 gap-y-1 rounded-md border bg-muted/40 p-3 font-mono text-sm">
+        {codes.map((c) => (
+          <li key={c}>{c}</li>
+        ))}
+      </ul>
+      <div className="flex flex-wrap gap-2">
+        <CopyButton value={text} label="Copy recovery codes" size="sm" variant="outline">
+          Copy
+        </CopyButton>
+        <Button type="button" size="sm" variant="outline" onClick={download}>
+          <Download aria-hidden="true" /> Download
+        </Button>
+      </div>
+      <DialogFooter>
+        <Button onClick={onDone}>{doneLabel}</Button>
+      </DialogFooter>
+    </div>
+  );
+}
+
+function QrImage({ uri }: { uri: string }) {
+  const [src, setSrc] = useState<string | null>(null);
+  useEffect(() => {
+    let live = true;
+    QRCode.toDataURL(uri, { margin: 1, width: 192 }).then((url) => live && setSrc(url), () => live && setSrc(null));
+    return () => {
+      live = false;
+    };
+  }, [uri]);
+  if (!src) return <div className="size-48 rounded-md bg-muted" aria-hidden="true" />;
+  // eslint-disable-next-line @next/next/no-img-element -- a generated data URL, nothing to optimise
+  return <img src={src} alt="QR code for your authenticator app" width={192} height={192} className="rounded-md bg-white p-1" />;
+}
+
+const passwordStepSchema = z.object({ password: z.string().min(1, "Enter your password.").max(256) });
+const confirmStepSchema = z.object({ code: codeField });
+
+function EnableMfaBody({ onClose }: { onClose: () => void }) {
+  const user = useUser();
+  const start = useStartMfa();
+  const enable = useEnableMfa();
+  const [setup, setSetup] = useState<MfaSetupOut | null>(null);
+  const [codes, setCodes] = useState<string[] | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const passwordForm = useForm<z.infer<typeof passwordStepSchema>>({ resolver: zodResolver(passwordStepSchema), defaultValues: { password: "" } });
+  const codeForm = useForm<z.infer<typeof confirmStepSchema>>({ resolver: zodResolver(confirmStepSchema), defaultValues: { code: "" } });
+
+  if (codes) {
+    return (
+      <div className="grid gap-4">
+        <DialogHeader>
+          <DialogTitle>Two-step verification is on</DialogTitle>
+          <DialogDescription>Every other session has been signed out. Save your recovery codes before you continue.</DialogDescription>
+        </DialogHeader>
+        <RecoveryCodes codes={codes} onDone={onClose} doneLabel="I have saved the codes" />
+      </div>
+    );
+  }
+
+  if (setup) {
+    const onConfirm = codeForm.handleSubmit(async ({ code }) => {
+      setFormError(null);
+      try {
+        setCodes((await enable.mutateAsync(code)).codes);
+      } catch (err) {
+        setFormError(applyApiError(err, codeForm.setError, ["code"]));
+      }
+    });
+    return (
+      <Form {...codeForm}>
+        <form method="post" onSubmit={onConfirm} noValidate className="grid gap-4">
+          <DialogHeader>
+            <DialogTitle>Scan the code with your authenticator app</DialogTitle>
+            <DialogDescription>
+              Use an app such as a password manager or an authenticator app. If you cannot scan, enter the key by hand.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-3">
+            <QrImage uri={setup.otpauth_uri} />
+            <div className="flex w-full items-center gap-2 rounded-md border bg-muted/40 p-2">
+              <code aria-label="Setup key" className="min-w-0 flex-1 font-mono text-xs break-all select-all">
+                {setup.secret}
+              </code>
+              <CopyButton value={setup.secret} label="Copy setup key" size="sm" variant="outline">
+                Copy
+              </CopyButton>
+            </div>
+          </div>
+          <FormError message={formError} />
+          <FormField
+            control={codeForm.control}
+            name="code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Code from the app</FormLabel>
+                <FormControl>
+                  <Input inputMode="numeric" autoComplete="one-time-code" className="w-40 font-mono" autoFocus {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose} disabled={enable.isPending}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={enable.isPending}>
+              {enable.isPending ? "Checking" : "Turn on"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </Form>
+    );
+  }
+
+  const onPassword = passwordForm.handleSubmit(async ({ password }) => {
+    setFormError(null);
+    try {
+      setSetup(await start.mutateAsync(password));
+    } catch (err) {
+      setFormError(applyApiError(err, passwordForm.setError, ["password"]));
+    }
+  });
+  return (
+    <Form {...passwordForm}>
+      <form method="post" onSubmit={onPassword} noValidate className="grid gap-4">
+        <DialogHeader>
+          <DialogTitle>Turn on two-step verification</DialogTitle>
+          <DialogDescription>Confirm your password to continue.</DialogDescription>
+        </DialogHeader>
+        <FormError message={formError} />
+        <input type="text" name="username" autoComplete="username" value={user.email} readOnly hidden />
+        <FormField
+          control={passwordForm.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input type="password" autoComplete="current-password" autoFocus {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={onClose} disabled={start.isPending}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={start.isPending}>
+            {start.isPending ? "Checking" : "Continue"}
+          </Button>
+        </DialogFooter>
+      </form>
+    </Form>
+  );
+}
+
+const disableSchema = z.object({ password: z.string().min(1, "Enter your password.").max(256), code: codeField });
+
+function DisableMfaBody({ onClose }: { onClose: () => void }) {
+  const user = useUser();
+  const disable = useDisableMfa();
+  const [formError, setFormError] = useState<string | null>(null);
+  const form = useForm<z.infer<typeof disableSchema>>({ resolver: zodResolver(disableSchema), defaultValues: { password: "", code: "" } });
+  const onSubmit = form.handleSubmit(async (values) => {
+    setFormError(null);
+    try {
+      await disable.mutateAsync(values);
+      toastSuccess("Two-step verification turned off");
+      onClose();
+    } catch (err) {
+      setFormError(applyApiError(err, form.setError, ["password", "code"]));
+    }
+  });
+  return (
+    <Form {...form}>
+      <form method="post" onSubmit={onSubmit} noValidate className="grid gap-4">
+        <DialogHeader>
+          <DialogTitle>Turn off two-step verification?</DialogTitle>
+          <DialogDescription>Signing in will need only your password again. Your recovery codes stop working.</DialogDescription>
+        </DialogHeader>
+        <FormError message={formError} />
+        <input type="text" name="username" autoComplete="username" value={user.email} readOnly hidden />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input type="password" autoComplete="current-password" autoFocus {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="code"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Authentication code</FormLabel>
+              <FormControl>
+                <Input autoComplete="one-time-code" autoCapitalize="off" spellCheck={false} className="font-mono" {...field} />
+              </FormControl>
+              <FormDescription>From your authenticator app, or one of your recovery codes.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={onClose} disabled={disable.isPending}>
+            Cancel
+          </Button>
+          <Button type="submit" variant="destructive" disabled={disable.isPending}>
+            {disable.isPending ? "Turning off" : "Turn off"}
+          </Button>
+        </DialogFooter>
+      </form>
+    </Form>
+  );
+}
+
+function ReplaceCodesBody({ onClose }: { onClose: () => void }) {
+  const replace = useReplaceRecoveryCodes();
+  const [codes, setCodes] = useState<string[] | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const form = useForm<z.infer<typeof confirmStepSchema>>({ resolver: zodResolver(confirmStepSchema), defaultValues: { code: "" } });
+  if (codes) {
+    return (
+      <div className="grid gap-4">
+        <DialogHeader>
+          <DialogTitle>New recovery codes</DialogTitle>
+          <DialogDescription>Your previous recovery codes no longer work.</DialogDescription>
+        </DialogHeader>
+        <RecoveryCodes codes={codes} onDone={onClose} doneLabel="I have saved the codes" />
+      </div>
+    );
+  }
+  const onSubmit = form.handleSubmit(async ({ code }) => {
+    setFormError(null);
+    try {
+      setCodes((await replace.mutateAsync(code)).codes);
+    } catch (err) {
+      setFormError(applyApiError(err, form.setError, ["code"]));
+    }
+  });
+  return (
+    <Form {...form}>
+      <form method="post" onSubmit={onSubmit} noValidate className="grid gap-4">
+        <DialogHeader>
+          <DialogTitle>Replace recovery codes</DialogTitle>
+          <DialogDescription>Enter a code from your authenticator app. Your current recovery codes will stop working.</DialogDescription>
+        </DialogHeader>
+        <FormError message={formError} />
+        <FormField
+          control={form.control}
+          name="code"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Code from the app</FormLabel>
+              <FormControl>
+                <Input inputMode="numeric" autoComplete="one-time-code" className="w-40 font-mono" autoFocus {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={onClose} disabled={replace.isPending}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={replace.isPending}>
+            {replace.isPending ? "Checking" : "Replace codes"}
+          </Button>
+        </DialogFooter>
+      </form>
+    </Form>
+  );
+}
+
+type MfaDialog = "enable" | "disable" | "codes" | null;
+
+function TwoStepVerification() {
+  const user = useUser();
+  const [dialog, setDialog] = useState<MfaDialog>(null);
+  const close = () => setDialog(null);
+  return (
+    <Panel title="Two-step verification" icon={ShieldCheck}>
+      <div className="grid max-w-xl gap-4">
+        <p className="flex flex-wrap items-center gap-2 text-sm">
+          <Badge variant={user.mfa_enabled ? "outline" : "secondary"}>{user.mfa_enabled ? "On" : "Off"}</Badge>
+          <span className="text-muted-foreground">
+            {user.mfa_enabled
+              ? "Signing in needs your password and a code from your authenticator app."
+              : "Add an authenticator app so that a stolen password alone cannot open your account."}
+          </span>
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {user.mfa_enabled ? (
+            <>
+              <Button variant="outline" onClick={() => setDialog("codes")}>
+                Replace recovery codes
+              </Button>
+              <Button variant="outline" onClick={() => setDialog("disable")}>
+                Turn off
+              </Button>
+            </>
+          ) : (
+            <Button onClick={() => setDialog("enable")}>Turn on</Button>
+          )}
+        </div>
+      </div>
+      <Dialog open={dialog !== null} onOpenChange={(open) => (open ? null : close())}>
+        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-lg" onInteractOutside={(e) => e.preventDefault()}>
+          {dialog === "enable" ? <EnableMfaBody onClose={close} /> : null}
+          {dialog === "disable" ? <DisableMfaBody onClose={close} /> : null}
+          {dialog === "codes" ? <ReplaceCodesBody onClose={close} /> : null}
+        </DialogContent>
+      </Dialog>
     </Panel>
   );
 }
@@ -460,6 +815,7 @@ export function SecurityTab() {
   return (
     <div className="flex flex-col gap-6">
       <PasswordForm />
+      <TwoStepVerification />
       <Sessions />
       <Tokens />
     </div>

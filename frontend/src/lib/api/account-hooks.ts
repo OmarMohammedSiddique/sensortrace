@@ -10,7 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api, unwrap } from "./client";
 import { FILE_URL_REFETCH, FILE_URL_STALE_TIME, useApiMutation } from "./hooks";
 import { qk } from "./keys";
-import type { ExportOut, Job, SessionOut, TokenCreated, TokenIn, TokenOut } from "./types";
+import type { ExportOut, Job, MfaSetupOut, RecoveryCodesOut, SessionOut, TokenCreated, TokenIn, TokenOut } from "./types";
 
 /* ----------------------------------------------------------------- sessions */
 
@@ -62,6 +62,31 @@ export function useChangePassword() {
     (body: { current_password: string; new_password: string }) => unwrap(api.POST("/api/v1/auth/password", { body })),
     { invalidate: [qk.sessions] },
   );
+}
+
+/* ---------------------------------------------------- two-step verification */
+
+/** Step 1: checks the password and returns a new authenticator secret that is not active yet. */
+export function useStartMfa() {
+  return useApiMutation((password: string) => unwrap<MfaSetupOut>(api.POST("/api/v1/auth/mfa/setup", { body: { password } })));
+}
+
+/** Step 2: confirms the secret with a current code. Returns the recovery codes, which are shown once. */
+export function useEnableMfa() {
+  return useApiMutation((code: string) => unwrap<RecoveryCodesOut>(api.POST("/api/v1/auth/mfa/enable", { body: { code } })), {
+    invalidate: [qk.me, qk.sessions],
+  });
+}
+
+export function useDisableMfa() {
+  return useApiMutation((body: { password: string; code: string }) => unwrap(api.POST("/api/v1/auth/mfa/disable", { body })), {
+    invalidate: [qk.me],
+  });
+}
+
+/** Needs a current authenticator code (not a recovery code). The old recovery codes stop working. */
+export function useReplaceRecoveryCodes() {
+  return useApiMutation((code: string) => unwrap<RecoveryCodesOut>(api.POST("/api/v1/auth/mfa/recovery-codes", { body: { code } })));
 }
 
 /* ------------------------------------------------------------------ exports */
