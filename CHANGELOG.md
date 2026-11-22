@@ -4,9 +4,40 @@ All notable changes are recorded here. Versions follow semantic versioning once 
 
 ## Unreleased
 
+### Added
+
+- Optional two-step verification with an authenticator app (TOTP, RFC 6238) and ten single-use recovery
+  codes, with `python -m app.cli disable-mfa` for operators (#38). The migration adds four columns to
+  `users`.
+- New passwords are checked offline with zxcvbn against breached and common passwords, words, names and
+  keyboard patterns (#22).
+- Downloads of originals, fingerprints, reports and export archives are recorded in the audit history, as
+  is detaching a comparison from an investigation (#22).
+- Audit retention: source addresses are cleared from audit records after 90 days
+  (`ST_AUDIT_ADDRESS_RETENTION_DAYS`), and ownerless records that carry one are removed (#22).
+- Third-party notices: `THIRD_PARTY_NOTICES.md`, and both container images write full notices at build
+  time (#23).
+- `PRODUCT.md`, a root `CLAUDE.md` with the working rules, a documentation index in `docs/README.md` and
+  YAML issue forms (#39).
+
 ### Changed
 
 - Licensed under the Apache License 2.0, with a NOTICE file and licence fields in every package manifest.
+- The web image no longer ships sharp or libvips; Next.js image optimisation is switched off (#23).
+- GitHub Actions in CI are pinned to commit SHAs.
+- `docs/adr/` is now `docs/decisions/` (#39).
+
+### Fixed
+
+- Account deletion: the failed-password throttle is keyed by account, so wrong passwords from one account
+  no longer block deletion for every account behind the same proxy.
+- Registration runs under a database lock, so concurrent sign-ups cannot both become administrator or
+  return a server error for an address already in use.
+- Code scanning alerts: the web proxy no longer puts client-supplied paths in log format strings, and job
+  failure logs use the parsed identifier.
+- Development dependencies: the minimatch advisory is cleared.
+
+## 0.1.0 release candidate 2
 
 Independent audit (see `audit/`). Decision logic `policy-1.1`.
 
