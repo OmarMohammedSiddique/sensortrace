@@ -1,7 +1,7 @@
 # Architecture
 
 SensorTrace is a modular monolith: a standalone scientific engine, an API with background workers, and a
-web application. Decisions and their reasons are recorded in `docs/adr/`.
+web application. Decisions and their reasons are recorded in `docs/decisions/`.
 
 ## System overview
 
