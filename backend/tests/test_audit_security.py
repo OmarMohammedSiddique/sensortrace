@@ -366,3 +366,21 @@ def test_failed_account_deletions_do_not_block_other_accounts(app, settings):
     assert codes[:3] == [403] * 3 and set(codes[3:]) == {429}
     assert victim.request("DELETE", f"{API}/account", json={"password": PASSWORD, "confirm": "DELETE MY ACCOUNT"}).status_code == 204
 
+
+def test_concurrent_registrations_with_one_address_do_not_error(app):
+    """Two simultaneous sign-ups for one address: one succeeds, the other is refused, neither fails."""
+    import concurrent.futures
+
+    from app.deps import get_redis
+    from tests.conftest import API, PASSWORD, Client
+
+    for key in get_redis().scan_iter("rl:auth-*"):
+        get_redis().delete(key)
+    email = f"race-{uuid.uuid4().hex[:8]}@audit-sensortrace.dev"
+
+    def register(_: int) -> int:
+        return Client(app).post(f"{API}/auth/register", json={"email": email, "password": PASSWORD}).status_code
+
+    with concurrent.futures.ThreadPoolExecutor(4) as pool:
+        codes = sorted(pool.map(register, range(4)))
+    assert codes == [201, 409, 409, 409]
