@@ -24,6 +24,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NODE_ENV=production
 RUN npm run build
+# Licence notices for every production package, written from the installed packages themselves.
+RUN node scripts/third-party-notices.mjs > THIRD_PARTY_NOTICES.txt
 
 # ---- runtime ---------------------------------------------------------------------
 FROM base AS runner
@@ -39,6 +41,10 @@ RUN addgroup -S -g 1001 nodejs && adduser -S -u 1001 -G nodejs nextjs
 COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=build --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=build --chown=nextjs:nodejs /app/public ./public
+COPY --from=build --chown=nextjs:nodejs /app/THIRD_PARTY_NOTICES.txt ./
+# Next.js traces sharp and its LGPL libvips binaries into the standalone output for image
+# optimisation, which is switched off (images.unoptimized). Leave them out of the image.
+RUN rm -rf node_modules/sharp node_modules/@img
 
 USER nextjs
 EXPOSE 3100
