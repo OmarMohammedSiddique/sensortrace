@@ -23,6 +23,9 @@ from ..security import (
 
 router = APIRouter(prefix="/auth", tags=["Authentication and accounts"])
 
+#: Transaction-scoped PostgreSQL advisory lock key held while an account is created.
+REGISTRATION_LOCK = 0x5354_5245_4749_5354 & 0x7FFF_FFFF_FFFF_FFFF
+
 
 def _start_session(db: Db, user: User, request: Request, response: Response) -> AuthSession:
     cfg = get_settings()
@@ -68,6 +71,9 @@ def _limit_auth(request: Request, email: str = "") -> None:
 @router.post("/register", response_model=s.SessionInfo, status_code=201)
 def register(body: s.RegisterIn, request: Request, response: Response, db: Db) -> s.SessionInfo:
     cfg = get_settings()
+    # Serialise registrations: otherwise two concurrent sign-ups on an empty database could both be
+    # made administrator, and two with the same address would hit the unique index as a server error.
+    db.execute(select(func.pg_advisory_xact_lock(REGISTRATION_LOCK)))
     if not cfg.allow_registration:
         no_accounts = (db.scalar(select(func.count()).select_from(User)) or 0) == 0
         if not (cfg.allow_first_account and no_accounts):
