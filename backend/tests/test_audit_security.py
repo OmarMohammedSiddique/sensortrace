@@ -384,3 +384,19 @@ def test_concurrent_registrations_with_one_address_do_not_error(app):
     with concurrent.futures.ThreadPoolExecutor(4) as pool:
         codes = sorted(pool.map(register, range(4)))
     assert codes == [201, 409, 409, 409]
+
+
+def test_downloads_are_audited_and_previews_are_not(user):
+    """F-19: taking a file away leaves an audit record; showing a preview does not."""
+
+    eid = upload_evidence(user, jpeg(62, 1))
+    ev = user.get(f"{API}/evidence/{eid}").json()
+
+    def downloads() -> list[dict]:
+        return user.get(f"{API}/account/audit", params={"action": "file.downloaded"}).json()["items"]
+
+    assert user.get(ev["preview_url"]).status_code == 200
+    assert downloads() == []
+    assert user.get(ev["download_url"]).status_code == 200
+    (row,) = downloads()
+    assert row["entity_type"] == "evidence" and row["details"]["filename"].endswith(".jpg") and row["details"]["size_bytes"] > 0

@@ -535,3 +535,34 @@ def test_bucket_creation_tolerates_a_concurrent_creator():
     st._c = Denied()
     with pytest.raises(ClientError):
         st.ensure_buckets()
+
+
+def test_audit_retention_clears_old_addresses_and_ownerless_records(app, settings):
+    """F-19: old source addresses are cleared and old failed sign-ins for unknown addresses removed."""
+    from datetime import timedelta
+
+    from app.models import AuditLog, utcnow
+
+    settings.audit_address_retention_days = 90
+    c = make_user(app)
+    uid = uuid.UUID(c.user_id)
+    old, recent = utcnow() - timedelta(days=91), utcnow() - timedelta(days=89)
+    with session_scope() as db:
+        rows = [
+            AuditLog(user_id=uid, action="auth.login", ip="203.0.113.7", created_at=old),
+            AuditLog(user_id=uid, action="auth.login", ip="203.0.113.8", created_at=recent),
+            AuditLog(user_id=None, action="auth.login_failed", ip="203.0.113.9", created_at=old),
+            AuditLog(user_id=None, action="auth.login_failed", ip="203.0.113.10", created_at=recent),
+            AuditLog(user_id=None, action="account.deleted", ip=None, created_at=old),
+        ]
+        db.add_all(rows)
+        db.flush()
+        ids = [r.id for r in rows]
+    jobs.purge_expired()
+    with session_scope() as db:
+        left = {r.id: r for r in db.scalars(select(AuditLog).where(AuditLog.id.in_(ids)))}
+    assert left[ids[0]].ip is None, "an old address was kept"
+    assert left[ids[1]].ip == "203.0.113.8", "a recent address was cleared"
+    assert ids[2] not in left, "an old failed sign-in with no owner was kept"
+    assert left[ids[3]].ip == "203.0.113.10"
+    assert ids[4] in left, "the anonymous account-deletion record was removed"

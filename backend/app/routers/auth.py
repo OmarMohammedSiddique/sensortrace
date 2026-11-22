@@ -80,7 +80,7 @@ def register(body: s.RegisterIn, request: Request, response: Response, db: Db) -
             raise ApiError(403, "registration_closed", "Registration is disabled on this server.")
     _limit_auth(request)
     email = body.email.strip().lower()
-    problem = password_problem(body.password, email)
+    problem = password_problem(body.password, email, body.display_name)
     if problem:
         raise bad_request("weak_password", problem)
     if db.scalar(select(User).where(User.email == email)) is not None:
@@ -179,7 +179,7 @@ def change_password(body: s.PasswordIn, auth: CurrentAuth, request: Request, db:
     _limit_auth(request, auth.user.email)
     if not verify_password(auth.user.password_hash, body.current_password):
         raise ApiError(403, "invalid_credentials", "Current password is incorrect.")
-    problem = password_problem(body.new_password, auth.user.email)
+    problem = password_problem(body.new_password, auth.user.email, auth.user.display_name or "")
     if problem:
         raise bad_request("weak_password", problem)
     auth.user.password_hash = hash_password(body.new_password)
