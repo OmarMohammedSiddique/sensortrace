@@ -35,6 +35,9 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
+  // The application never uses next/image. Switching the optimiser off also lets the image leave
+  // out sharp and its LGPL libvips binaries (see Dockerfile).
+  images: { unoptimized: true },
   reactStrictMode: true,
   // NOTE: the API proxy is NOT a `rewrites()` entry. Rewrites in next.config are
   // resolved at build time, which would bake API_INTERNAL_URL into the image.
