@@ -1,0 +1,67 @@
+name: Bug report
+description: Something is broken or behaves differently from the documentation
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve SensorTrace. Report security vulnerabilities privately (see SECURITY.md), not here.
+        Do not attach evidence images, fingerprints or credentials you are not authorised to share.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: Describe the problem and what you saw.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to ...
+        2. Select ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: SensorTrace version or commit
+      placeholder: v0.1.0 or a commit hash
+    validations:
+      required: true
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: How you run it
+      options:
+        - Docker Compose
+        - Hosted instance (sensortrace.vercel.app)
+        - Development on the host (make dev-*)
+        - Engine CLI only
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: OS and browser
+      description: If relevant.
+  - type: textarea
+    id: scientific-output
+    attributes:
+      label: Scientific output
+      description: If this concerns a comparison result, include the algorithm version, decision policy version and the measurements shown.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Sanitised logs or screenshots, if they help.
