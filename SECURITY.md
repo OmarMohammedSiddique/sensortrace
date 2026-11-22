@@ -95,8 +95,9 @@ with `python -m app.cli reset-password <email>`, which also revokes the account'
 
 ### Audit, retention, export and deletion
 
-- **Audit log.** Sign-ins and failures, uploads, fingerprint and analysis jobs, report generation,
-  exports, deletions and security changes are recorded with time and source address. Secrets, passwords
+- **Audit log.** Sign-ins and failures, uploads, downloads of originals, fingerprints, reports and
+  export archives, fingerprint and analysis jobs, report generation, exports, deletions and security
+  changes are recorded with time and source address. Secrets, passwords
   and image content are never written to it.
 - **Retention.** Each investigation can carry a retention date (with a per-account default). The
   scheduler permanently deletes expired investigations, expired exports and old sessions.
@@ -155,8 +156,6 @@ are part of CI or the release checklist. Results at the time of writing are in P
 ## Known gaps
 
 - No multi-factor authentication and no single sign-on.
-- Downloads of originals, fingerprints, reports and archives are not written to the audit log, and the
-  audit log is never purged.
 - No email verification or self-service password reset.
 - No per-organisation sharing or roles beyond user and administrator.
 - Storage is not encrypted by the application; encryption at rest is left to the storage layer.

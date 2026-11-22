@@ -145,6 +145,8 @@ def update_analysis(analysis_id: uuid.UUID, body: s.AnalysisPatch, user: Current
     """Save an analysis (and its evidence) into an investigation, or detach it."""
     an = owned(db, Analysis, analysis_id, user, "Analysis")
     if body.detach:
+        if an.investigation_id is not None:
+            audit(db, user.id, "analysis.detached_from_investigation", entity_type="analysis", entity_id=an.id, investigation_id=an.investigation_id)
         an.investigation_id = None
     elif body.investigation_id:
         inv = owned(db, Investigation, body.investigation_id, user, "Investigation")

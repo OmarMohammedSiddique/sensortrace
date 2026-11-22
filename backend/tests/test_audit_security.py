@@ -350,3 +350,19 @@ def test_reports_survive_very_long_text(app):
     text = "".join(p.extract_text() for p in PdfReader(io.BytesIO(c.get(r.json()["download_url"]).content)).pages)
     assert "shortened in this report" in text and "Idealised" not in text and "p-value" not in text.lower()
     assert c.post(f"{API}/investigations/{inv['id']}/reports").status_code == 201
+
+
+def test_downloads_are_audited_and_previews_are_not(user):
+    """F-19: taking a file away leaves an audit record; showing a preview does not."""
+
+    eid = upload_evidence(user, jpeg(62, 1))
+    ev = user.get(f"{API}/evidence/{eid}").json()
+
+    def downloads() -> list[dict]:
+        return user.get(f"{API}/account/audit", params={"action": "file.downloaded"}).json()["items"]
+
+    assert user.get(ev["preview_url"]).status_code == 200
+    assert downloads() == []
+    assert user.get(ev["download_url"]).status_code == 200
+    (row,) = downloads()
+    assert row["entity_type"] == "evidence" and row["details"]["filename"].endswith(".jpg") and row["details"]["size_bytes"] > 0

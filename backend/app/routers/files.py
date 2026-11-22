@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Response
 
-from ..deps import CurrentUser
+from ..audit import audit
+from ..deps import CurrentUser, Db
 from ..errors import not_found
 from ..security import read_file_token
 from ..storage import get_storage
@@ -15,7 +16,7 @@ INLINE_TYPES = {"image/png", "image/jpeg"}
 
 
 @router.get("/files/{token}", responses={200: {"content": {"application/octet-stream": {}}}})
-def download(token: str, user: CurrentUser) -> Response:
+def download(token: str, user: CurrentUser, db: Db) -> Response:
     """Fetch a private file using a signed, expiring token. The token is bound to the requesting user."""
     data = read_file_token(token)
     if data is None or data.get("u") != str(user.id):
@@ -30,6 +31,10 @@ def download(token: str, user: CurrentUser) -> Response:
         raise not_found("File") from None
     inline = bool(data.get("i")) and data["b"] == "derived" and data["t"] in INLINE_TYPES
     name = "".join(ch for ch in str(data["n"]) if ch.isalnum() or ch in "._-") or "file"
+    if not inline:
+        # Inline previews are shown on every page view; only files taken away are worth a record.
+        audit(db, user.id, "file.downloaded", entity_type=data["b"], bucket=data["b"], filename=name, content_type=data["t"], size_bytes=len(blob))
+        db.commit()
     return Response(
         content=blob,
         media_type=data["t"] if inline or data["t"] in ("application/pdf", "application/zip") else "application/octet-stream",
