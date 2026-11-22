@@ -350,3 +350,19 @@ def test_reports_survive_very_long_text(app):
     text = "".join(p.extract_text() for p in PdfReader(io.BytesIO(c.get(r.json()["download_url"]).content)).pages)
     assert "shortened in this report" in text and "Idealised" not in text and "p-value" not in text.lower()
     assert c.post(f"{API}/investigations/{inv['id']}/reports").status_code == 201
+
+
+def test_failed_account_deletions_do_not_block_other_accounts(app, settings):
+    """Wrong passwords on account deletion throttle that account only, not everyone behind the proxy."""
+    from app.deps import get_redis
+    from tests.conftest import API, PASSWORD, make_user
+
+    for key in get_redis().scan_iter("rl:auth-*"):
+        get_redis().delete(key)
+    settings.rate_auth_per_15min = 3
+    settings.trust_forwarded_for = False
+    attacker, victim = make_user(app), make_user(app)
+    codes = [attacker.request("DELETE", f"{API}/account", json={"password": "wrong-password-xx", "confirm": "DELETE MY ACCOUNT"}).status_code for _ in range(5)]
+    assert codes[:3] == [403] * 3 and set(codes[3:]) == {429}
+    assert victim.request("DELETE", f"{API}/account", json={"password": PASSWORD, "confirm": "DELETE MY ACCOUNT"}).status_code == 204
+

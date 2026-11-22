@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Query, Request, Response
+from fastapi import APIRouter, Query, Response
 from sensortrace_engine.version import (
     ALGORITHM_VERSION,
     DECISION_POLICY_VERSION,
@@ -16,7 +16,7 @@ from .. import demo
 from .. import schemas as s
 from ..audit import audit
 from ..config import get_settings
-from ..deps import CurrentAuth, CurrentUser, Db, client_ip, owned, rate_limit
+from ..deps import CurrentAuth, CurrentUser, Db, owned, rate_limit
 from ..errors import ApiError
 from ..jobs import enqueue
 from ..models import (
@@ -161,19 +161,15 @@ def delete_export(export_id: uuid.UUID, user: CurrentUser, db: Db) -> None:
 def delete_account(
     body: s.DeleteAccountIn,
     auth: CurrentAuth,
-    request: Request,
     response: Response,
     db: Db,
 ) -> None:
     """Permanently delete the account and every file and record that belongs to it. This cannot be undone."""
     if auth.kind != "session":
         raise ApiError(403, "session_required", "Account deletion requires an interactive session.")
-    rate_limit(
-        f"auth-ip:{client_ip(request)}",
-        get_settings().rate_auth_per_15min,
-        900,
-        fail_closed=True,
-    )
+    # Keyed by account, not by address: without trusted client addresses every browser shares the
+    # proxy's address, so a per-address bucket would let one user block deletion for everyone.
+    rate_limit(f"auth-delete:{auth.user.id}", get_settings().rate_auth_per_15min, 900, fail_closed=True)
     if not verify_password(auth.user.password_hash, body.password):
         raise ApiError(403, "invalid_credentials", "Password is incorrect.")
     uid = auth.user.id
