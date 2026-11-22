@@ -6,6 +6,7 @@ readme = "README.md"
 authors = [
     { name = "omarmohammedsiddique", email = "omarmohammedatiff@gmail.com" }
 ]
+license = "Apache-2.0"
 requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.20.1",
