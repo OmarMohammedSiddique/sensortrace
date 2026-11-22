@@ -78,6 +78,7 @@ class LoginIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
     email: str = Field(max_length=320)
     password: str = Field(max_length=256)
+    code: str | None = Field(default=None, max_length=32, description="Authenticator or recovery code, when the account has a second factor")
 
 
 class UserOut(Out):
@@ -87,6 +88,7 @@ class UserOut(Out):
     role: str
     settings: dict[str, Any]
     onboarding_completed: bool
+    mfa_enabled: bool = False
     created_at: datetime
 
 
@@ -100,6 +102,31 @@ class ProfileIn(Str):
     display_name: str | None = Field(default=None, max_length=120)
     onboarding_completed: bool | None = None
     default_retention_days: int | None = Field(default=None, ge=0, le=3650)
+
+
+class MfaSetupIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    password: str = Field(max_length=256)
+
+
+class MfaSetupOut(BaseModel):
+    secret: str = Field(description="Base32 secret, for authenticator apps that cannot scan the QR code")
+    otpauth_uri: str
+
+
+class MfaCodeIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    code: str = Field(min_length=1, max_length=32)
+
+
+class MfaDisableIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    password: str = Field(max_length=256)
+    code: str = Field(min_length=1, max_length=32, description="Authenticator or recovery code")
+
+
+class RecoveryCodesOut(BaseModel):
+    codes: list[str] = Field(description="Shown once. Each code signs in one time in place of an authenticator code")
 
 
 class PasswordIn(BaseModel):

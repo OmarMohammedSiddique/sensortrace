@@ -9,16 +9,23 @@ from sqlalchemy import func, select, update
 from .. import schemas as s
 from ..audit import audit
 from ..config import get_settings
-from ..deps import CurrentAuth, CurrentUser, Db, client_ip, rate_limit
-from ..errors import ApiError, bad_request, not_found
+from ..deps import CurrentAuth, CurrentUser, Db, client_ip, rate_limit, same_secret
+from ..errors import ApiError, bad_request, conflict, not_found
 from ..models import ApiToken, AuthSession, User, utcnow
 from ..security import (
     hash_password,
+    hash_recovery_code,
     hash_token,
     needs_rehash,
+    new_recovery_codes,
     new_token,
+    new_totp_secret,
+    open_totp_secret,
     password_problem,
+    seal_totp_secret,
+    totp_uri,
     verify_password,
+    verify_totp,
 )
 
 router = APIRouter(prefix="/auth", tags=["Authentication and accounts"])
@@ -66,6 +73,38 @@ def _limit_auth(request: Request, email: str = "") -> None:
         rate_limit("auth-shared", cfg.rate_auth_per_15min * 50, 900, fail_closed=True)
     if email:
         rate_limit(f"auth-email:{email.lower()[:200]}", cfg.rate_auth_per_15min, 900, fail_closed=True)
+
+
+def _second_factor_ok(db: Db, user: User, code: str, request: Request, *, allow_recovery: bool = True) -> bool:
+    """Check an authenticator code, or else a single-use recovery code, and consume it."""
+    # Lock the row so two requests cannot both accept the same code.
+    db.refresh(user, with_for_update=True)
+    secret = open_totp_secret(user.totp_secret) if user.totp_secret else None
+    if secret is not None:
+        step = verify_totp(secret, code, user.totp_last_step)
+        if step is not None:
+            user.totp_last_step = step
+            return True
+    if allow_recovery:
+        hashed = hash_recovery_code(code)
+        if any(same_secret(hashed, h) for h in user.recovery_code_hashes):
+            user.recovery_code_hashes = [h for h in user.recovery_code_hashes if h != hashed]
+            audit(db, user.id, "auth.recovery_code_used", ip=client_ip(request), remaining=len(user.recovery_code_hashes))
+            return True
+    return False
+
+
+def _require_session(auth: CurrentAuth) -> None:
+    if auth.kind != "session":
+        raise ApiError(403, "session_required", "The second factor can only be managed from an interactive session.")
+
+
+def _revoke_other_sessions(db: Db, auth: CurrentAuth) -> None:
+    db.execute(
+        update(AuthSession)
+        .where(AuthSession.user_id == auth.user.id, AuthSession.id != auth.session.id, AuthSession.revoked_at.is_(None))  # type: ignore[union-attr]
+        .values(revoked_at=utcnow())
+    )
 
 
 @router.post("/register", response_model=s.SessionInfo, status_code=201)
@@ -126,6 +165,13 @@ def login(body: s.LoginIn, request: Request, response: Response, db: Db) -> s.Se
         audit(db, user.id if user else None, "auth.login_failed", ip=client_ip(request))
         db.commit()
         raise ApiError(401, "invalid_credentials", "Email or password is incorrect.")
+    if user.mfa_enabled:
+        if not body.code:
+            raise ApiError(401, "mfa_required", "Enter the code from your authenticator app.")
+        if not _second_factor_ok(db, user, body.code, request):
+            audit(db, user.id, "auth.login_failed", ip=client_ip(request), reason="second_factor")
+            db.commit()
+            raise ApiError(401, "invalid_code", "The authentication code is incorrect or has already been used.")
     if needs_rehash(user.password_hash):
         user.password_hash = hash_password(body.password)
     sess = _start_session(db, user, request, response)
@@ -277,3 +323,79 @@ def revoke_token(token_id: uuid.UUID, user: CurrentUser, db: Db) -> None:
     tok.revoked_at = utcnow()
     audit(db, user.id, "token.revoked", entity_type="api_token", entity_id=tok.id)
     db.commit()
+
+
+# ---------------------------------------------------------------- second factor
+
+
+@router.post("/mfa/setup", response_model=s.MfaSetupOut)
+def mfa_setup(body: s.MfaSetupIn, auth: CurrentAuth, request: Request, db: Db) -> s.MfaSetupOut:
+    """Start adding an authenticator app. Returns a new secret; it takes effect only once confirmed."""
+    _require_session(auth)
+    _limit_auth(request, auth.user.email)
+    if not verify_password(auth.user.password_hash, body.password):
+        raise ApiError(403, "invalid_credentials", "Password is incorrect.")
+    if auth.user.mfa_enabled:
+        raise conflict("mfa_already_enabled", "Two-step verification is already on. Turn it off first to replace the authenticator.")
+    secret = new_totp_secret()
+    auth.user.totp_pending = seal_totp_secret(secret)
+    db.commit()
+    return s.MfaSetupOut(secret=secret, otpauth_uri=totp_uri(secret, auth.user.email))
+
+
+@router.post("/mfa/enable", response_model=s.RecoveryCodesOut)
+def mfa_enable(body: s.MfaCodeIn, auth: CurrentAuth, request: Request, db: Db) -> s.RecoveryCodesOut:
+    """Confirm the authenticator with a current code. Returns recovery codes once and signs out other sessions."""
+    _require_session(auth)
+    _limit_auth(request, auth.user.email)
+    user = auth.user
+    if user.mfa_enabled:
+        raise conflict("mfa_already_enabled", "Two-step verification is already on.")
+    secret = open_totp_secret(user.totp_pending) if user.totp_pending else None
+    if secret is None:
+        raise bad_request("mfa_not_started", "Start the setup again to get a new secret.")
+    step = verify_totp(secret, body.code, None)
+    if step is None:
+        raise bad_request("invalid_code", "The code is incorrect. Check the time on your device and try the current code.")
+    codes, hashes = new_recovery_codes()
+    user.totp_secret, user.totp_pending, user.totp_last_step, user.recovery_code_hashes = user.totp_pending, None, step, hashes
+    _revoke_other_sessions(db, auth)
+    audit(db, user.id, "account.mfa_enabled", ip=client_ip(request))
+    db.commit()
+    return s.RecoveryCodesOut(codes=codes)
+
+
+@router.post("/mfa/disable", status_code=204)
+def mfa_disable(body: s.MfaDisableIn, auth: CurrentAuth, request: Request, db: Db) -> None:
+    """Turn two-step verification off. Needs the password and an authenticator or recovery code."""
+    _require_session(auth)
+    _limit_auth(request, auth.user.email)
+    user = auth.user
+    if not verify_password(user.password_hash, body.password):
+        raise ApiError(403, "invalid_credentials", "Password is incorrect.")
+    if not user.mfa_enabled:
+        raise bad_request("mfa_not_enabled", "Two-step verification is not on.")
+    if not _second_factor_ok(db, user, body.code, request):
+        db.commit()
+        raise ApiError(403, "invalid_code", "The authentication code is incorrect or has already been used.")
+    user.totp_secret = user.totp_pending = user.totp_last_step = None
+    user.recovery_code_hashes = []
+    audit(db, user.id, "account.mfa_disabled", ip=client_ip(request))
+    db.commit()
+
+
+@router.post("/mfa/recovery-codes", response_model=s.RecoveryCodesOut)
+def mfa_recovery_codes(body: s.MfaCodeIn, auth: CurrentAuth, request: Request, db: Db) -> s.RecoveryCodesOut:
+    """Replace all recovery codes. Needs a current authenticator code; the old codes stop working."""
+    _require_session(auth)
+    _limit_auth(request, auth.user.email)
+    user = auth.user
+    if not user.mfa_enabled:
+        raise bad_request("mfa_not_enabled", "Two-step verification is not on.")
+    if not _second_factor_ok(db, user, body.code, request, allow_recovery=False):
+        db.commit()
+        raise ApiError(403, "invalid_code", "The authentication code is incorrect or has already been used.")
+    codes, user.recovery_code_hashes = new_recovery_codes()
+    audit(db, user.id, "account.recovery_codes_replaced", ip=client_ip(request))
+    db.commit()
+    return s.RecoveryCodesOut(codes=codes)
