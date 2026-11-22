@@ -1,0 +1,38 @@
+name: Feature request
+description: Suggest a focused improvement to SensorTrace
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do, and what gets in the way?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behaviour you want and why it would help.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: How will we know it is done?
+      placeholder: |
+        - [ ] ...
+  - type: textarea
+    id: scientific-impact
+    attributes:
+      label: Scientific impact
+      description: Would this change numerical output or decision logic? If so, say how it would be validated (see CONTRIBUTING.md, ground rules 1 to 3).
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Workarounds or other approaches.
