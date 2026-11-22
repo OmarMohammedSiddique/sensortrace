@@ -1,7 +1,7 @@
 [project]
 name = "sensortrace-api"
 version = "0.1.0"
-description = "Add your description here"
+description = "SensorTrace REST API, background jobs, storage and reports"
 readme = "README.md"
 authors = [
     { name = "omarmohammedsiddique", email = "omarmohammedatiff@gmail.com" }
