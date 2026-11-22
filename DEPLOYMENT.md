@@ -95,6 +95,7 @@ list and defaults).
 | `ST_USER_STORAGE_QUOTA_BYTES`, `ST_MAX_UPLOAD_BYTES`, `ST_MAX_REQUEST_BYTES`, `ST_MAX_IMAGE_PIXELS` | Limits | As needed |
 | `ST_JOB_TIMEOUT_SECONDS`, `ST_MAX_ACTIVE_JOBS_PER_USER` | Job limits | As needed |
 | `ST_DEFAULT_RETENTION_DAYS` | Default retention for new investigations (0 = keep) | Per policy |
+| `ST_AUDIT_ADDRESS_RETENTION_DAYS` | Days before source addresses are cleared from audit records and ownerless failed sign-ins are removed (0 = keep) | `90` |
 | `ST_WORKER_MEMORY_LIMIT_MB` | Per-job address-space cap (Linux) | Optional |
 | `WORKER_MEM_LIMIT`, `WORKER_CPUS` | Worker container limits | Size to your sensors |
 | `SENSORTRACE_FFT_WORKERS` | FFT threads per job | Match `WORKER_CPUS` |

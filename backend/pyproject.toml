@@ -27,6 +27,7 @@ dependencies = [
     "sqlalchemy>=2",
     "uvicorn[standard]>=0.54.0",
     "vercel>=0.12.2",
+    "zxcvbn>=4.5.0",
 ]
 
 [project.scripts]

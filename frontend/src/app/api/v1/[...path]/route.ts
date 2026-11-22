@@ -84,7 +84,9 @@ async function proxy(req: NextRequest, ctx: { params: Promise<{ path: string[] }
     } as RequestInit);
   } catch (err) {
     if (req.signal.aborted) return new Response(null, { status: 499 });
-    console.error(`[api-proxy] ${req.method} ${target} failed:`, err);
+    // The path comes from the client: pass it as an argument, never inside the format string, and
+    // strip line breaks so it cannot forge extra log lines.
+    console.error("[api-proxy] %s %s failed:", req.method, target.replace(/[\r\n]/g, " "), err);
     return errorResponse(
       502,
       "upstream_unavailable",

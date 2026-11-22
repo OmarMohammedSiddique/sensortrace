@@ -21,6 +21,8 @@ x-app-env: &app-env
   SENSORTRACE_FFT_WORKERS: ${WORKER_CPUS:-4}
   # Sign-in and registration attempts allowed per source address and per account in 15 minutes.
   ST_RATE_AUTH_PER_15MIN: ${ST_RATE_AUTH_PER_15MIN:-60}
+  # Days before source addresses are cleared from audit records (0 keeps them).
+  ST_AUDIT_ADDRESS_RETENTION_DAYS: ${ST_AUDIT_ADDRESS_RETENTION_DAYS:-90}
 
 services:
   db:

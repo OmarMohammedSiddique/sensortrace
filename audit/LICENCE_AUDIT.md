@@ -15,7 +15,7 @@ commercial distribution.
 | Third-party source code copied into the repository? | **None found** | 302 tracked files, all first-party; no vendored directories; the reference implementation is fetched to an ignored directory by script |
 | Dataset images redistributed? | **No** | Tracked images are 11 synthetic test fixtures and one results plot; `data/` is git-ignored |
 | Does the project state its own licence? | **No**. All rights reserved by default | No `LICENSE` file. **Open** |
-| Are third-party notices shipped with the container images? | **No** | No notices file. **Open**, see obligations |
+| Are third-party notices shipped with the container images? | **Yes** (since #23) | Generated from the installed packages during each image build; see `THIRD_PARTY_NOTICES.md` |
 
 ## Inventory summary
 
@@ -83,8 +83,8 @@ Apache-2.0 (see SBOM).
 |---|---|---|
 | 1 | No licence chosen for SensorTrace | Blocks any distribution |
 | 2 | Patent freedom-to-operate for PRNU camera identification is unchecked (patents assigned to the Research Foundation of SUNY). **Legal review** | Blocks commercial release |
-| 3 | No third-party notices file in the repository or the container images (MIT, BSD, Apache-2.0, LGPL, MPL, OFL, CC-BY all require notices on redistribution) | Must be fixed before distributing images |
-| 4 | LGPL compliance checklist for distributed images (psycopg, libvips, FFmpeg in OpenCV) | Before distributing images |
+| 3 | No third-party notices file in the repository or the container images (MIT, BSD, Apache-2.0, LGPL, MPL, OFL, CC-BY all require notices on redistribution) | **Fixed (#23):** `THIRD_PARTY_NOTICES.md`, and full notices written into both images at build time |
+| 4 | LGPL compliance checklist for distributed images (psycopg, libvips, FFmpeg in OpenCV) | Checklist in `THIRD_PARTY_NOTICES.md`; libvips no longer shipped. Legal confirmation still open (#8) |
 | 5 | Development-only use of the MIT port of non-commercial code as a test oracle | Low; decide or drop the test |
 | 6 | Redis licence acceptable for the intended distribution model, or switch to Valkey | Low |
 

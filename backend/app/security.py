@@ -15,6 +15,7 @@ from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError
 from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from zxcvbn import zxcvbn
 
 from .config import get_settings
 
@@ -22,22 +23,27 @@ _ph = PasswordHasher()  # argon2id with library defaults (OWASP-compliant parame
 #: Verified against when the account does not exist, so timing does not reveal which emails are registered.
 _DUMMY_HASH = _ph.hash("sensortrace-dummy-password")
 
-COMMON_PASSWORDS = {
-    "password", "password1", "password123", "1234567890", "12345678910", "qwertyuiop",
-    "letmein123", "iloveyou123", "sensortrace", "administrator", "changeme123",
-}  # fmt: skip
+#: zxcvbn score (0-4) a new password must reach. 3 means about 10^8 guesses or more: the estimate
+#: draws on lists of passwords exposed in breaches, common words, names, keyboard patterns and dates.
+MIN_PASSWORD_SCORE = 3
+#: zxcvbn's own input limit. Anything longer is already well beyond the score needed.
+_SCORED_LENGTH = 72
 
 
-def password_problem(password: str, email: str = "") -> str | None:
+def password_problem(password: str, email: str = "", display_name: str = "") -> str | None:
     if len(password) < 10:
         return "Password must be at least 10 characters long."
     if len(password) > 256:
         return "Password must be at most 256 characters long."
-    low = password.lower()
-    if low in COMMON_PASSWORDS or low == email.lower() or low == email.split("@")[0].lower():
-        return "This password is too easy to guess."
     if len(set(password)) < 5:
         return "Password must contain at least 5 different characters."
+    names = display_name.split()
+    hints = [h for h in (email, email.split("@")[0], "".join(names), *names, "sensortrace") if h]
+    result = zxcvbn(password[:_SCORED_LENGTH], user_inputs=hints)
+    if result["score"] < MIN_PASSWORD_SCORE:
+        warning = result["feedback"].get("warning") or ""
+        reason = f" {warning.rstrip('.')}." if warning else ""
+        return f"This password is too easy to guess.{reason} Try a longer phrase of unrelated words."
     return None
 
 

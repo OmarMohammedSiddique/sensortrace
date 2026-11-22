@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { accountMenu, dashboardMetric, fillRegistration, goToSection, JOB_TIMEOUT, MATCH, newAccount } from "./helpers";
+import { accountMenu, dashboardMetric, escapeRe, fillRegistration, goToSection, JOB_TIMEOUT, MATCH, newAccount } from "./helpers";
 
 const DEMO_NOTICE = "Everything in this guide is synthetic";
 
@@ -119,7 +119,7 @@ test("a fresh account completes the guided onboarding with the synthetic demo da
     await goToSection(page, "Cameras", "Cameras");
     const cameras = page.getByRole("table", { name: "Registered cameras" });
     for (const name of ["Demo camera A (synthetic)", "Demo camera B (synthetic)"]) {
-      const row = cameras.getByRole("row", { name: new RegExp(name.replace(/[()]/g, "\\$&")) });
+      const row = cameras.getByRole("row", { name: new RegExp(escapeRe(name)) });
       await expect(row).toContainText("Synthetic demo");
       await expect(row).toContainText("1 sensor, 1 with a fingerprint");
     }

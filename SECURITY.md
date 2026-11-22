@@ -31,7 +31,7 @@ SensorTrace is for analysing your own material or material you are authorised to
 | Control | Implementation |
 |---|---|
 | Password storage | Argon2id (argon2-cffi defaults), automatic re-hash when parameters change |
-| Password policy | 10–256 characters, not a common password, not the email address, at least 5 distinct characters |
+| Password policy | 10–256 characters, at least 5 distinct characters, and a zxcvbn strength score of at least 3 (about 10^8 guesses). The estimate runs offline against lists of breached and common passwords, words, names, keyboard patterns and dates, and treats the email address and display name as known to an attacker |
 | Account enumeration | Login returns one message for unknown account and wrong password; a dummy hash is verified for unknown accounts so timing is similar. Registration with an existing email returns a generic failure |
 | Sessions | Opaque random token in an `HttpOnly`, `SameSite=Lax` cookie (`Secure` in production), stored only as a SHA-256 hash, 12-hour lifetime, listable and revocable. A password change revokes every other session |
 | CSRF | State-changing requests authenticated by cookie must carry the session's CSRF token in `X-CSRF-Token` (constant-time comparison). CORS allows only configured origins |
@@ -98,11 +98,16 @@ codes with `python -m app.cli disable-mfa <email>`. Confirm the person's identit
 
 ### Audit, retention, export and deletion
 
-- **Audit log.** Sign-ins and failures, uploads, fingerprint and analysis jobs, report generation,
-  exports, deletions and security changes are recorded with time and source address. Secrets, passwords
+- **Audit log.** Sign-ins and failures, uploads, downloads of originals, fingerprints, reports and
+  export archives, fingerprint and analysis jobs, report generation, exports, deletions and security
+  changes are recorded with time and source address. Secrets, passwords
   and image content are never written to it.
 - **Retention.** Each investigation can carry a retention date (with a per-account default). The
-  scheduler permanently deletes expired investigations, expired exports and old sessions.
+  scheduler permanently deletes expired investigations, expired exports and old sessions. Source
+  addresses are cleared from audit records after 90 days (`ST_AUDIT_ADDRESS_RETENTION_DAYS`), and
+  failed sign-ins for unknown addresses, which have no owner, are removed then. Other audit records are
+  the account's own activity and custody history: they are kept while the account exists and deleted
+  with it.
 - **Export.** An account or a single investigation can be exported as a ZIP of records (JSON) and
   original files. Internal storage keys and credential hashes are excluded. The archive link expires
   after seven days, and an archive is deleted as soon as any data it contains is deleted or purged.
@@ -158,9 +163,6 @@ are part of CI or the release checklist. Results at the time of writing are in P
 ## Known gaps
 
 - No single sign-on, and no WebAuthn or passkeys as a second factor.
-- The password blocklist is short; there is no breached-password check.
-- Downloads of originals, fingerprints, reports and archives are not written to the audit log, and the
-  audit log is never purged.
 - No email verification or self-service password reset.
 - No per-organisation sharing or roles beyond user and administrator.
 - Storage is not encrypted by the application; encryption at rest is left to the storage layer.

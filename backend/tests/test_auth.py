@@ -31,6 +31,15 @@ def test_weak_and_duplicate_registration_rejected(app, anon, user):
     assert anon.post(f"{API}/auth/register", json={"email": "not-an-email", "password": PASSWORD}).status_code == 422
 
 
+def test_breached_and_guessable_passwords_rejected(anon):
+    """F-18: passwords from breach lists and simple patterns are refused, not only an 11-entry blocklist."""
+    for pw in ("Password1234", "1234567890ab", "qwertyuiop12", "iloveyou1234", "Sensortrace2026!"):
+        r = anon.post(f"{API}/auth/register", json={"email": "guessable@example.com", "password": pw})
+        assert r.status_code == 400 and r.json()["error"]["code"] == "weak_password", pw
+    r = anon.post(f"{API}/auth/register", json={"email": "mk@example.com", "display_name": "Margaret Kestrelford", "password": "MargaretKestrelford1"})
+    assert r.status_code == 400 and r.json()["error"]["code"] == "weak_password"
+
+
 def test_registration_can_be_closed(anon, settings):
     settings.allow_registration = False
     r = anon.post(f"{API}/auth/register", json={"email": "closed@example.com", "password": PASSWORD})

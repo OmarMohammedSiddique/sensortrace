@@ -39,6 +39,7 @@ code only and does not license any third-party patent (see Patents below).
 | redis-py, RQ | MIT / BSD-2-Clause | |
 | boto3 / botocore | Apache-2.0 | |
 | argon2-cffi | MIT | |
+| zxcvbn (Python port) | MIT | Offline password strength estimate; bundles frequency lists derived from public breach data |
 | pyotp | MIT | TOTP codes for two-step verification |
 | cryptography | Apache-2.0 or BSD-3-Clause | Encrypts stored TOTP secrets (AES-GCM) |
 | qrcode (npm) | MIT | Draws the authenticator setup QR code in the browser |
