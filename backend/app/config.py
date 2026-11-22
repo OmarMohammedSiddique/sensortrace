@@ -54,6 +54,9 @@ class Settings(BaseSettings):
     file_token_seconds: int = 300
     job_timeout_seconds: int = 3600
     default_retention_days: int = 0  # 0 = keep until deleted
+    #: Source addresses are cleared from audit records older than this, and records with no owner
+    #: (failed sign-ins for unknown addresses) are removed. 0 keeps them indefinitely.
+    audit_address_retention_days: int = 90
 
     # Rate limits (requests per window)
     rate_auth_per_15min: int = 20

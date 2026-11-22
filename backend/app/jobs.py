@@ -29,7 +29,7 @@ from sensortrace_engine.enrol import ReferenceInput, enrol
 from sensortrace_engine.errors import CancelledError, EngineError
 from sensortrace_engine.fingerprint import Fingerprint as EngineFingerprint
 from sensortrace_engine.pipeline import Candidate, analyse_questioned
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.orm import Session
 
 from . import models as m
@@ -741,11 +741,11 @@ def reap_interrupted() -> int:
 
 
 def purge_expired() -> dict[str, int]:
-    """Delete investigations past their retention date, expired exports and expired sessions."""
+    """Delete investigations past their retention date, expired exports and sessions, and old audit details."""
     from .services import purge_investigation
 
     st = get_storage()
-    out = {"investigations": 0, "exports": 0, "sessions": 0}
+    out = {"investigations": 0, "exports": 0, "sessions": 0, "audit_addresses_cleared": 0, "audit_records_removed": 0}
     now = m.utcnow()
     with session_scope() as db:
         for inv in db.scalars(
@@ -771,4 +771,13 @@ def purge_expired() -> dict[str, int]:
         for s in db.scalars(select(m.AuthSession).where(m.AuthSession.expires_at < now - timedelta(days=1))):
             db.delete(s)
             out["sessions"] += 1
+        days = get_settings().audit_address_retention_days
+        if days > 0:
+            cutoff = now - timedelta(days=days)
+            # Records with no owner are failed sign-ins for unknown addresses: only the address made
+            # them useful. The anonymous account-deletion record carries no address and is kept.
+            removed = db.execute(delete(m.AuditLog).where(m.AuditLog.user_id.is_(None), m.AuditLog.ip.is_not(None), m.AuditLog.created_at < cutoff))
+            cleared = db.execute(update(m.AuditLog).where(m.AuditLog.ip.is_not(None), m.AuditLog.created_at < cutoff).values(ip=None))
+            out["audit_records_removed"] = removed.rowcount or 0  # type: ignore[attr-defined]
+            out["audit_addresses_cleared"] = cleared.rowcount or 0  # type: ignore[attr-defined]
     return out

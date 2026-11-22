@@ -100,7 +100,11 @@ with `python -m app.cli reset-password <email>`, which also revokes the account'
   changes are recorded with time and source address. Secrets, passwords
   and image content are never written to it.
 - **Retention.** Each investigation can carry a retention date (with a per-account default). The
-  scheduler permanently deletes expired investigations, expired exports and old sessions.
+  scheduler permanently deletes expired investigations, expired exports and old sessions. Source
+  addresses are cleared from audit records after 90 days (`ST_AUDIT_ADDRESS_RETENTION_DAYS`), and
+  failed sign-ins for unknown addresses, which have no owner, are removed then. Other audit records are
+  the account's own activity and custody history: they are kept while the account exists and deleted
+  with it.
 - **Export.** An account or a single investigation can be exported as a ZIP of records (JSON) and
   original files. Internal storage keys and credential hashes are excluded. The archive link expires
   after seven days, and an archive is deleted as soon as any data it contains is deleted or purged.
