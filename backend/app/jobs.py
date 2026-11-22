@@ -275,7 +275,7 @@ def execute(job_id: str) -> None:
     except MemoryError:
         _finish(jid, "failed", "The job exceeded its memory limit.")
     except Exception:
-        log.exception("job %s failed (attempt %d)", job_id, attempts)
+        log.exception("job %s failed (attempt %d)", jid, attempts)
         cfg = get_settings()
         if attempts < MAX_ATTEMPTS and not cfg.jobs_inline and cfg.job_dispatch == "rq":
             with session_scope() as db:

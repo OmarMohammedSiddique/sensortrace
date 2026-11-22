@@ -22,14 +22,14 @@ export interface Account {
 
 /** A fresh account for every call, so runs never depend on earlier runs. */
 export function newAccount(label: string): Account {
-  const unique = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+  const unique = `${Date.now().toString(36)}${crypto.randomUUID().slice(0, 8)}`;
   return {
     email: `e2e-${label}-${unique}@e2e-sensortrace.dev`,
     password: `Tr4ce-${unique}-Kestrel!`,
   };
 }
 
-const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+export const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /* ------------------------------------------------------------------ account */
 
