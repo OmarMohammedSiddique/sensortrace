@@ -4,6 +4,10 @@ All notable changes are recorded here. Versions follow semantic versioning once 
 
 ## Unreleased
 
+### Changed
+
+- Licensed under the Apache License 2.0, with a NOTICE file and licence fields in every package manifest.
+
 Independent audit (see `audit/`). Decision logic `policy-1.1`.
 
 ### Fixed

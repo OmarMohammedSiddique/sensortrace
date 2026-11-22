@@ -1,6 +1,7 @@
 # SensorTrace
 
 [![CI](https://github.com/OmarMohammedSiddique/sensortrace/actions/workflows/ci.yml/badge.svg)](https://github.com/OmarMohammedSiddique/sensortrace/actions/workflows/ci.yml)
+[![Licence: Apache 2.0](https://img.shields.io/badge/licence-Apache%202.0-blue.svg)](LICENSE)
 
 Camera sensor fingerprinting and image source comparison. Hosted instance: https://sensortrace.vercel.app
 
@@ -150,4 +151,9 @@ any usage measurement. See [SECURITY.md](SECURITY.md).
 
 ## Licence
 
-No licence has been chosen yet; all rights reserved. See [LICENSE_DECISIONS.md](LICENSE_DECISIONS.md).
+SensorTrace is released under the [Apache License 2.0](LICENSE). See [NOTICE](NOTICE) for attribution.
+
+Third-party dependency, dataset and reference-code licences are recorded in
+[LICENSE_DECISIONS.md](LICENSE_DECISIONS.md). The VISION evaluation images are CC BY-SA 4.0 and are never
+redistributed with this repository. PRNU camera identification has a patent history; the licence covers
+this code only and is not a statement about third-party patents.

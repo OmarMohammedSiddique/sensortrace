@@ -6,8 +6,9 @@ have counsel review it before commercial distribution. Full research notes:
 
 ## SensorTrace's own licence
 
-No licence has been chosen yet. The repository is private and all rights are reserved by the owner until
-a licence is added. Nothing here prevents a proprietary or an open-source release.
+SensorTrace is licensed under the Apache License 2.0 (decided 2026-11-22; see `LICENSE` and `NOTICE`).
+Apache 2.0 was chosen over MIT for its explicit patent grant from contributors. It grants rights in this
+code only and does not license any third-party patent (see Patents below).
 
 ## Decisions
 
@@ -62,4 +63,4 @@ freedom-to-operate review by a patent attorney before commercial release.
 1. Patent freedom-to-operate (above).
 2. Whether using an MIT-licensed port of NC-licensed code as a development-only oracle carries any risk.
 3. LGPL compliance checklist for the distributed container images (FFmpeg in OpenCV wheels, psycopg).
-4. Choice of licence for SensorTrace itself.
+4. ~~Choice of licence for SensorTrace itself.~~ Decided: Apache 2.0.

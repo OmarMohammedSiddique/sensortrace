@@ -17,6 +17,11 @@
    come with an authorisation test from a second account.
 7. **Never commit** secrets, `.env` files, evidence, datasets or fingerprints.
 
+## Licence of contributions
+
+SensorTrace is licensed under the [Apache License 2.0](LICENSE). By submitting a pull request you agree
+that your contribution is licensed under the same terms (Apache 2.0, section 5).
+
 ## Setup
 
 ```bash
