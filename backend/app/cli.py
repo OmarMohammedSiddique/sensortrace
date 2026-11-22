@@ -1,4 +1,4 @@
-"""Operational commands:  python -m app.cli {worker|scheduler|purge|reset-password|openapi}"""
+"""Operational commands:  python -m app.cli {worker|scheduler|purge|reset-password|disable-mfa|openapi}"""
 
 from __future__ import annotations
 
@@ -76,6 +76,30 @@ def reset_password(email: str) -> int:
     return 0
 
 
+def disable_mfa(email: str) -> int:
+    """Turn off two-step verification for an account that lost its authenticator and recovery codes."""
+    from sqlalchemy import select, update
+
+    from .audit import audit
+    from .db import session_scope
+    from .models import AuthSession, User, utcnow
+
+    with session_scope() as db:
+        user = db.scalar(select(User).where(User.email == email.strip().lower()))
+        if user is None:
+            print("No such account.", file=sys.stderr)
+            return 1
+        if not user.mfa_enabled:
+            print("Two-step verification is not on for this account.", file=sys.stderr)
+            return 1
+        user.totp_secret = user.totp_pending = user.totp_last_step = None
+        user.recovery_code_hashes = []
+        db.execute(update(AuthSession).where(AuthSession.user_id == user.id, AuthSession.revoked_at.is_(None)).values(revoked_at=utcnow()))
+        audit(db, user.id, "account.mfa_disabled_by_operator")
+    print("Two-step verification turned off; sessions revoked. Confirm the person's identity before doing this.")
+    return 0
+
+
 def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
     p = argparse.ArgumentParser(prog="app.cli")
@@ -86,6 +110,8 @@ def main() -> int:
     sub.add_parser("openapi", help="print the OpenAPI document")
     rp = sub.add_parser("reset-password", help="set a new password for an account (operator action)")
     rp.add_argument("email")
+    dm = sub.add_parser("disable-mfa", help="turn off two-step verification for an account (operator action)")
+    dm.add_argument("email")
     a = p.parse_args()
     get_settings()
     if a.cmd == "worker":
@@ -98,6 +124,8 @@ def main() -> int:
         print(json.dumps(purge_expired()))
     elif a.cmd == "reset-password":
         return reset_password(a.email)
+    elif a.cmd == "disable-mfa":
+        return disable_mfa(a.email)
     elif a.cmd == "openapi":
         from .main import app
 

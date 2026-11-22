@@ -204,6 +204,7 @@ private file access (anonymous request refused), account deletion, and removal o
 | Add workers | `docker compose --profile app up -d --scale worker=3` |
 | Run the retention purge now | `docker compose --profile app exec scheduler python -m app.cli purge` |
 | Reset a user's password | `docker compose --profile app exec api python -m app.cli reset-password user@example.org` |
+| Turn off a user's two-step verification | `docker compose --profile app exec api python -m app.cli disable-mfa user@example.org` |
 | Apply migrations manually | `docker compose --profile app run --rm migrate` |
 | Database shell | `docker compose exec db psql -U sensortrace` |
 | Install a calibrated decision policy | Copy `policy.json` from an evaluation run into `backend/policies/` and rebuild |

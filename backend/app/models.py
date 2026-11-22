@@ -17,6 +17,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    text,
 )
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -48,6 +49,16 @@ class User(Base):
     storage_quota_bytes: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     onboarding_completed: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(TS, default=utcnow)
+    #: Second factor. Secrets are stored encrypted (see ``security.seal_totp_secret``); recovery codes
+    #: only as hashes. ``totp_pending`` holds a secret that has been shown but not yet confirmed.
+    totp_secret: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    totp_pending: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    totp_last_step: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    recovery_code_hashes: Mapped[list[str]] = mapped_column(JSONB, default=list, server_default=text("'[]'::jsonb"))
+
+    @property
+    def mfa_enabled(self) -> bool:
+        return self.totp_secret is not None
 
 
 class AuthSession(Base):
