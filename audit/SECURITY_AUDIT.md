@@ -58,8 +58,8 @@ was written down; each fix has a test that failed before the change and passes a
 | F-15 | Low | Active-job limit can be exceeded by concurrent requests | Not fixed: reported |
 | F-16 | Low | Report generation fails with 500 on long (valid) text fields | Not fixed: report-content decision |
 | F-17 | Low | API tokens survive a password change and can revoke sessions and start exports | Not fixed: product decision |
-| F-18 | Low | Password blocklist has 11 entries | Not fixed: product decision |
-| F-19 | Low | Downloads are not audited; the audit log is never purged | Not fixed: product decision |
+| F-18 | Low | Password blocklist has 11 entries | Fixed (#22): zxcvbn score of 3 or more required |
+| F-19 | Low | Downloads are not audited; the audit log is never purged | Fixed (#22): downloads audited, addresses cleared after 90 days |
 | F-20 | Low | `npm audit --omit=dev`: 6 advisories through the `shadcn` runtime dependency | Not fixed: dependency decision |
 | F-12 | Info | Export deletion not audited; the anonymous account-deletion record keeps the source address | Fixed |
 | F-21 | Info | Documentation and configuration inaccuracies | Reported |
