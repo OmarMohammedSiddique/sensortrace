@@ -12,6 +12,10 @@ COPY backend/app /srv/backend/app
 COPY backend/alembic /srv/backend/alembic
 COPY backend/alembic.ini /srv/backend/alembic.ini
 COPY backend/policies /srv/backend/policies
+# Licence notices for everything the image ships, written from the installed packages themselves.
+COPY LICENSE NOTICE THIRD_PARTY_NOTICES.md /srv/backend/
+COPY scripts/python_notices.py /tmp/python_notices.py
+RUN /srv/backend/.venv/bin/python /tmp/python_notices.py > /srv/backend/THIRD_PARTY_NOTICES.txt
 
 FROM python:3.12-slim
 # Apply pending security updates to the base image's system packages.
